@@ -1,0 +1,400 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Suspicious Email Analyzer - CipherScan{% endblock %}
+
+{% block extra_css %}
+<style>
+    .tab-bar { display:flex;gap:0;border-bottom:1px solid var(--border-color);margin-bottom:28px; }
+    .tab-btn { padding:14px 24px;font-size:14px;font-weight:600;background:transparent;border:none;color:var(--text-muted);cursor:pointer;transition:all 0.2s;border-bottom:2px solid transparent; }
+    .tab-btn:hover { color:var(--text-primary); }
+    .tab-btn.active { color:var(--accent-cyan);border-bottom-color:var(--accent-cyan); }
+
+    .risk-gauge { position:relative;width:220px;height:220px;margin:0 auto; }
+    .risk-gauge svg { transform:rotate(-90deg); }
+    .risk-gauge .bg-ring { fill:none;stroke:var(--border-color);stroke-width:16; }
+    .risk-gauge .progress-ring { fill:none;stroke-width:16;stroke-linecap:round;transition:stroke-dashoffset 1.8s cubic-bezier(0.4,0,0.2,1),stroke 0.5s ease; }
+    .risk-gauge .center-content { position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center; }
+    .risk-gauge .center-content .score { font-size:52px;font-weight:800;line-height:1;letter-spacing:-1px; }
+    .risk-gauge .center-content .label { font-size:12px;color:var(--text-muted);font-weight:500;text-transform:uppercase;letter-spacing:1.5px;margin-top:6px; }
+
+    .verdict-badge { display:inline-flex;align-items:center;gap:8px;padding:8px 20px;border-radius:24px;font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:2px; }
+    .verdict-phishing { background:rgba(239,68,68,0.15);color:var(--accent-red);border:1px solid rgba(239,68,68,0.3); }
+    .verdict-suspicious { background:rgba(245,158,11,0.15);color:var(--accent-amber);border:1px solid rgba(245,158,11,0.3); }
+    .verdict-clean { background:rgba(0,255,136,0.15);color:var(--accent-green);border:1px solid rgba(0,255,136,0.3); }
+
+    .indicator-item { display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border-radius:var(--radius-sm);margin-bottom:8px;font-size:14px; }
+    .indicator-critical { background:rgba(239,68,68,0.08);border-left:3px solid var(--accent-red); }
+    .indicator-high { background:rgba(245,158,11,0.08);border-left:3px solid var(--accent-amber); }
+    .indicator-medium { background:rgba(0,240,255,0.06);border-left:3px solid var(--accent-cyan); }
+    .indicator-low { background:rgba(136,136,170,0.06);border-left:3px solid var(--text-muted); }
+
+    .badge-risk { display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600; }
+    .badge-malicious { background:rgba(239,68,68,0.12);color:var(--accent-red); }
+    .badge-suspicious-link { background:rgba(245,158,11,0.12);color:var(--accent-amber); }
+    .badge-unknown { background:rgba(136,136,170,0.12);color:var(--text-secondary); }
+    .badge-unchecked { background:rgba(136,136,170,0.06);color:var(--text-muted); }
+
+    .link-table { width:100%;border-collapse:collapse;font-size:13px; }
+    .link-table th { text-align:left;padding:10px 12px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);border-bottom:1px solid var(--border-color); }
+    .link-table td { padding:10px 12px;border-bottom:1px solid var(--border-color);font-size:13px; }
+    .link-table tr:hover { background:rgba(255,255,255,0.02); }
+    .link-url { font-family:'JetBrains Mono',monospace;font-size:12px;word-break:break-all;color:var(--text-secondary);max-width:300px; }
+    .link-domain { font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted); }
+
+    .highlight-badge { display:inline-block;padding:2px 8px;margin:2px;border-radius:4px;font-size:11px;font-weight:600;font-family:'JetBrains Mono',monospace;background:rgba(239,68,68,0.1);color:var(--accent-red);border:1px solid rgba(239,68,68,0.2); }
+
+    .rec-item { display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border-radius:var(--radius-sm);margin-bottom:8px;font-size:14px;background:rgba(0,240,255,0.04);border-left:3px solid var(--accent-cyan); }
+
+    .breakdown-bar { display:flex;align-items:center;gap:12px; }
+    .breakdown-bar-fill { height:8px;border-radius:4px;transition:width 1.2s cubic-bezier(0.4,0,0.2,1); }
+    .breakdown-bar-label { font-size:13px;font-weight:600;min-width:80px;color:var(--text-secondary); }
+    .breakdown-bar-value { font-size:14px;font-weight:700;min-width:36px;text-align:right; }
+
+    .sel-opt { background:var(--bg-card);color:var(--text-primary); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="max-width:1000px;margin:0 auto;">
+    <div style="margin-bottom:32px;">
+        <h1 style="font-size:24px;font-weight:700;margin-bottom:4px;">Suspicious Email Analyzer</h1>
+        <p style="color:var(--text-secondary);font-size:14px;">Deep email analysis — phishing keyword detection, link reputation, homograph attacks, HTML tricks, attachment risk, and domain intelligence.</p>
+    </div>
+
+    {% if not result %}
+    <div class="card" style="margin-bottom:32px;">
+        <div class="tab-bar">
+            <button class="tab-btn active" data-tab="tab-paste" onclick="switchTab('tab-paste')">Paste Raw Email</button>
+            <button class="tab-btn" data-tab="tab-manual" onclick="switchTab('tab-manual')">Manual Entry</button>
+        </div>
+
+        <form method="post" id="analysis-form">
+            {% csrf_token %}
+
+            <div id="tab-paste" class="tab-content" style="display:block;">
+                <div style="margin-bottom:16px;">
+                    <label class="form-label" for="raw_email">Raw Email Source</label>
+                    <textarea name="raw_email" id="raw_email" class="form-input" rows="16" placeholder="Paste the full raw email (headers + body) here...&#10;&#10;From: sender@example.com&#10;To: you@example.com&#10;Subject: Urgent: Account Verification Required&#10;&#10;Dear Customer,&#10;Your account has been suspended..." style="font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.6;resize:vertical;"></textarea>
+                </div>
+                <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+                    <button type="submit" class="btn btn-primary btn-lg" style="padding:14px 36px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                        Analyze Email
+                    </button>
+                    <span style="font-size:12px;color:var(--text-muted);">We only analyze — we never store your raw email data permanently beyond the report.</span>
+                </div>
+            </div>
+
+            <div id="tab-manual" class="tab-content" style="display:none;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+                    <div>
+                        <label class="form-label" for="sender_email">Sender Email *</label>
+                        <input type="email" name="sender_email" id="sender_email" class="form-input" placeholder="sender@example.com" required style="font-family:'JetBrains Mono',monospace;font-size:14px;">
+                    </div>
+                    <div>
+                        <label class="form-label" for="subject">Subject</label>
+                        <input type="text" name="subject" id="subject" class="form-input" placeholder="Re: Your account needs attention" style="font-size:14px;">
+                    </div>
+                </div>
+                <div style="margin-bottom:16px;">
+                    <label class="form-label" for="email_body">Email Body</label>
+                    <textarea name="email_body" id="email_body" class="form-input" rows="12" placeholder="Paste the email body content here...&#10;&#10;Dear Customer,&#10;&#10;Your account has been limited due to unusual activity.&#10;Please verify your information immediately to avoid suspension.&#10;&#10;Click here: http://suspicious-link.example.com/verify&#10;&#10;Thank you,&#10;Security Team" style="font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.6;resize:vertical;"></textarea>
+                </div>
+                <div style="display:flex;gap:12px;align-items:center;">
+                    <button type="submit" class="btn btn-primary btn-lg" style="padding:14px 36px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                        Analyze Email
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+    {% endif %}
+
+    {% if result %}
+    <div style="margin-bottom:28px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:24px;">
+            <div>
+                <h2 style="font-size:20px;font-weight:700;">Analysis Results</h2>
+                <p style="font-size:13px;color:var(--text-muted);margin-top:2px;">
+                    From: <span style="color:var(--accent-cyan);font-family:'JetBrains Mono',monospace;">{{ result.sender_domain }}</span>
+                    &middot; {{ result.links|length }} links &middot; {{ result.indicators|length }} indicators
+                </p>
+            </div>
+            <div style="display:flex;gap:8px;">
+                <button class="btn btn-danger" onclick="alert('Block/report functionality coming soon!')" style="padding:10px 20px;font-size:13px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                    Block &amp; Report
+                </button>
+                <button class="btn btn-secondary" onclick="alert('PDF export coming soon!')" style="padding:10px 20px;font-size:13px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    Export PDF
+                </button>
+            </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:280px 1fr;gap:32px;align-items:center;margin-bottom:28px;">
+            <div class="risk-gauge">
+                {% with score=result.risk_score|default:0 %}
+                {% if score > 70 %}{% with color="#ef4444" %}{% endwith %}
+                {% elif score >= 30 %}{% with color="#f59e0b" %}{% endwith %}
+                {% else %}{% with color="#00ff88" %}{% endwith %}
+                {% endif %}{% endwith %}
+                <svg width="220" height="220" viewBox="0 0 220 220">
+                    <circle class="bg-ring" cx="110" cy="110" r="94"></circle>
+                    <circle class="progress-ring" cx="110" cy="110" r="94"
+                        stroke="{% if score > 70 %}#ef4444{% elif score >= 30 %}#f59e0b{% else %}#00ff88{% endif %}"
+                        stroke-dasharray="590.62"
+                        stroke-dashoffset="590.62">
+                    </circle>
+                </svg>
+                <div class="center-content">
+                    <div class="score" style="color:{% if score > 70 %}#ef4444{% elif score >= 30 %}#f59e0b{% else %}#00ff88{% endif %};">{{ score }}</div>
+                    <div class="label">Risk Score</div>
+                    <div style="margin-top:8px;">
+                        <span class="verdict-badge verdict-{{ result.verdict }}">{{ result.verdict }}</span>
+                    </div>
+                </div>
+                {% endwith %}
+            </div>
+            <div>
+                <h3 style="font-size:14px;font-weight:600;margin-bottom:16px;color:var(--text-secondary);">Score Breakdown</h3>
+                <div style="display:flex;flex-direction:column;gap:10px;">
+                    {% for key, item in result.risk_breakdown.items %}
+                    <div class="breakdown-bar">
+                        <span class="breakdown-bar-label">{{ item.detail|truncatechars:20 }}</span>
+                        <div style="flex:1;height:8px;border-radius:4px;background:var(--border-color);overflow:hidden;">
+                            <div class="breakdown-bar-fill" style="width:{% widthratio item.score item.max 100 %}%;background:{% if item.score >= item.max|add:0 %}#ef4444{% elif item.score >= item.max|divisibleby:2 %}#f59e0b{% elif item.score > 0 %}#00f0ff{% else %}#555577{% endif %};"></div>
+                        </div>
+                        <span class="breakdown-bar-value" style="color:{% if item.score >= item.max|add:0 %}#ef4444{% elif item.score >= item.max|divisibleby:2 %}#f59e0b{% elif item.score > 0 %}#00f0ff{% else %}#555577{% endif %};">{{ item.score }}/{{ item.max }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        {% if result.indicators %}
+        <div class="card" style="margin-bottom:24px;">
+            <div class="card-header" style="font-size:16px;">
+                <span>Phishing Indicators</span>
+                <span class="badge {% if result.verdict == 'phishing' %}badge-danger{% elif result.verdict == 'suspicious' %}badge-warning{% else %}badge-success{% endif %}">{{ result.indicators|length }} found</span>
+            </div>
+            <div>
+                {% for ind in result.indicators %}
+                <div class="indicator-item indicator-{{ ind.severity }}">
+                    <div style="flex-shrink:0;margin-top:2px;">
+                        {% if ind.severity == 'critical' %}
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-red)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                        {% elif ind.severity == 'high' %}
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-amber)" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        {% else %}
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                        {% endif %}
+                    </div>
+                    <div style="flex:1;">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                            <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:{% if ind.severity == 'critical' %}var(--accent-red){% elif ind.severity == 'high' %}var(--accent-amber){% else %}var(--accent-cyan){% endif %};">{{ ind.severity }}</span>
+                            <span style="font-weight:600;font-size:13px;">{{ ind.type|title|replace:"_"," " }}</span>
+                            {% if ind.count %}<span class="badge badge-free" style="font-size:10px;">{{ ind.count }} matches</span>{% endif %}
+                        </div>
+                        <p style="font-size:13px;color:var(--text-secondary);">{{ ind.details }}</p>
+                        {% if ind.matches %}
+                        <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;">
+                            {% for m in ind.matches %}
+                            <span class="highlight-badge">{{ m }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        {% if ind.mismatches %}
+                        <div style="margin-top:6px;">
+                            {% for mm in ind.mismatches %}
+                            <div style="padding:6px 10px;background:rgba(239,68,68,0.06);border-radius:4px;margin-bottom:4px;font-size:12px;">
+                                <span style="color:var(--accent-red);">Text:</span> <span style="color:var(--text-secondary);font-family:'JetBrains Mono',monospace;">{{ mm.text }}</span><br>
+                                <span style="color:var(--accent-red);">Href:</span> <span style="color:var(--text-muted);font-family:'JetBrains Mono',monospace;word-break:break-all;">{{ mm.href }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        {% if ind.urls %}
+                        <div style="margin-top:6px;">
+                            {% for u in ind.urls %}
+                            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);display:block;">{{ u }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        {% if ind.impersonates %}
+                        <div style="margin-top:4px;">
+                            <span style="font-size:12px;color:var(--accent-red);">Impersonates: <strong>{{ ind.impersonates }}</strong></span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if result.links %}
+        <div class="card" style="margin-bottom:24px;">
+            <div class="card-header" style="font-size:16px;">
+                <span>Links Found</span>
+                <span class="badge badge-free" style="font-size:11px;">{{ result.links|length }} URL(s)</span>
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="link-table">
+                    <thead>
+                        <tr>
+                            <th>URL</th>
+                            <th>Domain</th>
+                            <th style="text-align:center;">Reputation</th>
+                            <th style="text-align:center;">IP</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for link in result.links %}
+                        <tr>
+                            <td class="link-url" title="{{ link.url }}">{{ link.url|truncatechars:60 }}</td>
+                            <td class="link-domain">{{ link.domain }}</td>
+                            <td style="text-align:center;">
+                                {% with rep=link.reputation %}
+                                {% if rep.risk == 'malicious' %}
+                                <span class="badge-risk badge-malicious">
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                                    Malicious
+                                </span>
+                                {% elif rep.risk == 'suspicious' %}
+                                <span class="badge-risk badge-suspicious-link">
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                    Suspicious
+                                </span>
+                                {% elif rep.risk == 'unknown' %}
+                                <span class="badge-risk badge-unknown">Unknown</span>
+                                {% else %}
+                                <span class="badge-risk badge-unchecked">Unchecked</span>
+                                {% endif %}
+                                {% endwith %}
+                            </td>
+                            <td style="text-align:center;">
+                                {% if link.has_ip %}
+                                <span style="color:var(--accent-red);font-size:11px;">IP</span>
+                                {% else %}
+                                <span style="color:var(--text-muted);font-size:11px;">—</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" style="text-align:center;padding:24px;color:var(--text-muted);">No links found in email body.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if result.domain_age %}
+        <div class="card" style="margin-bottom:24px;">
+            <div class="card-header" style="font-size:16px;">
+                <span>Sender Domain Intelligence</span>
+                <span class="badge {% if result.domain_age.is_new %}badge-warning{% elif result.domain_age.status == 'established' %}badge-success{% else %}badge-free{% endif %}">{{ result.domain_age.status|title }}</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                <div>
+                    <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border-color);font-size:13px;">
+                        <span style="color:var(--text-secondary);">Domain</span>
+                        <span style="font-family:'JetBrains Mono',monospace;color:var(--accent-cyan);">{{ result.domain_age.domain }}</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border-color);font-size:13px;">
+                        <span style="color:var(--text-secondary);">Age</span>
+                        <span style="font-weight:600;">{% if result.domain_age.age_days %}{{ result.domain_age.age_days }} days{% else %}Unknown{% endif %}</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border-color);font-size:13px;">
+                        <span style="color:var(--text-secondary);">Created</span>
+                        <span>{{ result.domain_age.created_date|default:'Unknown' }}</span>
+                    </div>
+                </div>
+                <div>
+                    <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border-color);font-size:13px;">
+                        <span style="color:var(--text-secondary);">Registrar</span>
+                        <span>{{ result.domain_age.registrar|default:'Unknown' }}</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border-color);font-size:13px;">
+                        <span style="color:var(--text-secondary);">New Domain</span>
+                        <span>{% if result.domain_age.is_new %}<span style="color:var(--accent-red);font-weight:700;">YES</span>{% else %}<span style="color:var(--accent-green);">No</span>{% endif %}</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;padding:10px 0;font-size:13px;">
+                        <span style="color:var(--text-secondary);">New (&lt;30d) Penalty</span>
+                        <span>{% if result.domain_age.is_new %}<span style="color:var(--accent-red);font-weight:700;">+15 risk</span>{% else %}<span style="color:var(--text-muted);">None</span>{% endif %}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if result.recommendations %}
+        <div class="card" style="margin-bottom:24px;border-color:rgba(0,240,255,0.2);">
+            <div class="card-header" style="font-size:16px;color:var(--accent-cyan);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                Recommendations
+            </div>
+            <div>
+                {% for rec in result.recommendations %}
+                <div class="rec-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="2" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span style="color:var(--text-primary);font-size:13px;">{{ rec }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div style="display:flex;gap:12px;justify-content:center;margin-bottom:32px;">
+            <button class="btn btn-danger" onclick="alert('Block/report functionality coming soon!')" style="padding:14px 32px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:8px;"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                Block Sender &amp; Report
+            </button>
+            <a href="{% url 'phishing:suspicious_email' %}" class="btn btn-secondary" style="padding:14px 32px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:8px;"><line x1="1" y1="1" x2="23" y2="23"/><path d="M21 21a16 16 0 0 1-21 0"/></svg>
+                Analyze Another Email
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(function(el) {
+            el.style.display = 'none';
+        });
+        document.querySelectorAll('.tab-btn').forEach(function(el) {
+            el.classList.remove('active');
+        });
+        document.getElementById(tabId).style.display = 'block';
+        document.querySelector('[data-tab="' + tabId + '"]').classList.add('active');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var circle = document.querySelector('.progress-ring');
+        if (circle) {
+            var score = {{ result.risk_score|default:0 }};
+            var circumference = 590.62;
+            var offset = circumference - (score / 100) * circumference;
+            requestAnimationFrame(function() {
+                circle.style.strokeDashoffset = offset;
+            });
+        }
+
+        document.querySelectorAll('.breakdown-bar-fill').forEach(function(bar) {
+            var w = bar.style.width;
+            requestAnimationFrame(function() {
+                bar.style.width = '0%';
+                requestAnimationFrame(function() {
+                    bar.style.width = w;
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}

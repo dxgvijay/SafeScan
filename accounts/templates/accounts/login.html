@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Sign In - CipherScan{% endblock %}
+
+{% block content %}
+<div style="display:flex;gap:0;min-height:calc(100vh - 64px);margin:-32px -24px;background:var(--bg-secondary);border-radius:0;">
+    <div class="auth-bg" style="flex:1 1 50%;max-width:50%;display:flex;">
+        <div class="auth-graphic" style="text-align:center;">
+            <div style="margin-bottom:24px;">
+                <span style="font-size:12px;color:var(--accent-cyan);font-weight:600;letter-spacing:2px;text-transform:uppercase;background:rgba(0,240,255,0.08);padding:6px 14px;border-radius:20px;border:1px solid rgba(0,240,255,0.15);">Welcome Back</span>
+            </div>
+            <div class="globe"></div>
+            <h2 style="font-size:28px;font-weight:800;margin-bottom:8px;background:var(--gradient-main);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Glad to See You<br>Again</h2>
+            <p style="color:var(--text-secondary);font-size:15px;max-width:400px;margin:0 auto 32px;line-height:1.7;">Continue protecting your infrastructure with real-time threat intelligence and advanced scanning tools.</p>
+            <div class="scanner-line" style="max-width:400px;margin:0 auto 24px;"></div>
+            <div class="auth-stats" style="max-width:400px;margin:0 auto;">
+                <div class="auth-stat-item">
+                    <div class="number">10K+</div>
+                    <div class="label">Scans Completed</div>
+                </div>
+                <div class="auth-stat-item">
+                    <div class="number">99.9%</div>
+                    <div class="label">Detection Rate</div>
+                </div>
+                <div class="auth-stat-item">
+                    <div class="number">5K+</div>
+                    <div class="label">Active Users</div>
+                </div>
+                <div class="auth-stat-item">
+                    <div class="number">&lt;1s</div>
+                    <div class="label">Avg. Response</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="auth-form" style="flex:1 1 50%;max-width:50%;display:flex;align-items:center;justify-content:center;padding:48px;background:var(--bg-primary);border-left:1px solid var(--border-color);">
+        <div style="width:100%;max-width:440px;">
+            <div style="margin-bottom:32px;">
+                <h1 style="font-size:24px;font-weight:700;margin-bottom:6px;">Sign in</h1>
+                <p style="color:var(--text-secondary);font-size:14px;">Access your security dashboard and tools.</p>
+            </div>
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                <div class="alert alert-error" style="margin-bottom:20px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                    {{ form.non_field_errors.0 }}
+                </div>
+                {% endif %}
+
+                {% if form.email.errors %}
+                <div class="alert alert-error" style="margin-bottom:20px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                    {{ form.email.errors.0 }}
+                </div>
+                {% endif %}
+
+                <div class="floating-label-group">
+                    <input type="email" name="email" id="id_email" placeholder=" " value="{{ form.email.value|default:'' }}" required autocomplete="email" autofocus class="form-input">
+                    <label for="id_email">Email Address</label>
+                </div>
+
+                <div class="floating-label-group">
+                    <input type="password" name="password" id="id_password" placeholder=" " required autocomplete="current-password" class="form-input">
+                    <label for="id_password">Password</label>
+                    {% if form.password.errors %}<div class="form-error">{{ form.password.errors.0 }}</div>{% endif %}
+                </div>
+
+                <div class="form-group" id="tfaField" style="display:none;">
+                    <div class="floating-label-group">
+                        <input type="text" name="otp_token" id="id_otp_token" placeholder=" " autocomplete="one-time-code" class="form-input" inputmode="numeric" pattern="[0-9]*">
+                        <label for="id_otp_token">Two-Factor Code</label>
+                    </div>
+                </div>
+
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+                    <label class="form-check">
+                        <input type="checkbox" name="remember_me" id="id_remember_me" checked>
+                        <span style="font-size:13px;color:var(--text-secondary);">Remember me</span>
+                    </label>
+                    <a href="#" style="color:var(--text-muted);font-size:13px;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='var(--accent-cyan)'" onmouseout="this.style.color='var(--text-muted)'">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg" style="width:100%;margin-bottom:16px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                    Sign In
+                </button>
+
+                <div style="position:relative;text-align:center;margin:20px 0;">
+                    <div style="position:absolute;top:50%;left:0;right:0;height:1px;background:var(--border-color);"></div>
+                    <span style="position:relative;background:var(--bg-primary);padding:0 12px;color:var(--text-muted);font-size:13px;z-index:1;">or continue with</span>
+                </div>
+
+                <div style="display:flex;gap:12px;">
+                    <button type="button" class="btn btn-secondary" style="flex:1;padding:10px;" onclick="alert('Google OAuth coming soon!')">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="21.17" y1="8" x2="12" y2="8"/><line x1="3.95" y1="6.06" x2="8.54" y2="14"/><line x1="10.88" y1="21.94" x2="15.46" y2="14"/></svg>
+                        Google
+                    </button>
+                    <button type="button" class="btn btn-secondary" style="flex:1;padding:10px;" onclick="alert('GitHub OAuth coming soon!')">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+                        GitHub
+                    </button>
+                </div>
+
+                <p style="text-align:center;margin-top:24px;color:var(--text-muted);font-size:14px;">
+                    Don't have an account?
+                    <a href="{% url 'accounts:register' %}" style="color:var(--accent-cyan);text-decoration:none;font-weight:600;">Create one</a>
+                </p>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const passwordInput = document.getElementById('id_password');
+        const tfaField = document.getElementById('tfaField');
+        if (passwordInput) {
+            passwordInput.addEventListener('input', function() {
+                if (tfaField) tfaField.style.display = 'none';
+            });
+        }
+        {% if two_factor_enabled %}
+        if (tfaField) tfaField.style.display = 'block';
+        {% endif %}
+    });
+</script>
+{% endblock %}
