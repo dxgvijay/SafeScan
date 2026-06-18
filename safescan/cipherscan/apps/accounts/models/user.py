@@ -1,8 +1,25 @@
 import uuid
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils.translation import gettext_lazy as _
+
 
 class User(AbstractUser):
+    groups = models.ManyToManyField(
+        'auth.Group',
+        related_name='accounts_user_set',
+        blank=True,
+        verbose_name=_('groups'),
+        help_text=_('The groups this user belongs to.'),
+    )
+    user_permissions = models.ManyToManyField(
+        'auth.Permission',
+        related_name='accounts_user_set',
+        blank=True,
+        verbose_name=_('user permissions'),
+        help_text=_('Specific permissions for this user.'),
+    )
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(unique=True)
     is_verified = models.BooleanField(default=False)
