@@ -1,0 +1,1200 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Security Analysis Tools — CipherScan{% endblock %}
+
+{% block body_class %}full-width{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ============================================================
+   TOOLS PAGE — Hero / Search
+   ============================================================ */
+.tools-hero {
+    position: relative;
+    padding: 4rem 2rem 3rem;
+    text-align: center;
+    overflow: hidden;
+    background: linear-gradient(135deg, #0a0e1a 0%, #0f1628 30%, #0e0a20 60%, #0a0e1a 100%);
+}
+.tools-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background:
+        radial-gradient(ellipse at 25% 40%, rgba(0, 212, 255, 0.05) 0%, transparent 50%),
+        radial-gradient(ellipse at 75% 30%, rgba(124, 91, 254, 0.04) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 70%, rgba(255, 107, 53, 0.03) 0%, transparent 50%);
+    animation: hero-orbs 20s ease infinite;
+    pointer-events: none;
+}
+@keyframes hero-orbs {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(3%, 2%); }
+    50% { transform: translate(-2%, 4%); }
+    75% { transform: translate(4%, -2%); }
+}
+.tools-hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2300d4ff' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none;
+    opacity: 0.4;
+}
+.tools-hero .hero-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 780px;
+    margin: 0 auto;
+}
+.tools-hero .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--accent-cyan-dim);
+    border: 1px solid rgba(0, 212, 255, 0.12);
+    border-radius: 50px;
+    padding: 0.375rem 1rem 0.375rem 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--accent-cyan);
+    margin-bottom: 1.25rem;
+}
+.tools-hero .hero-badge .badge-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent-success);
+    animation: pulse-dot 2s infinite;
+}
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.75); }
+}
+.tools-hero h1 {
+    font-size: clamp(2rem, 4.5vw, 3.25rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.75rem;
+}
+.tools-hero h1 .highlight {
+    background: linear-gradient(135deg, var(--accent-cyan), #7c5bfe);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.tools-hero .hero-sub {
+    font-size: clamp(0.9375rem, 1.5vw, 1.125rem);
+    color: var(--text-secondary);
+    margin-bottom: 1.75rem;
+    line-height: 1.6;
+}
+
+/* Global search bar */
+.search-bar-wrapper {
+    position: relative;
+    max-width: 640px;
+    margin: 0 auto 1.5rem;
+}
+.search-bar-wrapper .search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    pointer-events: none;
+    z-index: 2;
+}
+.search-bar-wrapper input {
+    width: 100%;
+    background: rgba(15, 22, 40, 0.7);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: 0.875rem 1rem 0.875rem 2.75rem;
+    color: var(--text-primary);
+    font-family: var(--font-ui);
+    font-size: 0.9375rem;
+    backdrop-filter: blur(16px);
+    transition: all var(--transition-normal);
+}
+.search-bar-wrapper input:focus {
+    outline: none;
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 0 4px rgba(0, 212, 255, 0.08), 0 0 30px rgba(0, 212, 255, 0.1);
+}
+.search-bar-wrapper input::placeholder { color: var(--text-muted); }
+.search-bar-wrapper .search-shortcut {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 4px;
+    padding: 0.125rem 0.4375rem;
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    pointer-events: none;
+}
+
+/* Live stats ticker */
+.stats-ticker {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2rem;
+}
+.stats-ticker .ticker-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+}
+.stats-ticker .ticker-item .ticker-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+}
+.stats-ticker .ticker-item .ticker-icon.cyan { background: var(--accent-cyan-dim); color: var(--accent-cyan); }
+.stats-ticker .ticker-item .ticker-icon.orange { background: var(--accent-orange-dim); color: var(--accent-orange); }
+.stats-ticker .ticker-item .ticker-icon.danger { background: var(--accent-danger-dim); color: var(--accent-danger); }
+.stats-ticker .ticker-item .ticker-val {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    color: var(--text-primary);
+    font-size: 0.9375rem;
+}
+.stats-ticker .ticker-item .ticker-label { font-size: 0.75rem; }
+.stats-ticker .ticker-divider {
+    width: 1px;
+    background: var(--glass-border);
+    align-self: stretch;
+}
+
+/* ============================================================
+   TOOLS GRID
+   ============================================================ */
+.tools-section {
+    padding: 4rem 0 2rem;
+}
+.tools-section .section-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+.tools-section .section-header h2 {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+.tools-section .section-header p {
+    color: var(--text-secondary);
+    font-size: 0.9375rem;
+    max-width: 480px;
+    margin: 0 auto;
+}
+
+/* Tool card */
+.tool-card {
+    position: relative;
+    border-radius: var(--radius-lg);
+    padding: 1.75rem;
+    height: 100%;
+    overflow: hidden;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: default;
+    border: 1px solid transparent;
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+}
+.tool-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    border-radius: var(--radius-lg);
+    pointer-events: none;
+}
+.tool-card:hover {
+    transform: translateY(-6px) scale(1.01);
+}
+.tool-card .card-bg-glow {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+    z-index: 0;
+}
+.tool-card:hover .card-bg-glow {
+    opacity: 1;
+}
+.tool-card .card-content {
+    position: relative;
+    z-index: 1;
+}
+
+/* Card themes */
+.tool-card.theme-phishing {
+    border-color: rgba(255, 71, 87, 0.15);
+    background: linear-gradient(135deg, rgba(15, 22, 40, 0.85), rgba(40, 10, 15, 0.5));
+}
+.tool-card.theme-phishing::before { background: radial-gradient(ellipse at 50% 0%, rgba(255, 71, 87, 0.06) 0%, transparent 70%); }
+.tool-card.theme-phishing .card-bg-glow { background: radial-gradient(circle, rgba(255, 71, 87, 0.08) 0%, transparent 60%); }
+.tool-card.theme-phishing:hover { border-color: rgba(255, 71, 87, 0.3); box-shadow: 0 0 30px rgba(255, 71, 87, 0.12); }
+
+.tool-card.theme-url {
+    border-color: rgba(0, 212, 255, 0.15);
+    background: linear-gradient(135deg, rgba(15, 22, 40, 0.85), rgba(0, 25, 40, 0.5));
+}
+.tool-card.theme-url::before { background: radial-gradient(ellipse at 50% 0%, rgba(0, 212, 255, 0.06) 0%, transparent 70%); }
+.tool-card.theme-url .card-bg-glow { background: radial-gradient(circle, rgba(0, 212, 255, 0.08) 0%, transparent 60%); }
+.tool-card.theme-url:hover { border-color: rgba(0, 212, 255, 0.3); box-shadow: 0 0 30px rgba(0, 212, 255, 0.12); }
+
+.tool-card.theme-file {
+    border-color: rgba(124, 91, 254, 0.15);
+    background: linear-gradient(135deg, rgba(15, 22, 40, 0.85), rgba(20, 10, 40, 0.5));
+}
+.tool-card.theme-file::before { background: radial-gradient(ellipse at 50% 0%, rgba(124, 91, 254, 0.06) 0%, transparent 70%); }
+.tool-card.theme-file .card-bg-glow { background: radial-gradient(circle, rgba(124, 91, 254, 0.08) 0%, transparent 60%); }
+.tool-card.theme-file:hover { border-color: rgba(124, 91, 254, 0.3); box-shadow: 0 0 30px rgba(124, 91, 254, 0.12); }
+
+.tool-card.theme-sandbox {
+    border-color: rgba(0, 255, 136, 0.15);
+    background: linear-gradient(135deg, rgba(15, 22, 40, 0.85), rgba(0, 30, 20, 0.5));
+}
+.tool-card.theme-sandbox::before { background: radial-gradient(ellipse at 50% 0%, rgba(0, 255, 136, 0.06) 0%, transparent 70%); }
+.tool-card.theme-sandbox .card-bg-glow { background: radial-gradient(circle, rgba(0, 255, 136, 0.08) 0%, transparent 60%); }
+.tool-card.theme-sandbox:hover { border-color: rgba(0, 255, 136, 0.3); box-shadow: 0 0 30px rgba(0, 255, 136, 0.12); }
+
+.tool-card.theme-intel {
+    border-color: rgba(255, 217, 61, 0.15);
+    background: linear-gradient(135deg, rgba(15, 22, 40, 0.85), rgba(30, 25, 5, 0.5));
+}
+.tool-card.theme-intel::before { background: radial-gradient(ellipse at 50% 0%, rgba(255, 217, 61, 0.06) 0%, transparent 70%); }
+.tool-card.theme-intel .card-bg-glow { background: radial-gradient(circle, rgba(255, 217, 61, 0.08) 0%, transparent 60%); }
+.tool-card.theme-intel:hover { border-color: rgba(255, 217, 61, 0.3); box-shadow: 0 0 30px rgba(255, 217, 61, 0.12); }
+
+.tool-card.theme-reports {
+    border-color: rgba(0, 212, 255, 0.12);
+    background: linear-gradient(135deg, rgba(15, 22, 40, 0.85), rgba(0, 25, 25, 0.5));
+}
+.tool-card.theme-reports::before { background: radial-gradient(ellipse at 50% 0%, rgba(0, 212, 255, 0.04) 0%, transparent 70%); }
+.tool-card.theme-reports .card-bg-glow { background: radial-gradient(circle, rgba(0, 212, 255, 0.06) 0%, transparent 60%); }
+.tool-card.theme-reports:hover { border-color: rgba(0, 212, 255, 0.25); box-shadow: 0 0 30px rgba(0, 212, 255, 0.08); }
+
+/* Card icon */
+.tool-card .tool-icon-wrap {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.375rem;
+    margin-bottom: 1rem;
+    transition: all var(--transition-normal);
+    position: relative;
+}
+.tool-card:hover .tool-icon-wrap {
+    transform: scale(1.08);
+}
+.tool-card .tool-icon-wrap.ic-phishing { background: rgba(255, 71, 87, 0.15); color: #ff4757; box-shadow: 0 0 20px rgba(255, 71, 87, 0.1); }
+.tool-card .tool-icon-wrap.ic-url { background: rgba(0, 212, 255, 0.15); color: #00d4ff; box-shadow: 0 0 20px rgba(0, 212, 255, 0.1); }
+.tool-card .tool-icon-wrap.ic-file { background: rgba(124, 91, 254, 0.15); color: #7c5bfe; box-shadow: 0 0 20px rgba(124, 91, 254, 0.1); }
+.tool-card .tool-icon-wrap.ic-sandbox { background: rgba(0, 255, 136, 0.15); color: #00ff88; box-shadow: 0 0 20px rgba(0, 255, 136, 0.1); }
+.tool-card .tool-icon-wrap.ic-intel { background: rgba(255, 217, 61, 0.15); color: #ffd93d; box-shadow: 0 0 20px rgba(255, 217, 61, 0.1); }
+.tool-card .tool-icon-wrap.ic-reports { background: rgba(0, 212, 255, 0.12); color: #00d4ff; box-shadow: 0 0 20px rgba(0, 212, 255, 0.06); }
+
+/* Card content */
+.tool-card .tool-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.375rem;
+}
+.tool-card .tool-desc {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 0.75rem;
+}
+
+/* Scan counter */
+.tool-card .tool-scan-counter {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.71875rem;
+    color: var(--text-muted);
+    margin-bottom: 0.875rem;
+    padding: 0.25rem 0.625rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+}
+.tool-card .tool-scan-counter .counter-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--accent-success);
+    animation: pulse-dot 2s infinite;
+}
+.tool-card .tool-scan-counter .count-num {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Sub-feature badges */
+.tool-card .tool-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    margin-bottom: 1.125rem;
+}
+.tool-card .tool-badges .tb {
+    font-size: 0.65625rem;
+    font-weight: 500;
+    padding: 0.1875rem 0.5rem;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-muted);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    transition: all var(--transition-fast);
+}
+.tool-card:hover .tool-badges .tb {
+    color: var(--text-secondary);
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+/* Launch button */
+.tool-card .tool-launch {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    padding: 0.5rem 1.125rem;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    transition: all var(--transition-fast);
+    border: 1px solid;
+}
+.tool-card .tool-launch i {
+    font-size: 0.75rem;
+    transition: transform var(--transition-fast);
+}
+.tool-card:hover .tool-launch i {
+    transform: translateX(3px);
+}
+.tool-card .tool-launch.launch-phishing { background: rgba(255, 71, 87, 0.12); color: #ff4757; border-color: rgba(255, 71, 87, 0.2); }
+.tool-card .tool-launch.launch-phishing:hover { background: rgba(255, 71, 87, 0.2); box-shadow: 0 0 24px rgba(255, 71, 87, 0.15); }
+.tool-card .tool-launch.launch-url { background: rgba(0, 212, 255, 0.12); color: #00d4ff; border-color: rgba(0, 212, 255, 0.2); }
+.tool-card .tool-launch.launch-url:hover { background: rgba(0, 212, 255, 0.2); box-shadow: 0 0 24px rgba(0, 212, 255, 0.15); }
+.tool-card .tool-launch.launch-file { background: rgba(124, 91, 254, 0.12); color: #7c5bfe; border-color: rgba(124, 91, 254, 0.2); }
+.tool-card .tool-launch.launch-file:hover { background: rgba(124, 91, 254, 0.2); box-shadow: 0 0 24px rgba(124, 91, 254, 0.15); }
+.tool-card .tool-launch.launch-sandbox { background: rgba(0, 255, 136, 0.12); color: #00ff88; border-color: rgba(0, 255, 136, 0.2); }
+.tool-card .tool-launch.launch-sandbox:hover { background: rgba(0, 255, 136, 0.2); box-shadow: 0 0 24px rgba(0, 255, 136, 0.15); }
+.tool-card .tool-launch.launch-intel { background: rgba(255, 217, 61, 0.12); color: #ffd93d; border-color: rgba(255, 217, 61, 0.2); }
+.tool-card .tool-launch.launch-intel:hover { background: rgba(255, 217, 61, 0.2); box-shadow: 0 0 24px rgba(255, 217, 61, 0.15); }
+.tool-card .tool-launch.launch-reports { background: rgba(0, 212, 255, 0.1); color: #00d4ff; border-color: rgba(0, 212, 255, 0.15); }
+.tool-card .tool-launch.launch-reports:hover { background: rgba(0, 212, 255, 0.18); box-shadow: 0 0 24px rgba(0, 212, 255, 0.1); }
+
+/* ============================================================
+   ACCORDION — How Each Tool Works
+   ============================================================ */
+.accordion-section {
+    padding: 3rem 0 4rem;
+}
+.accordion-section .section-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+.accordion-section .section-header h2 {
+    font-size: clamp(1.375rem, 2.5vw, 1.75rem);
+    font-weight: 700;
+}
+.accordion-cs {
+    max-width: 800px;
+    margin: 0 auto;
+}
+.accordion-cs .accord-item {
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    margin-bottom: 0.5rem;
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    transition: all var(--transition-fast);
+    overflow: hidden;
+}
+.accordion-cs .accord-item:hover {
+    border-color: var(--glass-border-hover);
+}
+.accordion-cs .accord-item.open {
+    border-color: var(--glass-border-hover);
+}
+.accordion-cs .accord-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.875rem 1.25rem;
+    cursor: pointer;
+    user-select: none;
+    gap: 0.75rem;
+    transition: background var(--transition-fast);
+}
+.accordion-cs .accord-header:hover {
+    background: rgba(255, 255, 255, 0.015);
+}
+.accordion-cs .accord-header .ah-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+.accordion-cs .accord-header .ah-left .ah-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.accordion-cs .accord-header .ah-left .ah-tool-name {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+.accordion-cs .accord-header .ah-arrow {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    transition: transform var(--transition-normal);
+    flex-shrink: 0;
+}
+.accordion-cs .accord-item.open .ah-arrow {
+    transform: rotate(180deg);
+}
+.accordion-cs .accord-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.accordion-cs .accord-item.open .accord-body {
+    max-height: 400px;
+}
+.accordion-cs .accord-body-inner {
+    padding: 0 1.25rem 1.125rem;
+    border-top: 1px solid var(--glass-border);
+}
+.accordion-cs .accord-body-inner .step-list {
+    list-style: none;
+    padding: 0.75rem 0 0;
+    margin: 0;
+}
+.accordion-cs .accord-body-inner .step-list li {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.4375rem 0;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+.accordion-cs .accord-body-inner .step-list li .step-num {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    width: 20px;
+    flex-shrink: 0;
+    text-align: right;
+}
+
+/* ============================================================
+   API BANNER
+   ============================================================ */
+.api-banner {
+    padding: 3rem 0 5rem;
+}
+.api-banner .api-card {
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.06), rgba(124, 91, 254, 0.04));
+    border: 1px solid rgba(0, 212, 255, 0.12);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem;
+    position: relative;
+    overflow: hidden;
+}
+.api-banner .api-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(0, 212, 255, 0.04) 0%, transparent 70%);
+    pointer-events: none;
+}
+.api-banner .api-card .api-content {
+    position: relative;
+    z-index: 1;
+}
+.api-banner .api-card h3 {
+    font-size: 1.375rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+.api-banner .api-card .api-sub {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    margin-bottom: 1.25rem;
+    max-width: 500px;
+}
+.api-banner .api-card .api-code-block {
+    background: #070b14;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.25rem;
+    position: relative;
+    overflow-x: auto;
+}
+.api-banner .api-card .api-code-block pre {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+.api-banner .api-card .api-code-block pre .code-comment { color: #5a6380; }
+.api-banner .api-card .api-code-block pre .code-keyword { color: var(--accent-cyan); }
+.api-banner .api-card .api-code-block pre .code-string { color: var(--accent-success); }
+.api-banner .api-card .api-code-block .code-copy-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.75rem;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--glass-border);
+    color: var(--text-muted);
+    padding: 0.25rem 0.625rem;
+    border-radius: 4px;
+    font-size: 0.6875rem;
+    cursor: pointer;
+    font-family: var(--font-ui);
+    transition: all var(--transition-fast);
+}
+.api-banner .api-card .api-code-block .code-copy-btn:hover {
+    background: rgba(255,255,255,0.06);
+    color: var(--text-primary);
+    border-color: var(--text-muted);
+}
+.api-banner .api-card .api-bottom {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+}
+.api-banner .api-card .api-bottom .btn-api {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--accent-cyan);
+    color: #0a0e1a;
+    padding: 0.625rem 1.5rem;
+    border-radius: var(--radius-sm);
+    font-weight: 700;
+    font-size: 0.875rem;
+    text-decoration: none;
+    transition: all var(--transition-fast);
+    border: 1px solid var(--accent-cyan);
+}
+.api-banner .api-card .api-bottom .btn-api:hover {
+    background: #33ddff;
+    border-color: #33ddff;
+    box-shadow: var(--accent-cyan-glow);
+}
+.api-banner .api-card .api-bottom .api-doc-link {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+.api-banner .api-card .api-bottom .api-doc-link:hover {
+    color: var(--accent-cyan);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 991.98px) {
+    .tools-hero { padding: 3rem 1.5rem 2.5rem; }
+    .tools-section { padding: 3rem 0 1.5rem; }
+    .stats-ticker { gap: 1.25rem; }
+    .stats-ticker .ticker-divider { display: none; }
+    .api-banner .api-card { padding: 1.75rem; }
+}
+@media (max-width: 767.98px) {
+    .tools-hero { padding: 2.5rem 1rem 2rem; }
+    .tools-hero h1 { font-size: 1.75rem; }
+    .search-bar-wrapper input { font-size: 0.875rem; }
+    .stats-ticker .ticker-item .ticker-val { font-size: 0.8125rem; }
+    .tool-card { padding: 1.375rem; }
+    .api-banner .api-card { padding: 1.25rem; }
+    .api-banner .api-card .api-code-block { padding: 0.75rem 1rem; }
+    .api-banner .api-card .api-code-block pre { font-size: 0.71875rem; }
+}
+@media (max-width: 575.98px) {
+    .tools-hero { padding: 2rem 0.75rem 1.5rem; }
+    .search-bar-wrapper .search-shortcut { display: none; }
+    .stats-ticker { flex-direction: column; align-items: center; gap: 0.625rem; }
+    .accordion-cs .accord-header { padding: 0.75rem 1rem; }
+    .accordion-cs .accord-header .ah-left .ah-tool-name { font-size: 0.8125rem; }
+    .accordion-cs .accord-body-inner { padding: 0 1rem 0.875rem; }
+    .tool-card .tool-icon-wrap { width: 46px; height: 46px; font-size: 1.125rem; }
+}
+</style>
+{% endblock %}
+
+{% block hero %}
+<!-- ============================================================
+     TOOLS HERO / SEARCH
+     ============================================================ -->
+<section class="tools-hero">
+    <div class="hero-inner">
+        <div class="hero-badge">
+            <span class="badge-dot"></span>
+            17 security tools — one platform
+        </div>
+        <h1>Security <span class="highlight">Analysis Tools</span></h1>
+        <p class="hero-sub">
+            Professional-grade threat intelligence at your fingertips.
+            Scan, analyze, and neutralize threats across every attack vector.
+        </p>
+
+        <div class="search-bar-wrapper">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" id="toolSearchInput" placeholder="Search by URL, file hash, IP, domain, email&hellip;" autocomplete="off">
+            <span class="search-shortcut">Ctrl+K</span>
+        </div>
+
+        <div class="stats-ticker">
+            <div class="ticker-item">
+                <span class="ticker-icon cyan"><i class="fas fa-link"></i></span>
+                <span>
+                    <span class="ticker-val"><span id="urlsToday">12,847</span></span>
+                    <span class="ticker-label">URLs scanned today</span>
+                </span>
+            </div>
+            <div class="ticker-divider"></div>
+            <div class="ticker-item">
+                <span class="ticker-icon orange"><i class="fas fa-file"></i></span>
+                <span>
+                    <span class="ticker-val"><span id="filesToday">4,293</span></span>
+                    <span class="ticker-label">files analyzed</span>
+                </span>
+            </div>
+            <div class="ticker-divider"></div>
+            <div class="ticker-item">
+                <span class="ticker-icon danger"><i class="fas fa-shield"></i></span>
+                <span>
+                    <span class="ticker-val"><span id="threatsToday">1,847</span></span>
+                    <span class="ticker-label">threats blocked</span>
+                </span>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block content %}
+<!-- ============================================================
+     TOOLS GRID
+     ============================================================ -->
+<section class="tools-section" id="toolsGrid">
+    <div class="container">
+        <div class="section-header fade-in-up">
+            <h2>Choose a <span class="text-cyan">tool</span></h2>
+            <p>Each tool is purpose-built for a specific security analysis task.</p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Card 1 — Phishing Analyzer -->
+            <div class="col-lg-4 col-md-6">
+                <div class="tool-card theme-phishing fade-in-up">
+                    <div class="card-bg-glow"></div>
+                    <div class="card-content">
+                        <div class="tool-icon-wrap ic-phishing"><i class="fas fa-fish"></i></div>
+                        <h3 class="tool-name" style="color:#ff4757;">Phishing Analyzer</h3>
+                        <p class="tool-desc">Analyze email headers, detect spoofing, and block phishing campaigns with AI-driven inspection.</p>
+                        <div class="tool-scan-counter">
+                            <span class="counter-dot"></span>
+                            <span class="count-num" id="phishingCount">2,847</span> scans today
+                        </div>
+                        <div class="tool-badges">
+                            <span class="tb">Email Headers</span>
+                            <span class="tb">Email Health</span>
+                            <span class="tb">Suspicious Blocker</span>
+                            <span class="tb">DMARC/SPF</span>
+                        </div>
+                        <a href="{% url 'phishing_analysis' %}" class="tool-launch launch-phishing">
+                            Launch Tool <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2 — URL Scanner -->
+            <div class="col-lg-4 col-md-6">
+                <div class="tool-card theme-url fade-in-up">
+                    <div class="card-bg-glow"></div>
+                    <div class="card-content">
+                        <div class="tool-icon-wrap ic-url"><i class="fas fa-link"></i></div>
+                        <h3 class="tool-name" style="color:#00d4ff;">URL Scanner</h3>
+                        <p class="tool-desc">Deep scan any URL against 70+ threat databases. Detect phishing, malware, and malicious redirects.</p>
+                        <div class="tool-scan-counter">
+                            <span class="counter-dot"></span>
+                            <span class="count-num" id="urlCount">8,112</span> scans today
+                        </div>
+                        <div class="tool-badges">
+                            <span class="tb">70+ Vendors</span>
+                            <span class="tb">WHOIS Lookup</span>
+                            <span class="tb">SSL Check</span>
+                            <span class="tb">Redirect Trace</span>
+                        </div>
+                        <a href="{% url 'url_scan' %}" class="tool-launch launch-url">
+                            Launch Tool <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3 — File Scanner -->
+            <div class="col-lg-4 col-md-6">
+                <div class="tool-card theme-file fade-in-up">
+                    <div class="card-bg-glow"></div>
+                    <div class="card-content">
+                        <div class="tool-icon-wrap ic-file"><i class="fas fa-file-shield"></i></div>
+                        <h3 class="tool-name" style="color:#7c5bfe;">File Scanner</h3>
+                        <p class="tool-desc">Upload files for multi-engine malware detection. Supports PDFs, executables, archives, and documents.</p>
+                        <div class="tool-scan-counter">
+                            <span class="counter-dot"></span>
+                            <span class="count-num" id="fileCount">3,526</span> scans today
+                        </div>
+                        <div class="tool-badges">
+                            <span class="tb">PDF</span>
+                            <span class="tb">EXE</span>
+                            <span class="tb">DOCX</span>
+                            <span class="tb">BAT</span>
+                            <span class="tb">APK</span>
+                            <span class="tb">ZIP</span>
+                        </div>
+                        <a href="{% url 'file_scan' %}" class="tool-launch launch-file">
+                            Launch Tool <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 4 — Code Sandbox -->
+            <div class="col-lg-4 col-md-6">
+                <div class="tool-card theme-sandbox fade-in-up">
+                    <div class="card-bg-glow"></div>
+                    <div class="card-content">
+                        <div class="tool-icon-wrap ic-sandbox"><i class="fas fa-terminal"></i></div>
+                        <h3 class="tool-name" style="color:#00ff88;">Code Sandbox</h3>
+                        <p class="tool-desc">Execute and analyze suspicious code in an isolated environment. Observe behavior in real time.</p>
+                        <div class="tool-scan-counter">
+                            <span class="counter-dot"></span>
+                            <span class="count-num" id="sandboxCount">1,204</span> scans today
+                        </div>
+                        <div class="tool-badges">
+                            <span class="tb">Python</span>
+                            <span class="tb">JavaScript</span>
+                            <span class="tb">C++</span>
+                            <span class="tb">Bash</span>
+                            <span class="tb">Go</span>
+                            <span class="tb">Rust</span>
+                            <span class="tb">Java</span>
+                        </div>
+                        <a href="{% url 'sandbox' %}" class="tool-launch launch-sandbox">
+                            Launch Tool <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 5 — IP/Domain Intel -->
+            <div class="col-lg-4 col-md-6">
+                <div class="tool-card theme-intel fade-in-up">
+                    <div class="card-bg-glow"></div>
+                    <div class="card-content">
+                        <div class="tool-icon-wrap ic-intel"><i class="fas fa-radar"></i></div>
+                        <h3 class="tool-name" style="color:#ffd93d;">IP &amp; Domain Intel</h3>
+                        <p class="tool-desc">Investigate IP addresses and domains. Geolocation, ASN data, blacklist status, and open ports.</p>
+                        <div class="tool-scan-counter">
+                            <span class="counter-dot"></span>
+                            <span class="count-num" id="intelCount">984</span> scans today
+                        </div>
+                        <div class="tool-badges">
+                            <span class="tb">Geolocation</span>
+                            <span class="tb">ASN Lookup</span>
+                            <span class="tb">Blacklist Check</span>
+                            <span class="tb">Port Scan</span>
+                        </div>
+                        <a href="{% url 'ip_scan' %}" class="tool-launch launch-intel">
+                            Launch Tool <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 6 — Reports & History -->
+            <div class="col-lg-4 col-md-6">
+                <div class="tool-card theme-reports fade-in-up">
+                    <div class="card-bg-glow"></div>
+                    <div class="card-content">
+                        <div class="tool-icon-wrap ic-reports"><i class="fas fa-chart-simple"></i></div>
+                        <h3 class="tool-name" style="color:#00d4ff;">Reports &amp; History</h3>
+                        <p class="tool-desc">Access your full scan history, generate PDF reports, and integrate via our REST API.</p>
+                        <div class="tool-scan-counter">
+                            <span class="counter-dot"></span>
+                            <span class="count-num" id="reportsCount">2,451</span> reports generated
+                        </div>
+                        <div class="tool-badges">
+                            <span class="tb">Scan History</span>
+                            <span class="tb">Export PDF</span>
+                            <span class="tb">API Access</span>
+                            <span class="tb">Saved Reports</span>
+                        </div>
+                        <a href="{% url 'scan_history' %}" class="tool-launch launch-reports">
+                            Launch Tool <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     ACCORDION — How Each Tool Works
+     ============================================================ -->
+<section class="accordion-section" id="howItWorks">
+    <div class="container">
+        <div class="section-header fade-in-up">
+            <h2>How each <span class="text-cyan">tool works</span></h2>
+        </div>
+        <div class="accordion-cs" id="toolsAccordion">
+            <div class="accord-item open">
+                <div class="accord-header" data-accord-target="acc-1">
+                    <div class="ah-left">
+                        <span class="ah-dot" style="background:#ff4757;"></span>
+                        <span class="ah-tool-name">Phishing Analyzer</span>
+                    </div>
+                    <i class="fas fa-chevron-down ah-arrow"></i>
+                </div>
+                <div class="accord-body" id="acc-1">
+                    <div class="accord-body-inner">
+                        <ul class="step-list">
+                            <li><span class="step-num">01</span> Paste email headers or upload a suspicious email as .eml or .msg file.</li>
+                            <li><span class="step-num">02</span> The engine parses headers, checks SPF/DKIM/DMARC authentication, and extracts all links.</li>
+                            <li><span class="step-num">03</span> Each extracted URL is scanned against phishing databases and analyzed for spoofing patterns.</li>
+                            <li><span class="step-num">04</span> You receive a detailed report with threat score, verdict, and recommended actions.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accord-item">
+                <div class="accord-header" data-accord-target="acc-2">
+                    <div class="ah-left">
+                        <span class="ah-dot" style="background:#00d4ff;"></span>
+                        <span class="ah-tool-name">URL Scanner</span>
+                    </div>
+                    <i class="fas fa-chevron-down ah-arrow"></i>
+                </div>
+                <div class="accord-body" id="acc-2">
+                    <div class="accord-body-inner">
+                        <ul class="step-list">
+                            <li><span class="step-num">01</span> Enter a URL or paste a list of URLs for batch scanning.</li>
+                            <li><span class="step-num">02</span> The scanner fetches the page content, follows redirects, and extracts embedded resources.</li>
+                            <li><span class="step-num">03</span> Results are cross-referenced against 70+ threat intelligence vendors and databases.</li>
+                            <li><span class="step-num">04</span> View a comprehensive report including WHOIS, SSL status, domain reputation, and threat verdict.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accord-item">
+                <div class="accord-header" data-accord-target="acc-3">
+                    <div class="ah-left">
+                        <span class="ah-dot" style="background:#7c5bfe;"></span>
+                        <span class="ah-tool-name">File Scanner</span>
+                    </div>
+                    <i class="fas fa-chevron-down ah-arrow"></i>
+                </div>
+                <div class="accord-body" id="acc-3">
+                    <div class="accord-body-inner">
+                        <ul class="step-list">
+                            <li><span class="step-num">01</span> Upload a file up to 256 MB. Supports PDF, EXE, DOCX, ZIP, APK, BAT, and 50+ other formats.</li>
+                            <li><span class="step-num">02</span> The file is analyzed by multiple anti-virus engines and YARA rules simultaneously.</li>
+                            <li><span class="step-num">03</span> Behavioral analysis detects suspicious patterns like packers, obfuscation, and known malware signatures.</li>
+                            <li><span class="step-num">04</span> Download a detailed report with per-engine results, IoCs, and severity classification.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accord-item">
+                <div class="accord-header" data-accord-target="acc-4">
+                    <div class="ah-left">
+                        <span class="ah-dot" style="background:#00ff88;"></span>
+                        <span class="ah-tool-name">Code Sandbox</span>
+                    </div>
+                    <i class="fas fa-chevron-down ah-arrow"></i>
+                </div>
+                <div class="accord-body" id="acc-4">
+                    <div class="accord-body-inner">
+                        <ul class="step-list">
+                            <li><span class="step-num">01</span> Paste or upload code in Python, JavaScript, C++, Bash, Go, Rust, or Java.</li>
+                            <li><span class="step-num">02</span> The code runs in a secure, isolated container with network monitoring and filesystem tracking.</li>
+                            <li><span class="step-num">03</span> All system calls, network connections, and file modifications are recorded for analysis.</li>
+                            <li><span class="step-num">04</span> Review the execution trace, identify malicious behavior, and get a safety verdict.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accord-item">
+                <div class="accord-header" data-accord-target="acc-5">
+                    <div class="ah-left">
+                        <span class="ah-dot" style="background:#ffd93d;"></span>
+                        <span class="ah-tool-name">IP &amp; Domain Intel</span>
+                    </div>
+                    <i class="fas fa-chevron-down ah-arrow"></i>
+                </div>
+                <div class="accord-body" id="acc-5">
+                    <div class="accord-body-inner">
+                        <ul class="step-list">
+                            <li><span class="step-num">01</span> Enter an IP address or domain name to begin investigation.</li>
+                            <li><span class="step-num">02</span> The system fetches geolocation, ASN, reverse DNS, and WHOIS data.</li>
+                            <li><span class="step-num">03</span> Results are checked against 30+ blacklist databases and abuse registries.</li>
+                            <li><span class="step-num">04</span> View open ports, associated domains, and a comprehensive risk score.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accord-item">
+                <div class="accord-header" data-accord-target="acc-6">
+                    <div class="ah-left">
+                        <span class="ah-dot" style="background:#00d4ff;"></span>
+                        <span class="ah-tool-name">Reports &amp; History</span>
+                    </div>
+                    <i class="fas fa-chevron-down ah-arrow"></i>
+                </div>
+                <div class="accord-body" id="acc-6">
+                    <div class="accord-body-inner">
+                        <ul class="step-list">
+                            <li><span class="step-num">01</span> Browse your complete scan history with filters by date, type, and severity.</li>
+                            <li><span class="step-num">02</span> Click any scan to view the full detailed report with all findings.</li>
+                            <li><span class="step-num">03</span> Export reports as PDF or share them with your team via a secure link.</li>
+                            <li><span class="step-num">04</span> Access programmatic results and trigger scans via our REST API with your API key.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     API BANNER
+     ============================================================ -->
+<section class="api-banner" id="apiAccess">
+    <div class="container">
+        <div class="api-card fade-in-up">
+            <div class="api-content">
+                <h3><i class="fas fa-code text-cyan me-2"></i> Automate your security scans with our <span class="text-cyan">API</span></h3>
+                <p class="api-sub">Integrate CipherScan into your CI/CD pipeline, SIEM, or custom workflow. One API key unlocks every tool.</p>
+                <div class="api-code-block">
+                    <button class="code-copy-btn" id="copyCurlBtn"><i class="fas fa-copy me-1"></i> Copy</button>
+                    <pre><code><span class="code-comment"># Scan a URL with CipherScan API</span>
+curl -X POST https://api.cipherscan.io/v1/scan \
+  <span class="code-keyword">-H</span> <span class="code-string">"Authorization: Bearer cs_api_xxxxxxxxxxxx"</span> \
+  <span class="code-keyword">-H</span> <span class="code-string">"Content-Type: application/json"</span> \
+  <span class="code-keyword">-d</span> <span class="code-string">'{
+    "type": "url",
+    "target": "https://example.com",
+    "deep_scan": true
+  }'</span></code></pre>
+                </div>
+                <div class="api-bottom">
+                    <a href="{% url 'api_settings' %}" class="btn-api"><i class="fas fa-key"></i> Get Your API Key</a>
+                    <a href="{% url 'api_docs' %}" class="api-doc-link"><i class="fas fa-book me-1"></i> Read the API docs</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    // -------------------------------------------------------
+    // 1. KEYBOARD SHORTCUT — Ctrl+K focuses search
+    // -------------------------------------------------------
+    var searchInput = document.getElementById('toolSearchInput');
+    if (searchInput) {
+        document.addEventListener('keydown', function (e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                searchInput.focus();
+            }
+        });
+        // Redirect on enter — heuristic: if it looks like a URL, go to URL scanner
+        searchInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                var val = this.value.trim();
+                if (!val) return;
+                var type = 'url';
+                if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(val)) type = 'ip';
+                else if (/\.(com|net|org|io|gov|edu|xyz|top|tk|ru|cn|info|biz)\b/.test(val)) type = 'domain';
+                else if (/^[a-fA-F0-9]{32}$/.test(val) || /^[a-fA-F0-9]{40}$/.test(val) || /^[a-fA-F0-9]{64}$/.test(val)) type = 'hash';
+                var base = { url: '{% url "url_scan" %}', ip: '{% url "ip_scan" %}', domain: '{% url "domain_scan" %}', hash: '{% url "file_scan" %}' };
+                window.location.href = (base[type] || base.url) + '?q=' + encodeURIComponent(val);
+            }
+        });
+    }
+
+    // -------------------------------------------------------
+    // 2. STATS TICKER — Live counters (animated count-up)
+    // -------------------------------------------------------
+    function animateTicker(id, target) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        var current = parseInt(el.textContent.replace(/,/g, ''), 10) || 0;
+        var duration = 1500;
+        var startTime = null;
+        function step(timestamp) {
+            if (!startTime) startTime = timestamp;
+            var progress = Math.min((timestamp - startTime) / duration, 1);
+            var eased = 1 - Math.pow(1 - progress, 3);
+            var value = Math.floor(eased * target);
+            el.textContent = value.toLocaleString();
+            if (progress < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+    }
+    animateTicker('urlsToday', 12847);
+    animateTicker('filesToday', 4293);
+    animateTicker('threatsToday', 1847);
+
+    // Scan counters per tool
+    animateTicker('phishingCount', 2847);
+    animateTicker('urlCount', 8112);
+    animateTicker('fileCount', 3526);
+    animateTicker('sandboxCount', 1204);
+    animateTicker('intelCount', 984);
+    animateTicker('reportsCount', 2451);
+
+    // -------------------------------------------------------
+    // 3. ACCORDION — How Each Tool Works
+    // -------------------------------------------------------
+    var accordHeaders = document.querySelectorAll('.accord-header');
+    accordHeaders.forEach(function (header) {
+        header.addEventListener('click', function () {
+            var targetId = this.dataset.accordTarget;
+            var targetBody = document.getElementById(targetId);
+            var parentItem = this.closest('.accord-item');
+            if (!targetBody || !parentItem) return;
+
+            var isOpen = parentItem.classList.contains('open');
+
+            // Close all
+            document.querySelectorAll('.accord-item.open').forEach(function (item) {
+                item.classList.remove('open');
+            });
+
+            // Toggle clicked
+            if (!isOpen) {
+                parentItem.classList.add('open');
+            }
+        });
+    });
+
+    // -------------------------------------------------------
+    // 4. COPY CURL COMMAND
+    // -------------------------------------------------------
+    var copyBtn = document.getElementById('copyCurlBtn');
+    if (copyBtn) {
+        copyBtn.addEventListener('click', function () {
+            var codeEl = this.closest('.api-code-block').querySelector('code');
+            var text = codeEl ? codeEl.textContent : '';
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(function () {
+                    copyBtn.innerHTML = '<i class="fas fa-check me-1"></i> Copied!';
+                    setTimeout(function () {
+                        copyBtn.innerHTML = '<i class="fas fa-copy me-1"></i> Copy';
+                    }, 2000);
+                }).catch(function () {
+                    fallbackCopy(text);
+                });
+            } else {
+                fallbackCopy(text);
+            }
+        });
+    }
+    function fallbackCopy(text) {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+            document.execCommand('copy');
+            if (copyBtn) {
+                copyBtn.innerHTML = '<i class="fas fa-check me-1"></i> Copied!';
+                setTimeout(function () {
+                    copyBtn.innerHTML = '<i class="fas fa-copy me-1"></i> Copy';
+                }, 2000);
+            }
+        } catch (e) {}
+        document.body.removeChild(ta);
+    }
+
+    // -------------------------------------------------------
+    // 5. SCROLL ANIMATIONS
+    // -------------------------------------------------------
+    var animEls = document.querySelectorAll('.fade-in-up');
+    if (animEls.length) {
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+        animEls.forEach(function (el) { observer.observe(el); });
+    }
+
+    console.log('%cCipherScan%c Tools Hub — Loaded',
+        'color:#00d4ff;font-weight:700;font-size:1.2em;',
+        'color:#8892b0;font-size:0.9em;');
+});
+</script>
+{% endblock %}
