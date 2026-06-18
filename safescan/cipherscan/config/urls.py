@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib import admin
 from django.urls import path, include
 
@@ -24,4 +25,9 @@ urlpatterns = [
     path("sandbox/", include("apps.sandbox.urls.sandbox_urls")),
     path("sandbox/snippets/", include("apps.sandbox.urls.snippet_urls")),
     path("api/sandbox/", include("apps.sandbox.urls.api_urls")),
+    path("api/core/", include("apps.core.urls.api_urls")),
 ]
+
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns = [path("__debug__/", include(debug_toolbar.urls))] + urlpatterns

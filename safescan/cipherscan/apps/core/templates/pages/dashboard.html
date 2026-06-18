@@ -1,0 +1,1376 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard — CipherScan{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ============================================================
+   DASHBOARD — Page Header
+   ============================================================ */
+.dashboard-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+.dashboard-header .header-left h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.125rem;
+}
+.dashboard-header .header-left p {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+.dashboard-header .header-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* Notification bell */
+.notif-btn {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+.notif-btn:hover {
+    border-color: var(--glass-border-hover);
+    color: var(--text-primary);
+    background: var(--accent-cyan-dim);
+}
+.notif-btn .notif-badge {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--accent-danger);
+    color: #fff;
+    font-size: 0.625rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--bg-primary);
+}
+.notif-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 340px;
+    background: var(--bg-card-solid);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--glass-shadow), 0 0 40px rgba(0,0,0,0.4);
+    z-index: 1050;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-8px);
+    transition: all var(--transition-normal);
+    max-height: 420px;
+    overflow-y: auto;
+}
+.notif-dropdown.show {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+.notif-dropdown .notif-dropdown-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.875rem 1rem;
+    border-bottom: 1px solid var(--glass-border);
+}
+.notif-dropdown .notif-dropdown-header h6 {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    margin: 0;
+}
+.notif-dropdown .notif-dropdown-header a {
+    font-size: 0.71875rem;
+    color: var(--accent-cyan);
+    cursor: pointer;
+}
+.notif-dropdown .notif-item {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(255,255,255,0.02);
+    transition: background var(--transition-fast);
+    cursor: pointer;
+}
+.notif-dropdown .notif-item:hover {
+    background: rgba(255,255,255,0.02);
+}
+.notif-dropdown .notif-item.unread {
+    background: var(--accent-cyan-dim);
+    border-left: 2px solid var(--accent-cyan);
+}
+.notif-dropdown .notif-item .notif-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.78125rem;
+    flex-shrink: 0;
+}
+.notif-dropdown .notif-item .notif-icon.danger { background: var(--accent-danger-dim); color: var(--accent-danger); }
+.notif-dropdown .notif-item .notif-icon.warning { background: var(--accent-orange-dim); color: var(--accent-orange); }
+.notif-dropdown .notif-item .notif-icon.success { background: var(--accent-success-dim); color: var(--accent-success); }
+.notif-dropdown .notif-item .notif-icon.info { background: var(--accent-cyan-dim); color: var(--accent-cyan); }
+.notif-dropdown .notif-item .notif-text {
+    flex: 1;
+    min-width: 0;
+}
+.notif-dropdown .notif-item .notif-text .notif-title {
+    font-size: 0.78125rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.125rem;
+}
+.notif-dropdown .notif-item .notif-text .notif-time {
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+}
+.notif-dropdown .notif-item .notif-text .notif-title .notif-em {
+    color: var(--accent-cyan);
+    font-weight: 600;
+}
+
+/* ============================================================
+   STAT CARDS
+   ============================================================ */
+.stat-card-dash {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+}
+.stat-card-dash:hover {
+    border-color: var(--glass-border-hover);
+    box-shadow: var(--glass-shadow), var(--accent-cyan-glow);
+    transform: translateY(-2px);
+}
+.stat-card-dash .stat-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+}
+.stat-card-dash .stat-icon-box {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.125rem;
+    flex-shrink: 0;
+}
+.stat-card-dash .stat-icon-box.cyan { background: var(--accent-cyan-dim); color: var(--accent-cyan); }
+.stat-card-dash .stat-icon-box.danger { background: var(--accent-danger-dim); color: var(--accent-danger); }
+.stat-card-dash .stat-icon-box.orange { background: var(--accent-orange-dim); color: var(--accent-orange); }
+.stat-card-dash .stat-icon-box.success { background: var(--accent-success-dim); color: var(--accent-success); }
+.stat-card-dash .stat-icon-box.purple { background: var(--accent-purple-dim); color: var(--accent-purple); }
+.stat-card-dash .stat-sparkline {
+    width: 90px;
+    height: 36px;
+    flex-shrink: 0;
+}
+.stat-card-dash .stat-value {
+    font-size: 1.75rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    font-family: var(--font-mono);
+    line-height: 1.2;
+    margin-bottom: 0.125rem;
+}
+.stat-card-dash .stat-label {
+    font-size: 0.78125rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+.stat-card-dash .stat-change {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.71875rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: 50px;
+}
+.stat-card-dash .stat-change.up {
+    color: var(--accent-success);
+    background: var(--accent-success-dim);
+}
+.stat-card-dash .stat-change.down {
+    color: var(--accent-danger);
+    background: var(--accent-danger-dim);
+}
+.stat-card-dash .stat-change.neutral {
+    color: var(--text-muted);
+    background: rgba(255,255,255,0.03);
+}
+.stat-card-dash .stat-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* ============================================================
+   ACTIVITY TABLE
+   ============================================================ */
+.activity-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+.activity-card .activity-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--glass-border);
+}
+.activity-card .activity-header h5 {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.activity-card .activity-header .activity-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+.activity-card .activity-header .activity-actions select {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    font-size: 0.78125rem;
+    padding: 0.3125rem 1.75rem 0.3125rem 0.625rem;
+    font-family: var(--font-ui);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%238892b0' d='M1 0l4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    cursor: pointer;
+}
+.activity-card .activity-header .activity-actions select:focus {
+    outline: none;
+    border-color: var(--accent-cyan);
+}
+
+.activity-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8125rem;
+}
+.activity-table thead th {
+    padding: 0.6875rem 1.25rem;
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    font-weight: 600;
+    background: rgba(255,255,255,0.015);
+    border-bottom: 1px solid var(--glass-border);
+}
+.activity-table tbody tr {
+    transition: all var(--transition-fast);
+    position: relative;
+}
+.activity-table tbody tr:hover {
+    background: var(--accent-cyan-dim);
+}
+.activity-table tbody tr td {
+    padding: 0.6875rem 1.25rem;
+    border-bottom: 1px solid rgba(255,255,255,0.02);
+    vertical-align: middle;
+}
+.activity-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Threat level color bar on row */
+.activity-table tbody tr.row-malicious {
+    border-left: 3px solid var(--accent-danger);
+}
+.activity-table tbody tr.row-suspicious {
+    border-left: 3px solid var(--accent-orange);
+}
+.activity-table tbody tr.row-clean {
+    border-left: 3px solid var(--accent-success);
+}
+
+.activity-table .cell-type {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.activity-table .cell-type i {
+    font-size: 0.8125rem;
+}
+.activity-table .cell-type .type-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.71875rem;
+    flex-shrink: 0;
+}
+.activity-table .cell-type .type-icon.link { background: var(--accent-cyan-dim); color: var(--accent-cyan); }
+.activity-table .cell-type .type-icon.file { background: var(--accent-orange-dim); color: var(--accent-orange); }
+.activity-table .cell-type .type-icon.email { background: var(--accent-purple-dim); color: var(--accent-purple); }
+.activity-table .cell-type .type-icon.ip { background: var(--accent-warning-dim); color: var(--accent-warning); }
+
+.activity-table .cell-target {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-primary);
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.activity-table .cell-date {
+    font-size: 0.71875rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+}
+
+/* Threat level bar */
+.threat-bar {
+    width: 60px;
+    height: 4px;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.05);
+    overflow: hidden;
+}
+.threat-bar .threat-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.5s ease;
+}
+.threat-bar .threat-bar-fill.safe { background: var(--accent-success); width: 10%; }
+.threat-bar .threat-bar-fill.low { background: var(--accent-cyan); width: 25%; }
+.threat-bar .threat-bar-fill.medium { background: var(--accent-warning); width: 50%; }
+.threat-bar .threat-bar-fill.high { background: var(--accent-orange); width: 75%; }
+.threat-bar .threat-bar-fill.critical { background: var(--accent-danger); width: 100%; }
+
+/* Status badge in table */
+.status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 0.375rem;
+}
+.status-dot.completed { background: var(--accent-success); }
+.status-dot.pending { background: var(--accent-warning); }
+.status-dot.failed { background: var(--accent-danger); }
+.status-dot.running { background: var(--accent-cyan); animation: dot-pulse 1.5s infinite; }
+
+/* ============================================================
+   CHARTS
+   ============================================================ */
+.chart-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    height: 100%;
+}
+.chart-card .chart-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+.chart-card .chart-card-header h5 {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    margin: 0;
+}
+.chart-card .chart-card-header .chart-legend-custom {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+.chart-card .chart-card-header .chart-legend-custom .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.6875rem;
+    color: var(--text-secondary);
+}
+.chart-card .chart-card-header .chart-legend-custom .legend-item .legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+.chart-card .chart-wrapper-inner {
+    position: relative;
+    width: 100%;
+}
+.chart-card .chart-wrapper-inner canvas {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 260px;
+}
+
+/* Donut center text */
+.donut-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    pointer-events: none;
+}
+.donut-center .donut-center-value {
+    font-size: 1.75rem;
+    font-weight: 800;
+    font-family: var(--font-mono);
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+.donut-center .donut-center-label {
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+/* ============================================================
+   PROFILE CARD
+   ============================================================ */
+.profile-card-dash {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    text-align: center;
+    height: 100%;
+    transition: all var(--transition-normal);
+}
+.profile-card-dash:hover {
+    border-color: var(--glass-border-hover);
+    box-shadow: var(--glass-shadow), var(--accent-cyan-glow);
+}
+.profile-card-dash .profile-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: var(--accent-cyan-dim);
+    border: 2px solid var(--accent-cyan);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--accent-cyan);
+    margin: 0 auto 0.75rem;
+    overflow: hidden;
+}
+.profile-card-dash .profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.profile-card-dash .profile-name {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    margin-bottom: 0.125rem;
+}
+.profile-card-dash .profile-email {
+    font-size: 0.78125rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+}
+.profile-card-dash .profile-plan {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.71875rem;
+    font-weight: 600;
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    margin-bottom: 1rem;
+}
+.profile-card-dash .profile-plan.pro {
+    background: var(--accent-cyan-dim);
+    color: var(--accent-cyan);
+    border: 1px solid rgba(0, 212, 255, 0.15);
+}
+.profile-card-dash .profile-plan.free {
+    background: rgba(255,255,255,0.03);
+    color: var(--text-muted);
+    border: 1px solid var(--glass-border);
+}
+.profile-card-dash .profile-plan.enterprise {
+    background: var(--accent-purple-dim);
+    color: var(--accent-purple);
+    border: 1px solid rgba(124, 91, 254, 0.15);
+}
+.profile-card-dash .profile-stats {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--glass-border);
+}
+.profile-card-dash .profile-stats .pstat {
+    text-align: center;
+}
+.profile-card-dash .profile-stats .pstat .pstat-value {
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    color: var(--text-primary);
+}
+.profile-card-dash .profile-stats .pstat .pstat-label {
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.profile-card-dash .profile-actions {
+    margin-top: 1rem;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+/* ============================================================
+   QUICK SCAN WIDGET
+   ============================================================ */
+.quick-scan-widget {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    height: 100%;
+    transition: all var(--transition-normal);
+}
+.quick-scan-widget:hover {
+    border-color: var(--glass-border-hover);
+    box-shadow: var(--glass-shadow), var(--accent-cyan-glow);
+}
+.quick-scan-widget h5 {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.quick-scan-widget .qs-subtitle {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+.quick-scan-widget .qs-tabs {
+    display: flex;
+    background: rgba(255,255,255,0.02);
+    border-radius: var(--radius-sm);
+    padding: 2px;
+    margin-bottom: 0.75rem;
+}
+.quick-scan-widget .qs-tabs .qs-tab {
+    flex: 1;
+    text-align: center;
+    padding: 0.375rem 0;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    border: none;
+    background: none;
+    font-family: var(--font-ui);
+}
+.quick-scan-widget .qs-tabs .qs-tab.active {
+    background: var(--accent-cyan-dim);
+    color: var(--accent-cyan);
+}
+.quick-scan-widget .qs-tabs .qs-tab:hover:not(.active) {
+    color: var(--text-secondary);
+}
+.quick-scan-widget .qs-input-group {
+    display: flex;
+    gap: 0.5rem;
+}
+.quick-scan-widget .qs-input-group input {
+    flex: 1;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    padding: 0.5rem 0.75rem;
+    color: var(--text-primary);
+    font-size: 0.8125rem;
+    font-family: var(--font-ui);
+    outline: none;
+    transition: all var(--transition-fast);
+}
+.quick-scan-widget .qs-input-group input:focus {
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+}
+.quick-scan-widget .qs-input-group input::placeholder {
+    color: var(--text-muted);
+}
+.quick-scan-widget .qs-input-group .btn-qs {
+    background: var(--accent-cyan);
+    border: none;
+    color: #0a0e1a;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 0.8125rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-family: var(--font-ui);
+    white-space: nowrap;
+}
+.quick-scan-widget .qs-input-group .btn-qs:hover {
+    background: #33ddff;
+    box-shadow: var(--accent-cyan-glow);
+}
+.quick-scan-widget .qs-recent {
+    margin-top: 0.75rem;
+}
+.quick-scan-widget .qs-recent .qs-recent-title {
+    font-size: 0.71875rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    margin-bottom: 0.375rem;
+}
+.quick-scan-widget .qs-recent .qs-recent-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.375rem 0;
+    font-size: 0.75rem;
+    border-bottom: 1px solid rgba(255,255,255,0.02);
+}
+.quick-scan-widget .qs-recent .qs-recent-item:last-child {
+    border-bottom: none;
+}
+.quick-scan-widget .qs-recent .qs-recent-item .qs-item-target {
+    font-family: var(--font-mono);
+    color: var(--text-secondary);
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 1199.98px) {
+    .stat-card-dash .stat-sparkline {
+        width: 70px;
+    }
+}
+@media (max-width: 767.98px) {
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .dashboard-header .header-right {
+        width: 100%;
+        justify-content: flex-end;
+    }
+    .stat-card-dash .stat-value {
+        font-size: 1.375rem;
+    }
+    .stat-card-dash .stat-sparkline {
+        width: 70px;
+    }
+    .notif-dropdown {
+        width: 300px;
+        right: -60px;
+    }
+    .activity-table {
+        font-size: 0.75rem;
+    }
+    .activity-table thead th,
+    .activity-table tbody tr td {
+        padding: 0.5rem 0.75rem;
+    }
+    .activity-table .cell-target {
+        max-width: 120px;
+    }
+}
+@media (max-width: 575.98px) {
+    .profile-card-dash .profile-stats {
+        gap: 1rem;
+    }
+    .quick-scan-widget .qs-input-group {
+        flex-direction: column;
+    }
+    .dashboard-header .header-left h1 {
+        font-size: 1.25rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block page_header %}{% endblock %}
+
+{% block content %}
+<!-- ============================================================
+     DASHBOARD HEADER
+     ============================================================ -->
+<div class="dashboard-header">
+    <div class="header-left">
+        <h1>Dashboard</h1>
+        <p>Welcome back, <strong style="color:var(--text-primary)">{{ user.get_full_name|default:user.username }}</strong>. Here's your security overview.</p>
+    </div>
+    <div class="header-right">
+        <div style="position:relative;">
+            <button class="notif-btn" id="notifToggle" aria-label="Notifications">
+                <i class="fas fa-bell"></i>
+                <span class="notif-badge">3</span>
+            </button>
+            <div class="notif-dropdown" id="notifDropdown">
+                <div class="notif-dropdown-header">
+                    <h6>Notifications</h6>
+                    <a id="markAllRead">Mark all read</a>
+                </div>
+
+            </div>
+        </div>
+        <a href="{% url 'settings' %}" class="btn-cs btn-cs-ghost btn-cs-sm" aria-label="Settings">
+            <i class="fas fa-gear"></i>
+        </a>
+    </div>
+</div>
+
+<!-- ============================================================
+     STATS ROW
+     ============================================================ -->
+<div class="row g-3 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card-dash">
+            <div class="stat-top">
+                <div class="stat-icon-box cyan"><i class="fas fa-chart-bar"></i></div>
+                <div class="stat-sparkline">
+                    <canvas id="sparkTotal" width="90" height="36"></canvas>
+                </div>
+            </div>
+            <div class="stat-value"><span class="counter" data-target="{{ total_scans|default:18473 }}">{{ total_scans|default:0 }}</span></div>
+            <div class="stat-label">Total Scans</div>
+            <div class="stat-bottom">
+                <span class="stat-change up"><i class="fas fa-arrow-up"></i> {{ scan_change|default:"+12.5" }}%</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card-dash">
+            <div class="stat-top">
+                <div class="stat-icon-box danger"><i class="fas fa-shield"></i></div>
+                <div class="stat-sparkline">
+                    <canvas id="sparkThreats" width="90" height="36"></canvas>
+                </div>
+            </div>
+            <div class="stat-value"><span class="counter" data-target="{{ threats_found|default:521 }}">{{ threats_found|default:0 }}</span></div>
+            <div class="stat-label">Threats Found</div>
+            <div class="stat-bottom">
+                <span class="stat-change up"><i class="fas fa-arrow-up"></i> {{ threat_change|default:"+8.3" }}%</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card-dash">
+            <div class="stat-top">
+                <div class="stat-icon-box orange"><i class="fas fa-file"></i></div>
+                <div class="stat-sparkline">
+                    <canvas id="sparkFiles" width="90" height="36"></canvas>
+                </div>
+            </div>
+            <div class="stat-value"><span class="counter" data-target="{{ files_scanned|default:8473 }}">{{ files_scanned|default:0 }}</span></div>
+            <div class="stat-label">Files Scanned</div>
+            <div class="stat-bottom">
+                <span class="stat-change up"><i class="fas fa-arrow-up"></i> {{ file_change|default:"+5.2" }}%</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card-dash">
+            <div class="stat-top">
+                <div class="stat-icon-box success"><i class="fas fa-link"></i></div>
+                <div class="stat-sparkline">
+                    <canvas id="sparkUrls" width="90" height="36"></canvas>
+                </div>
+            </div>
+            <div class="stat-value"><span class="counter" data-target="{{ urls_scanned|default:12984 }}">{{ urls_scanned|default:0 }}</span></div>
+            <div class="stat-label">URLs Scanned</div>
+            <div class="stat-bottom">
+                <span class="stat-change up"><i class="fas fa-arrow-up"></i> {{ url_change|default:"+15.7" }}%</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     ACTIVITY TABLE + SIDEBAR (Profile + Quick Scan)
+     ============================================================ -->
+<div class="row g-4 mb-4">
+    <div class="col-xl-8">
+        <div class="activity-card">
+            <div class="activity-header">
+                <h5><i class="fas fa-clock-rotate text-cyan me-1"></i> Recent Activity</h5>
+                <div class="activity-actions">
+                    <select id="activityFilter">
+                        <option value="all">All Types</option>
+                        <option value="url">URL</option>
+                        <option value="file">File</option>
+                        <option value="email">Email</option>
+                        <option value="ip">IP</option>
+                    </select>
+                    <a href="{% url 'scan_history' %}" class="btn-cs btn-cs-ghost btn-cs-sm">
+                        View All <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="activity-table">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Target</th>
+                            <th>Status</th>
+                            <th>Threat Level</th>
+                            <th>Date</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for scan in recent_scans|default:default_scans %}
+                        <tr class="{% if scan.threat_level == 'critical' or scan.threat_level == 'high' %}row-malicious{% elif scan.threat_level == 'medium' or scan.threat_level == 'suspicious' %}row-suspicious{% else %}row-clean{% endif %}">
+                            <td>
+                                <div class="cell-type">
+                                    <span class="type-icon {% if scan.type == 'url' %}link{% elif scan.type == 'file' %}file{% elif scan.type == 'email' %}email{% else %}ip{% endif %}">
+                                        <i class="fas fa-{% if scan.type == 'url' %}link{% elif scan.type == 'file' %}file{% elif scan.type == 'email' %}envelope{% else %}network-wired{% endif %}"></i>
+                                    </span>
+                                    <span>{{ scan.type|title }}</span>
+                                </div>
+                            </td>
+                            <td><span class="cell-target">{{ scan.target }}</span></td>
+                            <td>
+                                <span class="status-dot {{ scan.status }}"></span>
+                                <span style="font-size:0.75rem;color:var(--text-secondary);text-transform:capitalize;">{{ scan.status }}</span>
+                            </td>
+                            <td>
+                                <div style="display:flex;align-items:center;gap:0.5rem;">
+                                    <div class="threat-bar">
+                                        <div class="threat-bar-fill {% if scan.threat_level == 'critical' or scan.threat_level == 'high' %}critical{% elif scan.threat_level == 'medium' %}medium{% elif scan.threat_level == 'low' %}low{% else %}safe{% endif %}"></div>
+                                    </div>
+                                    <span style="font-size:0.71875rem;color:var(--text-muted);text-transform:capitalize;">{{ scan.threat_level }}</span>
+                                </div>
+                            </td>
+                            <td><span class="cell-date">{{ scan.date|date:"M d, H:i" }}</span></td>
+                            <td>
+                                <a href="{% url 'scan_detail' scan.id %}" class="btn-cs btn-cs-ghost btn-cs-sm" style="padding:0.25rem 0.5rem;">
+                                    <i class="fas fa-chevron-right" style="font-size:0.75rem;"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" style="text-align:center;padding:3rem 1rem;color:var(--text-muted);">
+                                <i class="fas fa-inbox" style="font-size:2rem;display:block;margin-bottom:0.5rem;"></i>
+                                No recent scans yet. <a href="{% url 'url_scan' %}" style="color:var(--accent-cyan);">Start your first scan</a>.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4">
+        <div class="row g-4">
+            <div class="col-12">
+                <div class="profile-card-dash">
+                    <div class="profile-avatar">
+                        {% if user.profile.avatar %}
+                        <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}">
+                        {% else %}
+                        <i class="fas fa-user"></i>
+                        {% endif %}
+                    </div>
+                    <div class="profile-name">{{ user.get_full_name|default:user.username }}</div>
+                    <div class="profile-email">{{ user.email|default:"user@cipherscan.io" }}</div>
+                    <div class="profile-plan {% if user.profile.plan == 'enterprise' %}enterprise{% elif user.profile.plan == 'pro' %}pro{% else %}free{% endif %}">
+                        <i class="fas fa-{% if user.profile.plan == 'enterprise' %}building{% elif user.profile.plan == 'pro' %}crown{% else %}user{% endif %}"></i>
+                        {{ user.profile.plan|title|default:"Free" }}
+                    </div>
+                    <div class="profile-stats">
+                        <div class="pstat">
+                            <div class="pstat-value">{{ total_scans|default:0 }}</div>
+                            <div class="pstat-label">Scans</div>
+                        </div>
+                        <div class="pstat">
+                            <div class="pstat-value">{{ api_calls|default:"1.2k" }}</div>
+                            <div class="pstat-label">API Calls</div>
+                        </div>
+                        <div class="pstat">
+                            <div class="pstat-value">{{ user.profile.reports_saved|default:8 }}</div>
+                            <div class="pstat-label">Reports</div>
+                        </div>
+                    </div>
+                    <div class="profile-actions">
+                        <a href="{% url 'profile' %}" class="btn-cs btn-cs-ghost btn-cs-sm">Edit Profile</a>
+                        <a href="{% url 'settings' %}" class="btn-cs btn-cs-outline btn-cs-sm">Settings</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="quick-scan-widget">
+                    <h5><i class="fas fa-bolt text-cyan"></i> Quick Scan</h5>
+                    <p class="qs-subtitle">Scan a URL or file instantly</p>
+                    <div class="qs-tabs">
+                        <button class="qs-tab active" data-qs-type="url"><i class="fas fa-link me-1"></i> URL</button>
+                        <button class="qs-tab" data-qs-type="file"><i class="fas fa-file me-1"></i> File</button>
+                        <button class="qs-tab" data-qs-type="ip"><i class="fas fa-network-wired me-1"></i> IP</button>
+                    </div>
+                    <div class="qs-input-group">
+                        <input type="text" id="qsInput" placeholder="https://example.com" autocomplete="off">
+                        <button class="btn-qs" id="qsSubmit"><i class="fas fa-magnifying-glass"></i> Scan</button>
+                    </div>
+                    <div class="qs-recent">
+                        <div class="qs-recent-title">Recent Scans</div>
+                        {% for scan in recent_scans|slice:":3" %}
+                        <div class="qs-recent-item">
+                            <span class="qs-item-target">{{ scan.target }}</span>
+                            <span class="badge-cs badge-cs-{% if scan.threat_level == 'critical' or scan.threat_level == 'high' %}danger{% elif scan.threat_level == 'medium' %}warning{% elif scan.threat_level == 'low' or scan.threat_level == 'safe' %}safe{% else %}info{% endif %}" style="font-size:0.65625rem;padding:0.125rem 0.375rem;">
+                                {{ scan.threat_level|title }}
+                            </span>
+                        </div>
+                        {% empty %}
+                        <div class="qs-recent-item">
+                            <span class="qs-item-target" style="color:var(--text-muted);">No recent scans</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     CHARTS ROW
+     ============================================================ -->
+<div class="row g-4">
+    <div class="col-xl-5">
+        <div class="chart-card">
+            <div class="chart-card-header">
+                <h5><i class="fas fa-chart-pie text-cyan me-1"></i> Threat Distribution</h5>
+                <div class="chart-legend-custom" id="donutLegend"></div>
+            </div>
+            <div class="chart-wrapper-inner" style="position:relative;">
+                <canvas id="threatDonut"></canvas>
+                <div class="donut-center">
+                    <div class="donut-center-value">{{ threats_found|default:521 }}</div>
+                    <div class="donut-center-label">Total Threats</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-7">
+        <div class="chart-card">
+            <div class="chart-card-header">
+                <h5><i class="fas fa-chart-line text-cyan me-1"></i> Scan History — Last 30 Days</h5>
+                <div style="display:flex;gap:0.5rem;align-items:center;">
+                    <span style="font-size:0.71875rem;color:var(--text-muted);">Daily scans</span>
+                    <span class="badge-cs badge-cs-info" style="font-size:0.65625rem;">
+                        <span id="total30Days">{{ history_total|default:0 }}</span> total
+                    </span>
+                </div>
+            </div>
+            <div class="chart-wrapper-inner">
+                <canvas id="historyChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    // -------------------------------------------------------
+    // 1. NOTIFICATION BELL TOGGLE
+    // -------------------------------------------------------
+    const notifToggle = document.getElementById('notifToggle');
+    const notifDropdown = document.getElementById('notifDropdown');
+    const markAllRead = document.getElementById('markAllRead');
+
+    if (notifToggle && notifDropdown) {
+        notifToggle.addEventListener('click', function (e) {
+            e.stopPropagation();
+            notifDropdown.classList.toggle('show');
+        });
+        document.addEventListener('click', function () {
+            notifDropdown.classList.remove('show');
+        });
+        notifDropdown.addEventListener('click', function (e) {
+            e.stopPropagation();
+        });
+    }
+
+    if (markAllRead) {
+        markAllRead.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelectorAll('.notif-item.unread').forEach(function (el) {
+                el.classList.remove('unread');
+            });
+            var badge = document.querySelector('.notif-badge');
+            if (badge) badge.style.display = 'none';
+            if (window.CipherScan && window.CipherScan.toast) {
+                window.CipherScan.toast.success('Done', 'All notifications marked as read.');
+            }
+        });
+    }
+
+    // -------------------------------------------------------
+    // 2. ACTIVITY TABLE FILTER
+    // -------------------------------------------------------
+    const activityFilter = document.getElementById('activityFilter');
+    if (activityFilter) {
+        activityFilter.addEventListener('change', function () {
+            var val = this.value;
+            document.querySelectorAll('.activity-table tbody tr').forEach(function (row) {
+                if (val === 'all') {
+                    row.style.display = '';
+                    return;
+                }
+                var typeCell = row.querySelector('.cell-type');
+                if (typeCell) {
+                    var text = typeCell.textContent.trim().toLowerCase();
+                    row.style.display = text.includes(val) ? '' : 'none';
+                }
+            });
+        });
+    }
+
+    // -------------------------------------------------------
+    // 3. QUICK SCAN TABS
+    // -------------------------------------------------------
+    const qsTabs = document.querySelectorAll('.qs-tab');
+    const qsInput = document.getElementById('qsInput');
+    const qsSubmit = document.getElementById('qsSubmit');
+
+    if (qsTabs.length) {
+        qsTabs.forEach(function (tab) {
+            tab.addEventListener('click', function () {
+                qsTabs.forEach(function (t) { t.classList.remove('active'); });
+                this.classList.add('active');
+                var type = this.dataset.qsType;
+                if (qsInput) {
+                    if (type === 'url') qsInput.placeholder = 'https://example.com';
+                    else if (type === 'file') qsInput.placeholder = 'Choose a file...';
+                    else qsInput.placeholder = '192.168.1.1';
+                }
+            });
+        });
+    }
+
+    if (qsSubmit && qsInput) {
+        qsSubmit.addEventListener('click', function () {
+            var val = qsInput.value.trim();
+            if (!val) {
+                if (window.CipherScan && window.CipherScan.toast) {
+                    window.CipherScan.toast.warning('Input Required', 'Please enter a target to scan.');
+                }
+                return;
+            }
+            var activeTab = document.querySelector('.qs-tab.active');
+            var type = activeTab ? activeTab.dataset.qsType : 'url';
+            var urls = { url: '{% url "url_scan" %}', file: '{% url "file_scan" %}', ip: '{% url "ip_scan" %}' };
+            window.location.href = (urls[type] || urls.url) + '?q=' + encodeURIComponent(val);
+        });
+        qsInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') qsSubmit.click();
+        });
+    }
+
+    // -------------------------------------------------------
+    // 4. SPARKLINE CHARTS (mini line charts)
+    // -------------------------------------------------------
+    function createSparkline(canvasId, color, dataPoints) {
+        var canvas = document.getElementById(canvasId);
+        if (!canvas || typeof Chart === 'undefined') return;
+        var ctx = canvas.getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: dataPoints.map(function (_, i) { return i; }),
+                datasets: [{
+                    data: dataPoints,
+                    borderColor: color,
+                    borderWidth: 1.5,
+                    pointRadius: 0,
+                    pointHitRadius: 0,
+                    tension: 0.4,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                scales: {
+                    x: { display: false },
+                    y: { display: false, beginAtZero: false }
+                },
+                elements: { line: { borderJoinStyle: 'round' } }
+            }
+        });
+    }
+
+    var sparkData = [
+        12, 19, 15, 22, 18, 25, 30, 28, 35, 32, 38, 42, 40, 45, 48, 44, 50, 52, 48, 55, 58, 54, 60, 62, 58, 65, 70, 68, 72, 75
+    ];
+    createSparkline('sparkTotal', '#00d4ff', sparkData);
+    createSparkline('sparkThreats', '#ff4757', sparkData.map(function (v) { return Math.round(v * 0.12); }));
+    createSparkline('sparkFiles', '#ff6b35', sparkData.map(function (v) { return Math.round(v * 0.45); }));
+    createSparkline('sparkUrls', '#00ff88', sparkData.map(function (v) { return Math.round(v * 0.7); }));
+
+    // -------------------------------------------------------
+    // 5. THREAT DISTRIBUTION — Donut Chart
+    // -------------------------------------------------------
+    var donutCanvas = document.getElementById('threatDonut');
+    if (donutCanvas && typeof Chart !== 'undefined') {
+        var donutData = {
+            labels: {{ threat_distribution_labels|safe|default:"['Malware', 'Phishing', 'Spam', 'Suspicious', 'Safe']" }},
+            values: {{ threat_distribution_data|safe|default:"[35, 28, 18, 12, 7]" }}
+        };
+        var donutColors = ['#ff4757', '#ff6b35', '#ffd93d', '#00d4ff', '#00ff88'];
+
+        // Build custom legend
+        var legendContainer = document.getElementById('donutLegend');
+        if (legendContainer && donutData.labels) {
+            legendContainer.innerHTML = '';
+            donutData.labels.forEach(function (label, i) {
+                var item = document.createElement('span');
+                item.className = 'legend-item';
+                item.innerHTML = '<span class="legend-dot" style="background:' + donutColors[i] + '"></span> ' + label;
+                legendContainer.appendChild(item);
+            });
+        }
+
+        new Chart(donutCanvas, {
+            type: 'doughnut',
+            data: {
+                labels: donutData.labels,
+                datasets: [{
+                    data: donutData.values,
+                    backgroundColor: donutColors,
+                    borderColor: '#0a0e1a',
+                    borderWidth: 2,
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                cutout: '72%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#121a30',
+                        titleColor: '#e8edf5',
+                        bodyColor: '#8892b0',
+                        borderColor: 'rgba(0, 212, 255, 0.15)',
+                        borderWidth: 1,
+                        padding: 12,
+                        cornerRadius: 8,
+                        displayColors: true,
+                        boxPadding: 4,
+                        callbacks: {
+                            label: function (ctx) {
+                                var total = ctx.dataset.data.reduce(function (a, b) { return a + b; }, 0);
+                                var pct = ((ctx.parsed / total) * 100).toFixed(1);
+                                return ctx.label + ': ' + ctx.parsed + ' (' + pct + '%)';
+                            }
+                        }
+                    }
+                },
+                animation: {
+                    animateRotate: true,
+                    duration: 1200
+                }
+            }
+        });
+    }
+
+    // -------------------------------------------------------
+    // 6. SCAN HISTORY — Line Chart (30 days)
+    // -------------------------------------------------------
+    var historyCanvas = document.getElementById('historyChart');
+    if (historyCanvas && typeof Chart !== 'undefined') {
+        var labels = [];
+        var today = new Date();
+        for (var i = 29; i >= 0; i--) {
+            var d = new Date(today);
+            d.setDate(d.getDate() - i);
+            labels.push((d.getMonth() + 1) + '/' + d.getDate());
+        }
+        var historyData = {{ scan_history_data|safe|default:"[42,38,45,52,48,55,60,58,62,50,45,58,65,70,62,55,68,72,78,65,58,62,70,75,80,72,68,74,82,78]" }};
+
+        // Update total
+        var totalEl = document.getElementById('total30Days');
+        if (totalEl) totalEl.textContent = historyData.reduce(function (a, b) { return a + b; }, 0);
+
+        var gradient = historyCanvas.parentElement
+            ? historyCanvas.getContext('2d').createLinearGradient(0, 0, 0, 260)
+            : null;
+        if (gradient) {
+            gradient.addColorStop(0, 'rgba(0, 212, 255, 0.18)');
+            gradient.addColorStop(1, 'rgba(0, 212, 255, 0)');
+        }
+
+        new Chart(historyCanvas, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Scans',
+                    data: historyData,
+                    borderColor: '#00d4ff',
+                    backgroundColor: gradient || 'rgba(0, 212, 255, 0.1)',
+                    fill: true,
+                    tension: 0.35,
+                    pointBackgroundColor: '#00d4ff',
+                    pointBorderColor: '#0a0e1a',
+                    pointBorderWidth: 1.5,
+                    pointRadius: 2.5,
+                    pointHoverRadius: 5,
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                interaction: { intersect: false, mode: 'index' },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#121a30',
+                        titleColor: '#e8edf5',
+                        bodyColor: '#8892b0',
+                        borderColor: 'rgba(0, 212, 255, 0.15)',
+                        borderWidth: 1,
+                        padding: 12,
+                        cornerRadius: 8,
+                        displayColors: false,
+                        callbacks: {
+                            title: function (items) { return 'Date: ' + items[0].label; },
+                            label: function (ctx) { return 'Scans: ' + ctx.parsed.y; }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(255,255,255,0.03)', drawBorder: false },
+                        ticks: {
+                            color: '#5a6380',
+                            font: { family: 'Inter', size: 10 },
+                            maxTicksLimit: 10
+                        }
+                    },
+                    y: {
+                        grid: { color: 'rgba(255,255,255,0.03)', drawBorder: false },
+                        ticks: {
+                            color: '#5a6380',
+                            font: { family: 'Inter', size: 10 },
+                            maxTicksLimit: 6
+                        },
+                        beginAtZero: true
+                    }
+                },
+                animation: { duration: 1000 }
+            }
+        });
+    }
+
+    // -------------------------------------------------------
+    // 7. COUNTER ANIMATION
+    // -------------------------------------------------------
+    function animateDashboardCounters() {
+        document.querySelectorAll('.stat-card-dash .counter[data-target]').forEach(function (el) {
+            var target = parseInt(el.dataset.target, 10);
+            if (isNaN(target)) return;
+            var current = parseInt(el.textContent.replace(/,/g, ''), 10) || 0;
+            if (current >= target) {
+                el.textContent = target.toLocaleString();
+                return;
+            }
+            var duration = 1500;
+            var startTime = null;
+            function step(timestamp) {
+                if (!startTime) startTime = timestamp;
+                var progress = Math.min((timestamp - startTime) / duration, 1);
+                var eased = 1 - Math.pow(1 - progress, 3);
+                var value = Math.floor(eased * target);
+                el.textContent = value.toLocaleString();
+                if (progress < 1) {
+                    requestAnimationFrame(step);
+                } else {
+                    el.textContent = target.toLocaleString();
+                }
+            }
+            requestAnimationFrame(step);
+        });
+    }
+    animateDashboardCounters();
+
+    console.log('%cCipherScan%c Dashboard — Loaded',
+        'color:#00d4ff;font-weight:700;font-size:1.2em;',
+        'color:#8892b0;font-size:0.9em;');
+});
+</script>
+{% endblock %}

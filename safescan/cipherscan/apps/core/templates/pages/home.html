@@ -1,0 +1,1524 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}CipherScan — Analyze. Detect. Protect.{% endblock %}
+
+{% block body_class %}full-width{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ============================================================
+   LANDING PAGE — Hero
+   ============================================================ */
+#hero {
+    position: relative;
+    min-height: calc(100vh - var(--navbar-height));
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+}
+#hero #particles-js {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+}
+#hero .hero-content {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    padding: 4rem 2rem;
+}
+#hero .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--accent-cyan-dim);
+    border: 1px solid rgba(0, 212, 255, 0.15);
+    border-radius: 50px;
+    padding: 0.375rem 0.875rem 0.375rem 0.5rem;
+    font-size: 0.78125rem;
+    font-weight: 500;
+    color: var(--accent-cyan);
+    margin-bottom: 1.5rem;
+    animation: fade-in-up 0.8s ease both;
+}
+#hero .hero-badge .badge-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent-success);
+    animation: dot-pulse 2s infinite;
+}
+@keyframes dot-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+}
+#hero .hero-title {
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin-bottom: 1rem;
+    animation: fade-in-up 0.8s 0.15s ease both;
+}
+#hero .hero-title .gradient-text {
+    background: linear-gradient(135deg, var(--accent-cyan), #7c5bfe, var(--accent-cyan));
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: text-shimmer 4s linear infinite;
+}
+@keyframes text-shimmer {
+    0% { background-position: 0% center; }
+    100% { background-position: 200% center; }
+}
+#hero .hero-subtitle {
+    font-size: clamp(1rem, 2vw, 1.25rem);
+    color: var(--text-secondary);
+    max-width: 580px;
+    line-height: 1.7;
+    margin-bottom: 2rem;
+    animation: fade-in-up 0.8s 0.3s ease both;
+}
+#hero .hero-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 2.5rem;
+    animation: fade-in-up 0.8s 0.45s ease both;
+}
+#hero .hero-ctas .btn-cs {
+    padding: 0.75rem 1.75rem;
+    font-size: 0.9375rem;
+    border-radius: var(--radius-md);
+}
+#hero .hero-ctas .btn-hero-primary {
+    background: var(--accent-cyan);
+    color: #0a0e1a;
+    border: 1px solid var(--accent-cyan);
+    font-weight: 700;
+}
+#hero .hero-ctas .btn-hero-primary:hover {
+    background: #33ddff;
+    border-color: #33ddff;
+    box-shadow: var(--accent-cyan-glow), 0 0 60px rgba(0, 212, 255, 0.15);
+    transform: translateY(-2px);
+}
+#hero .hero-ctas .btn-hero-secondary {
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-primary);
+    border: 1px solid var(--glass-border);
+    font-weight: 600;
+    backdrop-filter: blur(10px);
+}
+#hero .hero-ctas .btn-hero-secondary:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--text-muted);
+    transform: translateY(-2px);
+}
+
+/* Hero Stats */
+.hero-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    margin-bottom: 2.5rem;
+    animation: fade-in-up 0.8s 0.6s ease both;
+}
+.hero-stat {
+    display: flex;
+    flex-direction: column;
+}
+.hero-stat .hero-stat-value {
+    font-size: 1.75rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    font-family: var(--font-mono);
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+.hero-stat .hero-stat-value .stat-suffix {
+    color: var(--accent-cyan);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+.hero-stat .hero-stat-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 500;
+}
+.hero-stat-divider {
+    width: 1px;
+    background: var(--glass-border);
+}
+
+/* Hero Quick Scan */
+.hero-scan {
+    animation: fade-in-up 0.8s 0.75s ease both;
+}
+.hero-scan .scan-input-wrapper {
+    display: flex;
+    gap: 0;
+    max-width: 640px;
+    background: rgba(15, 22, 40, 0.6);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    backdrop-filter: blur(20px);
+    transition: all var(--transition-normal);
+}
+.hero-scan .scan-input-wrapper:focus-within {
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 0 4px rgba(0, 212, 255, 0.08), var(--accent-cyan-glow);
+}
+.hero-scan .scan-input-wrapper .scan-type-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    padding: 0.75rem 1rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    border-right: 1px solid var(--glass-border);
+    white-space: nowrap;
+}
+.hero-scan .scan-input-wrapper .scan-type-btn:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.03);
+}
+.hero-scan .scan-input-wrapper .scan-type-btn.active {
+    color: var(--accent-cyan);
+    background: var(--accent-cyan-dim);
+}
+.hero-scan .scan-input-wrapper input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 0.75rem 1rem;
+    color: var(--text-primary);
+    font-family: var(--font-ui);
+    font-size: 0.875rem;
+    outline: none;
+    min-width: 0;
+}
+.hero-scan .scan-input-wrapper input::placeholder {
+    color: var(--text-muted);
+}
+.hero-scan .scan-input-wrapper .btn-scan-submit {
+    background: var(--accent-cyan);
+    border: none;
+    color: #0a0e1a;
+    padding: 0.75rem 1.5rem;
+    font-weight: 700;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+}
+.hero-scan .scan-input-wrapper .btn-scan-submit:hover {
+    background: #33ddff;
+}
+.hero-scan .scan-input-wrapper .btn-scan-submit i {
+    font-size: 0.875rem;
+}
+
+/* File drop zone */
+.file-drop-zone {
+    display: none;
+    max-width: 640px;
+    margin-top: 0.75rem;
+    border: 2px dashed var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    background: rgba(15, 22, 40, 0.3);
+}
+.file-drop-zone.active {
+    display: block;
+}
+.file-drop-zone:hover,
+.file-drop-zone.dragover {
+    border-color: var(--accent-cyan);
+    background: var(--accent-cyan-dim);
+}
+.file-drop-zone i {
+    font-size: 2rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+    display: block;
+}
+.file-drop-zone p {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+.file-drop-zone p strong {
+    color: var(--accent-cyan);
+}
+
+/* ============================================================
+   SECTION COMMON
+   ============================================================ */
+.section-cs {
+    padding: 5rem 0;
+}
+.section-cs .section-header {
+    text-align: center;
+    margin-bottom: 3.5rem;
+}
+.section-cs .section-header h2 {
+    font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.75rem;
+}
+.section-cs .section-header .section-subtitle {
+    color: var(--text-secondary);
+    font-size: 1.0625rem;
+    max-width: 540px;
+    margin: 0 auto;
+    line-height: 1.7;
+}
+.section-cs .section-header .section-accent {
+    display: inline-block;
+    width: 40px;
+    height: 3px;
+    background: var(--accent-cyan);
+    border-radius: 3px;
+    margin-top: 0.75rem;
+}
+
+/* ============================================================
+   FEATURES SECTION
+   ============================================================ */
+#features {
+    position: relative;
+}
+.feature-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: 2rem 1.5rem;
+    height: 100%;
+    transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+}
+.feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+}
+.feature-card:hover {
+    border-color: var(--glass-border-hover);
+    box-shadow: var(--glass-shadow), var(--accent-cyan-glow);
+    transform: translateY(-6px);
+}
+.feature-card:hover::before {
+    opacity: 1;
+}
+.feature-card .feature-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    margin-bottom: 1.25rem;
+    transition: all var(--transition-normal);
+}
+.feature-card:hover .feature-icon {
+    transform: scale(1.1);
+}
+.feature-card .feature-icon.cyan { background: var(--accent-cyan-dim); color: var(--accent-cyan); }
+.feature-card .feature-icon.orange { background: var(--accent-orange-dim); color: var(--accent-orange); }
+.feature-card .feature-icon.success { background: var(--accent-success-dim); color: var(--accent-success); }
+.feature-card .feature-icon.purple { background: var(--accent-purple-dim); color: var(--accent-purple); }
+.feature-card .feature-icon.danger { background: var(--accent-danger-dim); color: var(--accent-danger); }
+.feature-card .feature-icon.warning { background: var(--accent-warning-dim); color: var(--accent-warning); }
+
+.feature-card h4 {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+.feature-card p {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0;
+}
+.feature-card .feature-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    margin-top: 1rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--accent-cyan);
+    transition: gap var(--transition-fast);
+}
+.feature-card .feature-link:hover {
+    gap: 0.625rem;
+}
+
+/* ============================================================
+   HOW IT WORKS
+   ============================================================ */
+#how-it-works {
+    position: relative;
+}
+#how-it-works::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(0, 212, 255, 0.03) 0%, transparent 60%);
+    pointer-events: none;
+}
+.step-card {
+    text-align: center;
+    position: relative;
+    padding: 2rem 1.5rem;
+}
+.step-card .step-number {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    margin: 0 auto 1.25rem;
+    position: relative;
+    background: var(--accent-cyan-dim);
+    color: var(--accent-cyan);
+    border: 2px solid rgba(0, 212, 255, 0.2);
+    transition: all var(--transition-normal);
+}
+.step-card:hover .step-number {
+    box-shadow: var(--accent-cyan-glow);
+    transform: scale(1.05);
+}
+.step-card .step-icon {
+    font-size: 1.25rem;
+}
+.step-card h4 {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    margin-bottom: 0.375rem;
+}
+.step-card p {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0;
+    max-width: 260px;
+    margin: 0 auto;
+}
+.step-connector {
+    position: absolute;
+    top: 28px;
+    right: -1.5rem;
+    width: 3rem;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent-cyan-dim), var(--glass-border));
+}
+.step-connector .connector-arrow {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--accent-cyan);
+    font-size: 0.625rem;
+    opacity: 0.4;
+}
+@media (max-width: 767.98px) {
+    .step-connector {
+        display: none;
+    }
+}
+
+/* ============================================================
+   STATS / TRUST SECTION
+   ============================================================ */
+#trust {
+    position: relative;
+}
+#trust .trust-bg-accent {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 30% 50%, rgba(0, 212, 255, 0.04) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 50%, rgba(124, 91, 254, 0.03) 0%, transparent 60%);
+    pointer-events: none;
+}
+.trust-counter {
+    text-align: center;
+    padding: 1.5rem 1rem;
+}
+.trust-counter .counter-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.125rem;
+    margin: 0 auto 1rem;
+}
+.trust-counter .counter-icon.cyan { background: var(--accent-cyan-dim); color: var(--accent-cyan); }
+.trust-counter .counter-icon.orange { background: var(--accent-orange-dim); color: var(--accent-orange); }
+.trust-counter .counter-icon.success { background: var(--accent-success-dim); color: var(--accent-success); }
+.trust-counter .counter-icon.purple { background: var(--accent-purple-dim); color: var(--accent-purple); }
+.trust-counter .counter-value {
+    font-size: 2.25rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    font-family: var(--font-mono);
+    line-height: 1.2;
+}
+.trust-counter .counter-label {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+}
+
+/* Chart wrapper */
+.chart-wrapper {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+}
+.chart-wrapper .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+}
+.chart-wrapper .chart-header h4 {
+    font-size: 1rem;
+    font-weight: 600;
+}
+.chart-wrapper .chart-header .chart-badge {
+    font-size: 0.71875rem;
+    padding: 0.25rem 0.625rem;
+    border-radius: 50px;
+    background: var(--accent-success-dim);
+    color: var(--accent-success);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+.chart-wrapper canvas {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 280px;
+}
+
+/* ============================================================
+   THREAT FEED
+   ============================================================ */
+#threats {
+    position: relative;
+}
+.threat-feed-wrapper {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+.threat-feed-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--glass-border);
+}
+.threat-feed-header h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.threat-feed-header .threat-live-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent-success);
+    animation: dot-pulse 2s infinite;
+}
+.threat-feed-header .threat-count {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+}
+.threat-feed-body {
+    overflow-y: auto;
+    position: relative;
+}
+.threat-feed-body .threat-feed-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8125rem;
+}
+.threat-feed-body .threat-feed-table thead th {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.015);
+    border-bottom: 1px solid var(--glass-border);
+}
+.threat-feed-body .threat-feed-table tbody tr {
+    transition: all var(--transition-fast);
+    animation: threat-row-in 0.4s ease both;
+}
+.threat-feed-body .threat-feed-table tbody tr:hover {
+    background: var(--accent-cyan-dim);
+}
+.threat-feed-body .threat-feed-table tbody tr td {
+    padding: 0.625rem 1.25rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+    vertical-align: middle;
+}
+.threat-feed-body .threat-feed-table tbody tr:last-child td {
+    border-bottom: none;
+}
+.threat-feed-body .threat-feed-table .threat-target {
+    font-family: var(--font-mono);
+    font-size: 0.78125rem;
+    color: var(--text-primary);
+}
+.threat-feed-body .threat-feed-table .threat-type {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+.threat-feed-body .threat-feed-table .threat-type i {
+    font-size: 0.75rem;
+}
+.threat-feed-body .threat-feed-table .threat-time {
+    font-size: 0.71875rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+}
+@keyframes threat-row-in {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ============================================================
+   SCROLL ANIMATIONS
+   ============================================================ */
+.fade-in-up {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.fade-in-up.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+.fade-in-left {
+    opacity: 0;
+    transform: translateX(-30px);
+    transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.fade-in-left.visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+.fade-in-right {
+    opacity: 0;
+    transform: translateX(30px);
+    transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.fade-in-right.visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+.fade-in-scale {
+    opacity: 0;
+    transform: scale(0.92);
+    transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.fade-in-scale.visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.stagger-children > * {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.stagger-children.visible > *:nth-child(1) { transition-delay: 0.0s; }
+.stagger-children.visible > *:nth-child(2) { transition-delay: 0.1s; }
+.stagger-children.visible > *:nth-child(3) { transition-delay: 0.2s; }
+.stagger-children.visible > *:nth-child(4) { transition-delay: 0.3s; }
+.stagger-children.visible > *:nth-child(5) { transition-delay: 0.4s; }
+.stagger-children.visible > *:nth-child(6) { transition-delay: 0.5s; }
+.stagger-children.visible > * {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+@keyframes fade-in-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+   RESPONSIVE LANDING
+   ============================================================ */
+@media (max-width: 991.98px) {
+    #hero .hero-content {
+        padding: 3rem 1.5rem;
+    }
+    #hero .hero-stats {
+        gap: 1.5rem;
+    }
+    .hero-stat-divider {
+        display: none;
+    }
+    .section-cs {
+        padding: 3.5rem 0;
+    }
+}
+@media (max-width: 575.98px) {
+    #hero .hero-content {
+        padding: 2rem 1rem;
+    }
+    #hero .hero-ctas {
+        flex-direction: column;
+    }
+    #hero .hero-ctas .btn-cs {
+        width: 100%;
+        justify-content: center;
+    }
+    #hero .hero-stats {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .hero-scan .scan-input-wrapper {
+        flex-direction: column;
+        border-radius: var(--radius-md);
+    }
+    .hero-scan .scan-input-wrapper .scan-type-btn {
+        border-right: none;
+        border-bottom: 1px solid var(--glass-border);
+        justify-content: center;
+    }
+    .hero-scan .scan-input-wrapper .btn-scan-submit {
+        justify-content: center;
+        border-radius: 0 0 var(--radius-md) var(--radius-md);
+    }
+    #hero {
+        min-height: auto;
+    }
+    .trust-counter .counter-value {
+        font-size: 1.75rem;
+    }
+    .threat-feed-body .threat-feed-table {
+        font-size: 0.75rem;
+    }
+    .threat-feed-body .threat-feed-table thead th,
+    .threat-feed-body .threat-feed-table tbody tr td {
+        padding: 0.5rem 0.75rem;
+    }
+}
+
+/* ------------------------------------------------------------
+   STAT SKELETON LOADING
+   ------------------------------------------------------------ */
+@keyframes stat-skeleton-pulse {
+    0% { opacity: 0.3; }
+    50% { opacity: 0.7; }
+    100% { opacity: 0.3; }
+}
+.stat-skeleton {
+    display: inline-block;
+    min-width: 100px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 4px;
+    animation: stat-skeleton-pulse 1.5s ease-in-out infinite;
+}
+.hero-stat-value .stat-skeleton {
+    min-width: 140px;
+    height: 48px;
+    vertical-align: middle;
+}
+.trust-counter .stat-skeleton {
+    min-width: 80px;
+    height: 36px;
+}
+</style>
+{% endblock %}
+
+{% block hero %}
+<!-- ============================================================
+     HERO SECTION
+     ============================================================ -->
+<section class="hero-gradient" id="hero">
+    <div id="particles-js"></div>
+
+    <div class="hero-content">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-xl-8 col-lg-10 text-center">
+                    <div class="hero-badge">
+                        <span class="badge-dot"></span>
+                        Real-time threat intelligence — 99.7% detection rate
+                    </div>
+
+                    <h1 class="hero-title">
+                        Analyze. Detect.<br>
+                        <span class="gradient-text">Protect.</span>
+                    </h1>
+
+                    <p class="hero-subtitle mx-auto">
+                        Enterprise-grade cybersecurity analysis platform. Scan URLs, files, and emails
+                        for threats in real-time. Powered by advanced AI and global threat intelligence.
+                    </p>
+
+                    <div class="hero-ctas justify-content-center">
+                        <a href="{% url 'url_scan' %}" class="btn-cs btn-hero-primary">
+                            <i class="fas fa-shield-halo"></i> Start Scanning
+                        </a>
+                        <a href="{% url 'dashboard' %}" class="btn-cs btn-hero-secondary">
+                            <i class="fas fa-chart-pie"></i> View Dashboard
+                        </a>
+                    </div>
+
+                    <div class="hero-stats justify-content-center">
+                        <div class="hero-stat">
+                            <span class="hero-stat-value">
+                                <span class="counter" data-stat-type="files_scanned"><span class="stat-skeleton">&nbsp;</span></span>
+                                <span class="stat-suffix">+</span>
+                            </span>
+                            <span class="hero-stat-label">Files Scanned</span>
+                        </div>
+                        <div class="hero-stat-divider"></div>
+                        <div class="hero-stat">
+                            <span class="hero-stat-value">
+                                <span class="counter" data-stat-type="urls_checked"><span class="stat-skeleton">&nbsp;</span></span>
+                                <span class="stat-suffix">+</span>
+                            </span>
+                            <span class="hero-stat-label">URLs Checked</span>
+                        </div>
+                        <div class="hero-stat-divider"></div>
+                        <div class="hero-stat">
+                            <span class="hero-stat-value">
+                                <span class="counter" data-stat-type="threats_detected"><span class="stat-skeleton">&nbsp;</span></span>
+                                <span class="stat-suffix">+</span>
+                            </span>
+                            <span class="hero-stat-label">Threats Detected</span>
+                        </div>
+                    </div>
+
+                    <div class="hero-scan">
+                        <div class="scan-input-wrapper mx-auto">
+                            <button class="scan-type-btn active" data-type="url" id="scanTypeUrl">
+                                <i class="fas fa-link"></i> URL
+                            </button>
+                            <button class="scan-type-btn" data-type="file" id="scanTypeFile">
+                                <i class="fas fa-file"></i> File
+                            </button>
+                            <input type="text" id="scanInput" placeholder="Enter URL to scan — https://example.com" autocomplete="off">
+                            <button class="btn-scan-submit" id="scanSubmitBtn">
+                                <i class="fas fa-magnifying-glass"></i> Scan
+                            </button>
+                        </div>
+                        <div class="file-drop-zone" id="fileDropZone">
+                            <i class="fas fa-cloud-arrow-up"></i>
+                            <p>Drag & drop a file here or <strong>browse</strong> to upload</p>
+                            <input type="file" id="fileInput" style="display:none" multiple>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+{% endblock %}
+
+{% block content %}
+<!-- ============================================================
+     FEATURES SECTION
+     ============================================================ -->
+<section class="section-cs" id="features">
+    <div class="container">
+        <div class="section-header fade-in-up">
+            <h2>Everything you need to stay <span class="text-cyan">secure</span></h2>
+            <p class="section-subtitle">Comprehensive security analysis tools used by cybersecurity professionals worldwide to detect and neutralize threats.</p>
+            <span class="section-accent"></span>
+        </div>
+        <div class="row g-4 stagger-children" id="featuresGrid">
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon cyan"><i class="fas fa-link"></i></div>
+                    <h4>URL Scanning</h4>
+                    <p>Real-time analysis of URLs against 50+ threat databases. Detect phishing, malware, and malicious redirects instantly.</p>
+                    <a href="{% url 'url_scan' %}" class="feature-link">Try Now <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon danger"><i class="fas fa-file-shield"></i></div>
+                    <h4>File Analysis</h4>
+                    <p>Upload and scan files for malware, viruses, and suspicious behavior. Multi-engine detection with detailed reports.</p>
+                    <a href="{% url 'file_scan' %}" class="feature-link">Try Now <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon orange"><i class="fas fa-fish"></i></div>
+                    <h4>Phishing Detection</h4>
+                    <p>AI-powered email and website phishing analysis. Identify spoofed domains, fraudulent links, and social engineering.</p>
+                    <a href="{% url 'phishing_analysis' %}" class="feature-link">Try Now <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon purple"><i class="fas fa-cube"></i></div>
+                    <h4>Sandbox Environment</h4>
+                    <p>Execute suspicious files in an isolated sandbox environment. Observe behavior, network calls, and system changes safely.</p>
+                    <a href="{% url 'sandbox' %}" class="feature-link">Try Now <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon success"><i class="fas fa-shield-halo"></i></div>
+                    <h4>Threat Intelligence</h4>
+                    <p>Real-time global threat data aggregation. Access IOC feeds, CVE data, and emerging threat patterns from 100+ sources.</p>
+                    <a href="{% url 'threat_intel' %}" class="feature-link">Try Now <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon warning"><i class="fas fa-skull"></i></div>
+                    <h4>Dark Web Monitor</h4>
+                    <p>Continuous dark web surveillance for leaked credentials, stolen data, and mentions of your organization.</p>
+                    <a href="{% url 'dark_web' %}" class="feature-link">Try Now <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     HOW IT WORKS
+     ============================================================ -->
+<section class="section-cs" id="how-it-works" style="background: rgba(255,255,255,0.01);">
+    <div class="container">
+        <div class="section-header fade-in-up">
+            <h2>How it <span class="text-cyan">works</span></h2>
+            <p class="section-subtitle">From submission to actionable intelligence in seconds. Four simple steps to comprehensive threat analysis.</p>
+            <span class="section-accent"></span>
+        </div>
+        <div class="row stagger-children" id="stepsRow">
+            <div class="col-md-3">
+                <div class="step-card">
+                    <div class="step-number"><span class="step-icon"><i class="fas fa-paper-plane"></i></span></div>
+                    <h4>Submit Your Target</h4>
+                    <p>Enter a URL, upload a file, or paste email headers. Multiple input formats supported.</p>
+                </div>
+            </div>
+            <div class="col-md-3 position-relative">
+                <div class="step-connector">
+                    <span class="connector-arrow"><i class="fas fa-chevron-right"></i></span>
+                </div>
+                <div class="step-card">
+                    <div class="step-number"><span class="step-icon"><i class="fas fa-microchip"></i></span></div>
+                    <h4>AI-Powered Analysis</h4>
+                    <p>Advanced machine learning models analyze your submission against 50+ threat engines and databases.</p>
+                </div>
+            </div>
+            <div class="col-md-3 position-relative">
+                <div class="step-connector">
+                    <span class="connector-arrow"><i class="fas fa-chevron-right"></i></span>
+                </div>
+                <div class="step-card">
+                    <div class="step-number"><span class="step-icon"><i class="fas fa-chart-simple"></i></span></div>
+                    <h4>Threat Scoring</h4>
+                    <p>Receive a comprehensive threat score with severity classification and detailed breakdown of findings.</p>
+                </div>
+            </div>
+            <div class="col-md-3 position-relative">
+                <div class="step-connector" style="display:none;">
+                    <span class="connector-arrow"><i class="fas fa-chevron-right"></i></span>
+                </div>
+                <div class="step-card">
+                    <div class="step-number"><span class="step-icon"><i class="fas fa-file-lines"></i></span></div>
+                    <h4>Actionable Report</h4>
+                    <p>Get detailed reports with remediation steps, IoCs, and export options for your security team.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     TRUST / STATS SECTION
+     ============================================================ -->
+<section class="section-cs" id="trust">
+    <div class="trust-bg-accent"></div>
+    <div class="container">
+        <div class="section-header fade-in-up">
+            <h2>Trusted by <span class="text-cyan">thousands</span></h2>
+            <p class="section-subtitle">Security teams and individuals worldwide rely on CipherScan for their threat analysis needs.</p>
+            <span class="section-accent"></span>
+        </div>
+        <div class="row g-4 mb-5 stagger-children" id="trustCounters">
+            <div class="col-6 col-lg-3">
+                <div class="trust-counter">
+                    <div class="counter-icon cyan"><i class="fas fa-file"></i></div>
+                    <div class="counter-value"><span class="counter" data-stat-type="files_scanned"><span class="stat-skeleton">&nbsp;</span></span></div>
+                    <div class="counter-label">Files Scanned</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="trust-counter">
+                    <div class="counter-icon orange"><i class="fas fa-link"></i></div>
+                    <div class="counter-value"><span class="counter" data-stat-type="urls_checked"><span class="stat-skeleton">&nbsp;</span></span></div>
+                    <div class="counter-label">URLs Checked</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="trust-counter">
+                    <div class="counter-icon success"><i class="fas fa-shield"></i></div>
+                    <div class="counter-value"><span class="counter" data-stat-type="threats_detected"><span class="stat-skeleton">&nbsp;</span></span></div>
+                    <div class="counter-label">Threats Blocked</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="trust-counter">
+                    <div class="counter-icon purple"><i class="fas fa-users"></i></div>
+                    <div class="counter-value"><span class="counter" data-stat-type="users_protected"><span class="stat-skeleton">&nbsp;</span></span></div>
+                    <div class="counter-label">Users Protected</div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="chart-wrapper fade-in-up">
+                    <div class="chart-header">
+                        <h4><i class="fas fa-chart-line text-cyan me-2"></i> Threats Detected — Last 6 Months</h4>
+                        <span class="chart-badge"><i class="fas fa-arrow-up"></i> +12.4%</span>
+                    </div>
+                    <canvas id="threatChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     RECENT THREATS
+     ============================================================ -->
+<section class="section-cs" id="threats" style="background: rgba(255,255,255,0.01);">
+    <div class="container">
+        <div class="section-header fade-in-up">
+            <h2>Live <span class="text-cyan">Threat Feed</span></h2>
+            <p class="section-subtitle">Real-time global threat intelligence showing recently detected malicious activity across our network.</p>
+            <span class="section-accent"></span>
+        </div>
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                <div class="threat-feed-wrapper fade-in-up">
+                    <div class="threat-feed-header">
+                        <h4>
+                            <span class="threat-live-dot"></span>
+                            Recent Threats
+                        </h4>
+                        <span class="threat-count">Updating live...</span>
+                    </div>
+                    <div class="threat-feed-body" style="max-height: 420px;">
+                        <table class="threat-feed-table">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Target</th>
+                                    <th>Severity</th>
+                                    <th>Engine</th>
+                                    <th>Time</th>
+                                </tr>
+                            </thead>
+                            <tbody id="threatFeedBody">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    // -------------------------------------------------------
+    // 1. PARTICLES.JS
+    // -------------------------------------------------------
+    if (typeof particlesJS !== 'undefined' && document.getElementById('particles-js')) {
+        particlesJS('particles-js', {
+            particles: {
+                number: { value: 80, density: { enable: true, value_area: 800 } },
+                color: { value: '#00d4ff' },
+                shape: { type: 'circle' },
+                opacity: { value: 0.4, random: true, anim: { enable: true, speed: 0.5, opacity_min: 0.1 } },
+                size: { value: 3, random: true, anim: { enable: true, speed: 2, size_min: 0.5 } },
+                line_linked: {
+                    enable: true,
+                    distance: 150,
+                    color: '#00d4ff',
+                    opacity: 0.12,
+                    width: 1
+                },
+                move: {
+                    enable: true,
+                    speed: 1.2,
+                    direction: 'none',
+                    random: true,
+                    straight: false,
+                    out_mode: 'out',
+                    bounce: false
+                }
+            },
+            interactivity: {
+                detect_on: 'canvas',
+                events: {
+                    onhover: { enable: true, mode: 'grab' },
+                    onclick: { enable: true, mode: 'push' },
+                    resize: true
+                },
+                modes: {
+                    grab: { distance: 180, line_linked: { opacity: 0.15 } },
+                    push: { particles_nb: 4 }
+                }
+            },
+            retina_detect: true
+        });
+    }
+
+    // -------------------------------------------------------
+    // 2. SCAN TYPE TOGGLE (URL / File)
+    // -------------------------------------------------------
+    const scanTypeUrl = document.getElementById('scanTypeUrl');
+    const scanTypeFile = document.getElementById('scanTypeFile');
+    const scanInput = document.getElementById('scanInput');
+    const fileDropZone = document.getElementById('fileDropZone');
+    const fileInput = document.getElementById('fileInput');
+    const scanSubmitBtn = document.getElementById('scanSubmitBtn');
+
+    if (scanTypeUrl && scanTypeFile) {
+        scanTypeUrl.addEventListener('click', function () {
+            this.classList.add('active');
+            scanTypeFile.classList.remove('active');
+            scanInput.style.display = '';
+            scanInput.placeholder = 'Enter URL to scan — https://example.com';
+            fileDropZone.classList.remove('active');
+        });
+        scanTypeFile.addEventListener('click', function () {
+            this.classList.add('active');
+            scanTypeUrl.classList.remove('active');
+            scanInput.style.display = 'none';
+            fileDropZone.classList.add('active');
+        });
+    }
+
+    // File drop zone
+    if (fileDropZone && fileInput) {
+        fileDropZone.addEventListener('click', function () { fileInput.click(); });
+        fileDropZone.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            this.classList.add('dragover');
+        });
+        fileDropZone.addEventListener('dragleave', function () {
+            this.classList.remove('dragover');
+        });
+        fileDropZone.addEventListener('drop', function (e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                if (window.CipherScan && window.CipherScan.toast) {
+                    window.CipherScan.toast.success('Files Ready', e.dataTransfer.files.length + ' file(s) selected for scanning.');
+                }
+            }
+        });
+        fileInput.addEventListener('change', function () {
+            if (this.files.length && window.CipherScan && window.CipherScan.toast) {
+                window.CipherScan.toast.success('Files Ready', this.files.length + ' file(s) selected for scanning.');
+            }
+        });
+    }
+
+    // Scan submit
+    if (scanSubmitBtn) {
+        scanSubmitBtn.addEventListener('click', function () {
+            var isUrl = scanTypeUrl && scanTypeUrl.classList.contains('active');
+            if (isUrl) {
+                var url = scanInput ? scanInput.value.trim() : '';
+                if (url) {
+                    window.location.href = (window.location.origin + '/url-scan/?q=' + encodeURIComponent(url));
+                } else if (window.CipherScan && window.CipherScan.toast) {
+                    window.CipherScan.toast.warning('Input Required', 'Please enter a URL to scan.');
+                }
+            } else {
+                if (fileInput && fileInput.files.length) {
+                    if (window.CipherScan && window.CipherScan.toast) {
+                        window.CipherScan.toast.info('Uploading', 'Uploading ' + fileInput.files.length + ' file(s) for analysis...');
+                    }
+                } else if (window.CipherScan && window.CipherScan.toast) {
+                    window.CipherScan.toast.warning('No File Selected', 'Please select a file or drag & drop one.');
+                }
+            }
+        });
+        scanInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') scanSubmitBtn.click();
+        });
+    }
+
+    // -------------------------------------------------------
+    // 3. LIVE STATS — fetch from /api/core/stats/
+    // -------------------------------------------------------
+    var statsData = null;
+
+    function animateCounter(el, target) {
+        var duration = 2000;
+        var startTime = null;
+        function step(timestamp) {
+            if (!startTime) startTime = timestamp;
+            var progress = Math.min((timestamp - startTime) / duration, 1);
+            var eased = 1 - Math.pow(1 - progress, 3);
+            el.textContent = Math.floor(eased * target).toLocaleString();
+            if (progress < 1) {
+                requestAnimationFrame(step);
+            } else {
+                el.textContent = target.toLocaleString();
+            }
+        }
+        requestAnimationFrame(step);
+    }
+
+    function renderStats(stats) {
+        document.querySelectorAll('.counter[data-stat-type]').forEach(function (el) {
+            var key = el.dataset.statType;
+            var val = stats[key];
+            if (val === undefined || val === null) {
+                el.textContent = '\u2014';
+                return;
+            }
+            var skeleton = el.querySelector('.stat-skeleton');
+            if (skeleton) skeleton.remove();
+            animateCounter(el, val);
+        });
+    }
+
+    function fetchStats() {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', '/api/core/stats/');
+        xhr.onload = function () {
+            if (xhr.status >= 200 && xhr.status < 400) {
+                try {
+                    statsData = JSON.parse(xhr.responseText);
+                } catch (_) {
+                    statsData = null;
+                }
+            } else {
+                statsData = null;
+            }
+            if (statsData) {
+                renderStats(statsData);
+            } else {
+                document.querySelectorAll('.counter[data-stat-type]').forEach(function (el) {
+                    var skeleton = el.querySelector('.stat-skeleton');
+                    if (skeleton) skeleton.remove();
+                    el.textContent = '\u2014';
+                });
+            }
+        };
+        xhr.onerror = function () {
+            document.querySelectorAll('.counter[data-stat-type]').forEach(function (el) {
+                var skeleton = el.querySelector('.stat-skeleton');
+                if (skeleton) skeleton.remove();
+                el.textContent = '\u2014';
+            });
+        };
+        xhr.send();
+    }
+
+    fetchStats();
+
+    // -------------------------------------------------------
+    // 4. CHART.JS — Threat Trends
+    // -------------------------------------------------------
+    var chartCanvas = document.getElementById('threatChart');
+    if (chartCanvas && typeof Chart !== 'undefined') {
+        var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+        var dataValues = [2847, 3215, 2984, 3621, 4178, 4692];
+
+        new Chart(chartCanvas, {
+            type: 'line',
+            data: {
+                labels: months,
+                datasets: [{
+                    label: 'Threats Detected',
+                    data: dataValues,
+                    borderColor: '#00d4ff',
+                    backgroundColor: function (ctx) {
+                        var gradient = ctx.chart.ctx.createLinearGradient(0, 0, 0, 280);
+                        gradient.addColorStop(0, 'rgba(0, 212, 255, 0.2)');
+                        gradient.addColorStop(1, 'rgba(0, 212, 255, 0)');
+                        return gradient;
+                    },
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#00d4ff',
+                    pointBorderColor: '#0a0e1a',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    borderWidth: 2.5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#121a30',
+                        titleColor: '#e8edf5',
+                        bodyColor: '#8892b0',
+                        borderColor: 'rgba(0, 212, 255, 0.15)',
+                        borderWidth: 1,
+                        padding: 12,
+                        cornerRadius: 8,
+                        displayColors: false
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(255, 255, 255, 0.03)', drawBorder: false },
+                        ticks: { color: '#5a6380', font: { family: 'Inter', size: 11 } }
+                    },
+                    y: {
+                        grid: { color: 'rgba(255, 255, 255, 0.03)', drawBorder: false },
+                        ticks: {
+                            color: '#5a6380',
+                            font: { family: 'Inter', size: 11 },
+                            callback: function (value) { return value.toLocaleString(); }
+                        },
+                        beginAtZero: false
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                }
+            }
+        });
+    }
+
+    // -------------------------------------------------------
+    // 5. LIVE THREAT FEED
+    // -------------------------------------------------------
+    var threatFeedBody = document.getElementById('threatFeedBody');
+    if (threatFeedBody) {
+        var threatTypes = [
+            { label: 'Phishing', icon: 'fa-fish', color: 'var(--accent-orange)' },
+            { label: 'Malware', icon: 'fa-bug', color: 'var(--accent-danger)' },
+            { label: 'CVE Exploit', icon: 'fa-bomb', color: 'var(--accent-danger)' },
+            { label: 'Suspicious', icon: 'fa-triangle-exclamation', color: 'var(--accent-warning)' },
+            { label: 'Spam', icon: 'fa-envelope', color: 'var(--accent-orange)' },
+            { label: 'Botnet', icon: 'fa-server', color: 'var(--accent-danger)' }
+        ];
+        var severities = [
+            { label: 'Safe', color: 'var(--accent-success)', badge: 'badge-cs-safe' },
+            { label: 'Low', color: 'var(--accent-cyan)', badge: 'badge-cs-info' },
+            { label: 'Medium', color: 'var(--accent-warning)', badge: 'badge-cs-warning' },
+            { label: 'High', color: 'var(--accent-orange)', badge: 'badge-cs-suspicious' },
+            { label: 'Critical', color: 'var(--accent-danger)', badge: 'badge-cs-critical' }
+        ];
+        var engines = ['CipherScan AI', 'ClamAV', 'YARA', 'PhishTank', 'VirusTotal', 'SpamHaus', 'AbuseIPDB', 'AlienVault'];
+        var targets = [
+            'login-microsoft-verify.com', 'invoice-urgent-payment.net',
+            '192.168.1.105', 'drive-google-sharefile.top',
+            'secure-bank-login.xyz', 'malware-sample.exe',
+            'suspicious-email@phish.net', 'crypto-wallet-drainer.org',
+            'payload-encoded.bin', 'replit-exec-script.tk',
+            'fake-amazon-login.com', 'trojan-dropper.vbs'
+        ];
+        var tlds = ['.com', '.net', '.org', '.xyz', '.top', '.tk'];
+        var ipBase = ['45.33.22.', '103.235.46.', '185.220.101.', '91.121.87.', '23.129.64.', '5.188.62.'];
+
+        function randomItem(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+        function randomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+        function generateThreat() {
+            var type = randomItem(threatTypes);
+            var severity = randomItem(severities);
+            var engine = randomItem(engines);
+            var isIP = Math.random() > 0.55;
+            var target;
+            if (isIP) {
+                target = randomItem(ipBase) + randomInt(2, 254);
+            } else {
+                var prefix = randomItem(['', 'www.', 'mail.', 'secure.', 'login.', 'admin.', 'app.', 'api.']);
+                var name = randomItem(targets);
+                target = prefix + name;
+            }
+            var minutesAgo = randomInt(0, 59);
+            var timeStr = minutesAgo === 0
+                ? 'Just now'
+                : (minutesAgo < 60 ? minutesAgo + 'm ago' : Math.floor(minutesAgo / 60) + 'h ago');
+
+            return {
+                type: type,
+                severity: severity,
+                engine: engine,
+                target: target,
+                time: timeStr,
+                minutesAgo: minutesAgo
+            };
+        }
+
+        // Initial rows
+        var initialThreats = [];
+        for (var i = 0; i < 15; i++) {
+            initialThreats.push(generateThreat());
+        }
+        initialThreats.sort(function (a, b) { return a.minutesAgo - b.minutesAgo; });
+
+        function renderThreatRow(threat, index) {
+            var tr = document.createElement('tr');
+            tr.style.animationDelay = (index * 0.05) + 's';
+            tr.innerHTML =
+                '<td><span class="threat-type"><i class="fas ' + threat.type.icon + '" style="color:' + threat.type.color + '"></i> ' + threat.type.label + '</span></td>' +
+                '<td><span class="threat-target">' + threat.target + '</span></td>' +
+                '<td><span class="badge-cs ' + threat.severity.badge + '">' + threat.severity.label + '</span></td>' +
+                '<td><span style="color:var(--text-secondary);font-size:0.75rem;">' + threat.engine + '</span></td>' +
+                '<td><span class="threat-time">' + threat.time + '</span></td>';
+            return tr;
+        }
+
+        initialThreats.forEach(function (t, i) {
+            threatFeedBody.appendChild(renderThreatRow(t, i));
+        });
+
+        // Add new threats periodically
+        setInterval(function () {
+            var newThreat = generateThreat();
+            newThreat.minutesAgo = 0;
+            newThreat.time = 'Just now';
+            var tr = renderThreatRow(newThreat, 0);
+            tr.style.animation = 'threat-row-in 0.4s ease both';
+            threatFeedBody.insertBefore(tr, threatFeedBody.firstChild);
+
+            // Update existing times
+            var rows = threatFeedBody.querySelectorAll('tr');
+            rows.forEach(function (row, idx) {
+                if (idx === 0) return;
+                var timeCell = row.querySelector('.threat-time');
+                if (timeCell) {
+                    var text = timeCell.textContent;
+                    var match = text.match(/(\d+)m ago/);
+                    if (match) {
+                        var mins = parseInt(match[1], 10) + 1;
+                        timeCell.textContent = mins + 'm ago';
+                    }
+                }
+            });
+
+            // Keep max 20 rows
+            while (threatFeedBody.children.length > 20) {
+                threatFeedBody.removeChild(threatFeedBody.lastChild);
+            }
+
+            // Update counter
+            var countEl = document.querySelector('.threat-count');
+            if (countEl) {
+                countEl.textContent = threatFeedBody.children.length + ' threats detected';
+            }
+
+        }, 4000);
+    }
+
+    // -------------------------------------------------------
+    // 6. SCROLL ANIMATIONS (Intersection Observer)
+    // -------------------------------------------------------
+    function initScrollAnimations() {
+        var animElements = document.querySelectorAll('.fade-in-up, .fade-in-left, .fade-in-right, .fade-in-scale, .stagger-children');
+        if (!animElements.length) return;
+
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+        animElements.forEach(function (el) {
+            observer.observe(el);
+        });
+    }
+    initScrollAnimations();
+
+    console.log('%cCipherScan%c Landing Page — Loaded',
+        'color:#00d4ff;font-weight:700;font-size:1.2em;',
+        'color:#8892b0;font-size:0.9em;');
+});
+</script>
+{% endblock %}
