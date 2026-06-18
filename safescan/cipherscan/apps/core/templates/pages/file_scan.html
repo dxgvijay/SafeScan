@@ -978,12 +978,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (fill) fill.style.width = progress + '%';
                     if (pct) pct.textContent = progress + '%';
                     if (stepIdx === steps.length) {
-                        // Close modal after showing done
                         setTimeout(function () {
                             modal.classList.remove('active');
-                            if (window.CipherScan && window.CipherScan.toast) {
-                                window.CipherScan.toast.success('Scan Complete', file.name + ' — Analysis finished. No threats detected.');
-                            }
                         }, 1200);
                     }
                 }, delay);
