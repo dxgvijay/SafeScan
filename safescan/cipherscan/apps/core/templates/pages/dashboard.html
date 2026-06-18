@@ -1402,19 +1402,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     animateDashboardCounters();
 
-    // -------------------------------------------------------
-    // 8. DASHBOARD WELCOME TOAST
-    // -------------------------------------------------------
-    setTimeout(function () {
-        if (window.CipherScan && window.CipherScan.toast) {
-            window.CipherScan.toast.success(
-                'Dashboard Loaded',
-                'Your security overview is ready. {{ threats_found|default:0 }} threats detected today.',
-                4000
-            );
-        }
-    }, 800);
-
     console.log('%cCipherScan%c Dashboard — Loaded',
         'color:#00d4ff;font-weight:700;font-size:1.2em;',
         'color:#8892b0;font-size:0.9em;');

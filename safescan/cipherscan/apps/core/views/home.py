@@ -15,15 +15,32 @@ class HomeView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["total_scans"] = 18473
-        context["threats_found"] = 521
-        context["files_scanned"] = 8473
-        context["urls_scanned"] = 12984
+        context["total_scans"] = ScanHistory.objects.count()
+        context["threats_found"] = ScanHistory.objects.exclude(threat_level='safe').count()
+        context["files_scanned"] = ScanHistory.objects.filter(scan_type='file').count()
+        context["urls_scanned"] = ScanHistory.objects.filter(scan_type='url').count()
         context["scan_change"] = "+12.5"
         context["threat_change"] = "+8.3"
         context["file_change"] = "+5.2"
         context["url_change"] = "+15.7"
         return context
+
+
+class StatsView(APIView):
+    def get(self, request):
+        total_scans = ScanHistory.objects.count()
+        files_scanned = ScanHistory.objects.filter(scan_type='file').count()
+        urls_checked = ScanHistory.objects.filter(scan_type='url').count()
+        threats_detected = ScanHistory.objects.exclude(threat_level='safe').count()
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        users_protected = User.objects.count()
+        return Response({
+            'files_scanned': files_scanned,
+            'urls_checked': urls_checked,
+            'threats_detected': threats_detected,
+            'users_protected': users_protected,
+        })
 
 
 class ThreatHistoryView(APIView):

@@ -160,22 +160,16 @@
 .hero-scan {
     animation: fade-in-up 0.8s 0.75s ease both;
 }
-.hero-scan .scan-input-wrapper {
+.hero-scan .scan-tabs {
     display: flex;
-    gap: 0;
     max-width: 640px;
     background: rgba(15, 22, 40, 0.6);
     border: 1px solid var(--glass-border);
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     overflow: hidden;
     backdrop-filter: blur(20px);
-    transition: all var(--transition-normal);
 }
-.hero-scan .scan-input-wrapper:focus-within {
-    border-color: var(--accent-cyan);
-    box-shadow: 0 0 0 4px rgba(0, 212, 255, 0.08), var(--accent-cyan-glow);
-}
-.hero-scan .scan-input-wrapper .scan-type-btn {
+.hero-scan .scan-tabs .scan-type-btn {
     background: transparent;
     border: none;
     color: var(--text-secondary);
@@ -190,15 +184,32 @@
     border-right: 1px solid var(--glass-border);
     white-space: nowrap;
 }
-.hero-scan .scan-input-wrapper .scan-type-btn:hover {
+.hero-scan .scan-tabs .scan-type-btn:hover {
     color: var(--text-primary);
     background: rgba(255, 255, 255, 0.03);
 }
-.hero-scan .scan-input-wrapper .scan-type-btn.active {
+.hero-scan .scan-tabs .scan-type-btn.active {
     color: var(--accent-cyan);
     background: var(--accent-cyan-dim);
 }
-.hero-scan .scan-input-wrapper input {
+.hero-scan .scan-tabs .scan-type-btn:last-child {
+    border-right: none;
+}
+
+.hero-scan .scan-action-wrapper {
+    max-width: 640px;
+    background: rgba(15, 22, 40, 0.6);
+    border: 1px solid var(--glass-border);
+    border-top: none;
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    overflow: hidden;
+    backdrop-filter: blur(20px);
+}
+
+#urlModeContent {
+    display: flex;
+}
+#urlModeContent input {
     flex: 1;
     background: transparent;
     border: none;
@@ -209,10 +220,10 @@
     outline: none;
     min-width: 0;
 }
-.hero-scan .scan-input-wrapper input::placeholder {
+#urlModeContent input::placeholder {
     color: var(--text-muted);
 }
-.hero-scan .scan-input-wrapper .btn-scan-submit {
+#urlModeContent .btn-scan-submit {
     background: var(--accent-cyan);
     border: none;
     color: #0a0e1a;
@@ -226,89 +237,60 @@
     gap: 0.5rem;
     white-space: nowrap;
 }
-.hero-scan .scan-input-wrapper .btn-scan-submit:hover {
+#urlModeContent .btn-scan-submit:hover {
     background: #33ddff;
 }
-.hero-scan .scan-input-wrapper .btn-scan-submit i {
+#urlModeContent .btn-scan-submit i {
     font-size: 0.875rem;
 }
 
-/* File drop zone */
-.file-drop-zone {
-    display: none;
-    max-width: 640px;
-    margin: 0.75rem auto 0;
-    border: 2px dashed var(--glass-border);
-    border-radius: var(--radius-lg);
-    padding: 2rem;
+#fileModeContent .file-drop-zone {
+    border: none;
+    border-radius: 0;
+    padding: 1.5rem;
+    margin: 0;
+    max-width: none;
+    display: block;
     text-align: center;
     cursor: pointer;
     transition: all var(--transition-normal);
-    background: rgba(15, 22, 40, 0.3);
 }
-.file-drop-zone.active {
-    display: block;
-}
-.file-drop-zone:hover,
-.file-drop-zone.dragover {
-    border-color: var(--accent-cyan);
+#fileModeContent .file-drop-zone:hover,
+#fileModeContent .file-drop-zone.dragover {
     background: var(--accent-cyan-dim);
 }
-.file-drop-zone i {
+#fileModeContent .file-drop-zone i {
     font-size: 2rem;
     color: var(--text-muted);
     margin-bottom: 0.5rem;
     display: block;
 }
-.file-drop-zone p {
+#fileModeContent .file-drop-zone p {
     font-size: 0.8125rem;
     color: var(--text-secondary);
-    margin: 0;
+    margin: 0 0 1rem;
 }
-.file-drop-zone p strong {
+#fileModeContent .file-drop-zone p strong {
     color: var(--accent-cyan);
 }
-
-/* Hero scroll indicator */
-.hero-scroll-indicator {
-    position: absolute;
-    bottom: 2rem;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.375rem;
-    color: var(--text-muted);
-    font-size: 0.6875rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    animation: fade-in-up 0.8s 1s ease both;
-}
-.hero-scroll-indicator .scroll-mouse {
-    width: 22px;
-    height: 34px;
-    border: 2px solid var(--text-muted);
-    border-radius: 12px;
-    position: relative;
-}
-.hero-scroll-indicator .scroll-mouse::after {
-    content: '';
-    position: absolute;
-    top: 6px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 3px;
-    height: 8px;
+#fileModeContent .file-drop-zone .btn-scan-submit {
     background: var(--accent-cyan);
-    border-radius: 2px;
-    animation: scroll-wheel 2s infinite;
+    border: none;
+    color: #0a0e1a;
+    padding: 0.75rem 1.5rem;
+    font-weight: 700;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    justify-content: center;
+    border-radius: var(--radius-md);
 }
-@keyframes scroll-wheel {
-    0% { opacity: 1; transform: translateX(-50%) translateY(0); }
-    80% { opacity: 0; transform: translateX(-50%) translateY(12px); }
-    100% { opacity: 0; transform: translateX(-50%) translateY(12px); }
+#fileModeContent .file-drop-zone .btn-scan-submit:hover {
+    background: #33ddff;
 }
 
 /* ============================================================
@@ -598,108 +580,6 @@
 }
 
 /* ============================================================
-   THREAT FEED
-   ============================================================ */
-#threats {
-    position: relative;
-}
-.threat-feed-wrapper {
-    background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur));
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-}
-.threat-feed-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 1.25rem;
-    border-bottom: 1px solid var(--glass-border);
-}
-.threat-feed-header h4 {
-    font-size: 1rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-.threat-feed-header .threat-live-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--accent-success);
-    animation: dot-pulse 2s infinite;
-}
-.threat-feed-header .threat-count {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    font-family: var(--font-mono);
-}
-.threat-feed-body {
-    overflow-y: auto;
-    position: relative;
-}
-.threat-feed-body .threat-feed-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.8125rem;
-}
-.threat-feed-body .threat-feed-table thead th {
-    padding: 0.625rem 1.25rem;
-    font-size: 0.6875rem;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--text-muted);
-    font-weight: 600;
-    background: rgba(255, 255, 255, 0.015);
-    border-bottom: 1px solid var(--glass-border);
-}
-.threat-feed-body .threat-feed-table tbody tr {
-    transition: all var(--transition-fast);
-    animation: threat-row-in 0.4s ease both;
-}
-.threat-feed-body .threat-feed-table tbody tr:hover {
-    background: var(--accent-cyan-dim);
-}
-.threat-feed-body .threat-feed-table tbody tr td {
-    padding: 0.625rem 1.25rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.02);
-    vertical-align: middle;
-}
-.threat-feed-body .threat-feed-table tbody tr:last-child td {
-    border-bottom: none;
-}
-.threat-feed-body .threat-feed-table .threat-target {
-    font-family: var(--font-mono);
-    font-size: 0.78125rem;
-    color: var(--text-primary);
-}
-.threat-feed-body .threat-feed-table .threat-type {
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-}
-.threat-feed-body .threat-feed-table .threat-type i {
-    font-size: 0.75rem;
-}
-.threat-feed-body .threat-feed-table .threat-time {
-    font-size: 0.71875rem;
-    color: var(--text-muted);
-    font-family: var(--font-mono);
-}
-@keyframes threat-row-in {
-    from {
-        opacity: 0;
-        transform: translateX(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-/* ============================================================
    SCROLL ANIMATIONS
    ============================================================ */
 .fade-in-up {
@@ -797,21 +677,21 @@
         flex-direction: column;
         gap: 1rem;
     }
-    .hero-scan .scan-input-wrapper {
+    .hero-scan .scan-tabs {
         flex-direction: column;
-        border-radius: var(--radius-md);
+        border-radius: var(--radius-md) var(--radius-md) 0 0;
     }
-    .hero-scan .scan-input-wrapper .scan-type-btn {
+    .hero-scan .scan-tabs .scan-type-btn {
         border-right: none;
         border-bottom: 1px solid var(--glass-border);
         justify-content: center;
     }
-    .hero-scan .scan-input-wrapper .btn-scan-submit {
+    #urlModeContent {
+        flex-direction: column;
+    }
+    #urlModeContent .btn-scan-submit {
         justify-content: center;
         border-radius: 0 0 var(--radius-md) var(--radius-md);
-    }
-    .hero-scroll-indicator {
-        display: none;
     }
     #hero {
         min-height: auto;
@@ -868,7 +748,7 @@
                     <div class="hero-stats justify-content-center">
                         <div class="hero-stat">
                             <span class="hero-stat-value">
-                                <span class="counter" data-target="1847293">0</span>
+                                <span class="counter" data-target="0" data-stat-key="files_scanned">0</span>
                                 <span class="stat-suffix">+</span>
                             </span>
                             <span class="hero-stat-label">Files Scanned</span>
@@ -876,7 +756,7 @@
                         <div class="hero-stat-divider"></div>
                         <div class="hero-stat">
                             <span class="hero-stat-value">
-                                <span class="counter" data-target="3215847">0</span>
+                                <span class="counter" data-target="0" data-stat-key="urls_checked">0</span>
                                 <span class="stat-suffix">+</span>
                             </span>
                             <span class="hero-stat-label">URLs Checked</span>
@@ -884,7 +764,7 @@
                         <div class="hero-stat-divider"></div>
                         <div class="hero-stat">
                             <span class="hero-stat-value">
-                                <span class="counter" data-target="52194">0</span>
+                                <span class="counter" data-target="0" data-stat-key="threats_detected">0</span>
                                 <span class="stat-suffix">+</span>
                             </span>
                             <span class="hero-stat-label">Threats Detected</span>
@@ -892,22 +772,29 @@
                     </div>
 
                     <div class="hero-scan">
-                        <div class="scan-input-wrapper mx-auto">
+                        <div class="scan-tabs mx-auto">
                             <button class="scan-type-btn active" data-type="url" id="scanTypeUrl">
                                 <i class="fas fa-link"></i> URL
                             </button>
                             <button class="scan-type-btn" data-type="file" id="scanTypeFile">
                                 <i class="fas fa-file"></i> File
                             </button>
+                        </div>
+                        <div id="urlModeContent" class="scan-action-wrapper mx-auto">
                             <input type="text" id="scanInput" placeholder="Enter URL to scan — https://example.com" autocomplete="off">
                             <button class="btn-scan-submit" id="scanSubmitBtn">
                                 <i class="fas fa-magnifying-glass"></i> Scan
                             </button>
                         </div>
-                        <div class="file-drop-zone" id="fileDropZone">
-                            <i class="fas fa-cloud-arrow-up"></i>
-                            <p>Drag & drop a file here or <strong>browse</strong> to upload</p>
-                            <input type="file" id="fileInput" style="display:none" multiple>
+                        <div id="fileModeContent" class="scan-action-wrapper mx-auto" style="display:none">
+                            <div class="file-drop-zone" id="fileDropZone">
+                                <i class="fas fa-cloud-arrow-up"></i>
+                                <p>Drag & drop a file here or <strong>browse</strong> to upload</p>
+                                <input type="file" id="fileInput" style="display:none" multiple>
+                                <button class="btn-scan-submit" id="fileScanBtn">
+                                    <i class="fas fa-magnifying-glass"></i> Upload & Scan
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -915,10 +802,6 @@
         </div>
     </div>
 
-    <div class="hero-scroll-indicator">
-        <div class="scroll-mouse"></div>
-        <span>Scroll</span>
-    </div>
 </section>
 {% endblock %}
 
@@ -1053,28 +936,28 @@
             <div class="col-6 col-lg-3">
                 <div class="trust-counter">
                     <div class="counter-icon cyan"><i class="fas fa-file"></i></div>
-                    <div class="counter-value"><span class="counter" data-target="1847293">0</span></div>
+                    <div class="counter-value"><span class="counter" data-target="0" data-stat-key="files_scanned">0</span></div>
                     <div class="counter-label">Files Scanned</div>
                 </div>
             </div>
             <div class="col-6 col-lg-3">
                 <div class="trust-counter">
                     <div class="counter-icon orange"><i class="fas fa-link"></i></div>
-                    <div class="counter-value"><span class="counter" data-target="3215847">0</span></div>
+                    <div class="counter-value"><span class="counter" data-target="0" data-stat-key="urls_checked">0</span></div>
                     <div class="counter-label">URLs Checked</div>
                 </div>
             </div>
             <div class="col-6 col-lg-3">
                 <div class="trust-counter">
                     <div class="counter-icon success"><i class="fas fa-shield"></i></div>
-                    <div class="counter-value"><span class="counter" data-target="52194">0</span></div>
+                    <div class="counter-value"><span class="counter" data-target="0" data-stat-key="threats_detected">0</span></div>
                     <div class="counter-label">Threats Blocked</div>
                 </div>
             </div>
             <div class="col-6 col-lg-3">
                 <div class="trust-counter">
                     <div class="counter-icon purple"><i class="fas fa-users"></i></div>
-                    <div class="counter-value"><span class="counter" data-target="127483">0</span></div>
+                    <div class="counter-value"><span class="counter" data-target="0" data-stat-key="users_protected">0</span></div>
                     <div class="counter-label">Users Protected</div>
                 </div>
             </div>
@@ -1096,47 +979,7 @@
     </div>
 </section>
 
-<!-- ============================================================
-     RECENT THREATS
-     ============================================================ -->
-<section class="section-cs" id="threats" style="background: rgba(255,255,255,0.01);">
-    <div class="container">
-        <div class="section-header fade-in-up">
-            <h2>Live <span class="text-cyan">Threat Feed</span></h2>
-            <p class="section-subtitle">Real-time global threat intelligence showing recently detected malicious activity across our network.</p>
-            <span class="section-accent"></span>
-        </div>
-        <div class="row">
-            <div class="col-lg-10 mx-auto">
-                <div class="threat-feed-wrapper fade-in-up">
-                    <div class="threat-feed-header">
-                        <h4>
-                            <span class="threat-live-dot"></span>
-                            Recent Threats
-                        </h4>
-                        <span class="threat-count">Updating live...</span>
-                    </div>
-                    <div class="threat-feed-body" style="max-height: 420px;">
-                        <table class="threat-feed-table">
-                            <thead>
-                                <tr>
-                                    <th>Type</th>
-                                    <th>Target</th>
-                                    <th>Severity</th>
-                                    <th>Engine</th>
-                                    <th>Time</th>
-                                </tr>
-                            </thead>
-                            <tbody id="threatFeedBody">
-                                <!-- Populated by JS -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+
 {% endblock %}
 
 {% block extra_js %}
@@ -1192,25 +1035,38 @@ document.addEventListener('DOMContentLoaded', function () {
     // -------------------------------------------------------
     const scanTypeUrl = document.getElementById('scanTypeUrl');
     const scanTypeFile = document.getElementById('scanTypeFile');
+    const urlModeContent = document.getElementById('urlModeContent');
+    const fileModeContent = document.getElementById('fileModeContent');
     const scanInput = document.getElementById('scanInput');
     const fileDropZone = document.getElementById('fileDropZone');
     const fileInput = document.getElementById('fileInput');
     const scanSubmitBtn = document.getElementById('scanSubmitBtn');
+    const fileScanBtn = document.getElementById('fileScanBtn');
+
+    // Remove file mode from DOM on load (URL is the default)
+    if (fileModeContent && fileModeContent.parentNode) fileModeContent.remove();
+
+    function activateUrlMode() {
+        if (scanTypeUrl.classList.contains('active')) return;
+        var fileMC = document.getElementById('fileModeContent');
+        var urlMC = document.getElementById('urlModeContent');
+        if (fileMC && fileMC.parentNode) fileMC.replaceWith(urlMC);
+        scanTypeUrl.classList.add('active');
+        scanTypeFile.classList.remove('active');
+    }
+
+    function activateFileMode() {
+        if (scanTypeFile.classList.contains('active')) return;
+        var urlMC = document.getElementById('urlModeContent');
+        var fileMC = document.getElementById('fileModeContent');
+        if (urlMC && urlMC.parentNode) urlMC.replaceWith(fileMC);
+        scanTypeFile.classList.add('active');
+        scanTypeUrl.classList.remove('active');
+    }
 
     if (scanTypeUrl && scanTypeFile) {
-        scanTypeUrl.addEventListener('click', function () {
-            this.classList.add('active');
-            scanTypeFile.classList.remove('active');
-            scanInput.style.display = '';
-            scanInput.placeholder = 'Enter URL to scan — https://example.com';
-            fileDropZone.classList.remove('active');
-        });
-        scanTypeFile.addEventListener('click', function () {
-            this.classList.add('active');
-            scanTypeUrl.classList.remove('active');
-            scanInput.style.display = 'none';
-            fileDropZone.classList.add('active');
-        });
+        scanTypeUrl.addEventListener('click', activateUrlMode);
+        scanTypeFile.addEventListener('click', activateFileMode);
     }
 
     // File drop zone
@@ -1240,29 +1096,31 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Scan submit
+    // URL scan submit
     if (scanSubmitBtn) {
         scanSubmitBtn.addEventListener('click', function () {
-            var isUrl = scanTypeUrl && scanTypeUrl.classList.contains('active');
-            if (isUrl) {
-                var url = scanInput ? scanInput.value.trim() : '';
-                if (url) {
-                    window.location.href = (window.location.origin + '/url-scan/?q=' + encodeURIComponent(url));
-                } else if (window.CipherScan && window.CipherScan.toast) {
-                    window.CipherScan.toast.warning('Input Required', 'Please enter a URL to scan.');
-                }
-            } else {
-                if (fileInput && fileInput.files.length) {
-                    if (window.CipherScan && window.CipherScan.toast) {
-                        window.CipherScan.toast.info('Uploading', 'Uploading ' + fileInput.files.length + ' file(s) for analysis...');
-                    }
-                } else if (window.CipherScan && window.CipherScan.toast) {
-                    window.CipherScan.toast.warning('No File Selected', 'Please select a file or drag & drop one.');
-                }
+            var url = scanInput ? scanInput.value.trim() : '';
+            if (url) {
+                window.location.href = (window.location.origin + '/url-scan/?q=' + encodeURIComponent(url));
+            } else if (window.CipherScan && window.CipherScan.toast) {
+                window.CipherScan.toast.warning('Input Required', 'Please enter a URL to scan.');
             }
         });
         scanInput.addEventListener('keydown', function (e) {
             if (e.key === 'Enter') scanSubmitBtn.click();
+        });
+    }
+
+    // File scan submit
+    if (fileScanBtn) {
+        fileScanBtn.addEventListener('click', function () {
+            if (fileInput && fileInput.files.length) {
+                if (window.CipherScan && window.CipherScan.toast) {
+                    window.CipherScan.toast.info('Uploading', 'Uploading ' + fileInput.files.length + ' file(s) for analysis...');
+                }
+            } else if (window.CipherScan && window.CipherScan.toast) {
+                window.CipherScan.toast.warning('No File Selected', 'Please select a file or drag & drop one.');
+            }
         });
     }
 
@@ -1293,31 +1151,19 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Intersection Observer for counters
-    var counterObserver = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-            if (entry.isIntersecting) {
-                animateCounters();
-                counterObserver.unobserve(entry.target);
-            }
-        });
-    }, { threshold: 0.3 });
-
-    var counters = document.querySelectorAll('.counter[data-target]');
-    if (counters.length) {
-        // Observe the parent of the first counter
-        counterObserver.observe(counters[0].closest('.hero-stats') || counters[0].parentElement);
-    }
-
-    // Also trigger counters immediately for hero stats (they're in viewport)
-    setTimeout(function () {
-        var heroStatCounters = document.querySelectorAll('#hero .counter[data-target]');
-        var allDone = true;
-        heroStatCounters.forEach(function (el) {
-            if (parseInt(el.textContent.replace(/,/g, ''), 10) === 0) allDone = false;
-        });
-        if (allDone) animateCounters();
-    }, 1500);
+    // Fetch real stats from API and animate counters
+    fetch('/api/stats/')
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            document.querySelectorAll('.counter[data-stat-key]').forEach(function (el) {
+                var key = el.dataset.statKey;
+                if (data[key] !== undefined) {
+                    el.dataset.target = data[key];
+                }
+            });
+            animateCounters();
+        })
+        .catch(function () {});
 
     // -------------------------------------------------------
     // 4. CHART.JS — Threat Trends (live data from API)
@@ -1429,135 +1275,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     loadThreatData();
 
-    // -------------------------------------------------------
-    // 5. LIVE THREAT FEED
-    // -------------------------------------------------------
-    var threatFeedBody = document.getElementById('threatFeedBody');
-    if (threatFeedBody) {
-        var threatTypes = [
-            { label: 'Phishing', icon: 'fa-fish', color: 'var(--accent-orange)' },
-            { label: 'Malware', icon: 'fa-bug', color: 'var(--accent-danger)' },
-            { label: 'CVE Exploit', icon: 'fa-bomb', color: 'var(--accent-danger)' },
-            { label: 'Suspicious', icon: 'fa-triangle-exclamation', color: 'var(--accent-warning)' },
-            { label: 'Spam', icon: 'fa-envelope', color: 'var(--accent-orange)' },
-            { label: 'Botnet', icon: 'fa-server', color: 'var(--accent-danger)' }
-        ];
-        var severities = [
-            { label: 'Safe', color: 'var(--accent-success)', badge: 'badge-cs-safe' },
-            { label: 'Low', color: 'var(--accent-cyan)', badge: 'badge-cs-info' },
-            { label: 'Medium', color: 'var(--accent-warning)', badge: 'badge-cs-warning' },
-            { label: 'High', color: 'var(--accent-orange)', badge: 'badge-cs-suspicious' },
-            { label: 'Critical', color: 'var(--accent-danger)', badge: 'badge-cs-critical' }
-        ];
-        var engines = ['CipherScan AI', 'ClamAV', 'YARA', 'PhishTank', 'VirusTotal', 'SpamHaus', 'AbuseIPDB', 'AlienVault'];
-        var targets = [
-            'login-microsoft-verify.com', 'invoice-urgent-payment.net',
-            '192.168.1.105', 'drive-google-sharefile.top',
-            'secure-bank-login.xyz', 'malware-sample.exe',
-            'suspicious-email@phish.net', 'crypto-wallet-drainer.org',
-            'payload-encoded.bin', 'replit-exec-script.tk',
-            'fake-amazon-login.com', 'trojan-dropper.vbs'
-        ];
-        var tlds = ['.com', '.net', '.org', '.xyz', '.top', '.tk'];
-        var ipBase = ['45.33.22.', '103.235.46.', '185.220.101.', '91.121.87.', '23.129.64.', '5.188.62.'];
 
-        function randomItem(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-        function randomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
-
-        function generateThreat() {
-            var type = randomItem(threatTypes);
-            var severity = randomItem(severities);
-            var engine = randomItem(engines);
-            var isIP = Math.random() > 0.55;
-            var target;
-            if (isIP) {
-                target = randomItem(ipBase) + randomInt(2, 254);
-            } else {
-                var prefix = randomItem(['', 'www.', 'mail.', 'secure.', 'login.', 'admin.', 'app.', 'api.']);
-                var name = randomItem(targets);
-                target = prefix + name;
-            }
-            var minutesAgo = randomInt(0, 59);
-            var timeStr = minutesAgo === 0
-                ? 'Just now'
-                : (minutesAgo < 60 ? minutesAgo + 'm ago' : Math.floor(minutesAgo / 60) + 'h ago');
-
-            return {
-                type: type,
-                severity: severity,
-                engine: engine,
-                target: target,
-                time: timeStr,
-                minutesAgo: minutesAgo
-            };
-        }
-
-        // Initial rows
-        var initialThreats = [];
-        for (var i = 0; i < 15; i++) {
-            initialThreats.push(generateThreat());
-        }
-        initialThreats.sort(function (a, b) { return a.minutesAgo - b.minutesAgo; });
-
-        function renderThreatRow(threat, index) {
-            var tr = document.createElement('tr');
-            tr.style.animationDelay = (index * 0.05) + 's';
-            tr.innerHTML =
-                '<td><span class="threat-type"><i class="fas ' + threat.type.icon + '" style="color:' + threat.type.color + '"></i> ' + threat.type.label + '</span></td>' +
-                '<td><span class="threat-target">' + threat.target + '</span></td>' +
-                '<td><span class="badge-cs ' + threat.severity.badge + '">' + threat.severity.label + '</span></td>' +
-                '<td><span style="color:var(--text-secondary);font-size:0.75rem;">' + threat.engine + '</span></td>' +
-                '<td><span class="threat-time">' + threat.time + '</span></td>';
-            return tr;
-        }
-
-        initialThreats.forEach(function (t, i) {
-            threatFeedBody.appendChild(renderThreatRow(t, i));
-        });
-
-        // Add new threats periodically
-        setInterval(function () {
-            var newThreat = generateThreat();
-            newThreat.minutesAgo = 0;
-            newThreat.time = 'Just now';
-            var tr = renderThreatRow(newThreat, 0);
-            tr.style.animation = 'threat-row-in 0.4s ease both';
-            threatFeedBody.insertBefore(tr, threatFeedBody.firstChild);
-
-            // Update existing times
-            var rows = threatFeedBody.querySelectorAll('tr');
-            rows.forEach(function (row, idx) {
-                if (idx === 0) return;
-                var timeCell = row.querySelector('.threat-time');
-                if (timeCell) {
-                    var text = timeCell.textContent;
-                    var match = text.match(/(\d+)m ago/);
-                    if (match) {
-                        var mins = parseInt(match[1], 10) + 1;
-                        timeCell.textContent = mins + 'm ago';
-                    }
-                }
-            });
-
-            // Keep max 20 rows
-            while (threatFeedBody.children.length > 20) {
-                threatFeedBody.removeChild(threatFeedBody.lastChild);
-            }
-
-            // Update counter
-            var countEl = document.querySelector('.threat-count');
-            if (countEl) {
-                countEl.textContent = threatFeedBody.children.length + ' threats detected';
-            }
-
-            if (window.CipherScan && window.CipherScan.toast && Math.random() > 0.6) {
-                window.CipherScan.toast.warning(
-                    'Threat Detected',
-                    newThreat.type.label + ' — ' + newThreat.target
-                );
-            }
-        }, 4000);
-    }
 
     // -------------------------------------------------------
     // 6. SCROLL ANIMATIONS (Intersection Observer)
@@ -1580,22 +1298,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
     initScrollAnimations();
-
-    // -------------------------------------------------------
-    // 7. HERO SCROLL INDICATOR HIDE ON SCROLL
-    // -------------------------------------------------------
-    var scrollIndicator = document.querySelector('.hero-scroll-indicator');
-    if (scrollIndicator) {
-        window.addEventListener('scroll', function () {
-            if (window.scrollY > 100) {
-                scrollIndicator.style.opacity = '0';
-                scrollIndicator.style.pointerEvents = 'none';
-            } else {
-                scrollIndicator.style.opacity = '1';
-                scrollIndicator.style.pointerEvents = 'auto';
-            }
-        }, { passive: true });
-    }
 
     console.log('%cCipherScan%c Landing Page — Loaded',
         'color:#00d4ff;font-weight:700;font-size:1.2em;',

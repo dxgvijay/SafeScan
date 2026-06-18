@@ -946,80 +946,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if (fill) fill.style.width = '0%';
         if (pct) pct.textContent = '0%';
 
-        // Simulate progress through steps
-        var stepDurations = [800, 600, 2000, 1500, 500];
-        var totalDuration = stepDurations.reduce(function (a, b) { return a + b; }, 0);
-        var elapsed = 0;
-
-        function advanceStep(stepIndex) {
-            if (stepIndex > 0 && stepIndex <= steps.length) {
-                var prev = steps[stepIndex - 1];
-                if (prev) { prev.classList.remove('active'); prev.classList.add('done'); }
-            }
-            if (stepIndex < steps.length) {
-                var curr = steps[stepIndex];
-                if (curr) curr.classList.add('active');
-                var label = document.getElementById('fsmStep' + stepIndex);
-                var texts = ['Uploading...', 'Hashing...', 'Scanning...', 'Analyzing...', 'Done!'];
-                if (label) label.textContent = texts[stepIndex] || '...';
-            }
-        }
-
-        advanceStep(0);
-
-        for (var i = 1; i <= steps.length; i++) {
-            (function (stepIdx) {
-                var delay = 0;
-                for (var j = 0; j < stepIdx; j++) { delay += stepDurations[j]; }
-                setTimeout(function () {
-                    advanceStep(stepIdx);
-                    var progress = Math.min(Math.round((delay / totalDuration) * 100), 100);
-                    if (stepIdx === steps.length) progress = 100;
-                    if (fill) fill.style.width = progress + '%';
-                    if (pct) pct.textContent = progress + '%';
-                    if (stepIdx === steps.length) {
-                        // Close modal after showing done
-                        setTimeout(function () {
-                            modal.classList.remove('active');
-                            if (window.CipherScan && window.CipherScan.toast) {
-                                window.CipherScan.toast.success('Scan Complete', file.name + ' — Analysis finished. No threats detected.');
-                            }
-                        }, 1200);
-                    }
-                }, delay);
-            })(i);
-        }
     }
 
-    // -------------------------------------------------------
-    // 4. RECENT SCANS TABLE (Pagination + Search)
-    // -------------------------------------------------------
-    var sampleScans = [
-        { name: 'invoice_2025.pdf', type: 'PDF', det: '0/72', threat: 'safe', date: '2025-06-17 14:32' },
-        { name: 'setup_installer.exe', type: 'EXE', det: '3/72', threat: 'suspicious', date: '2025-06-17 13:15' },
-        { name: 'document_macro.doc', type: 'DOC', det: '1/72', threat: 'low', date: '2025-06-17 11:48' },
-        { name: 'report_q2.xlsx', type: 'XLSX', det: '0/72', threat: 'safe', date: '2025-06-17 10:05' },
-        { name: 'driver_update.msi', type: 'MSI', det: '2/72', threat: 'low', date: '2025-06-16 22:30' },
-        { name: 'payload_encrypted.bin', type: 'BIN', det: '12/72', threat: 'high', date: '2025-06-16 19:12' },
-        { name: 'presentation.pptx', type: 'PPTX', det: '0/72', threat: 'safe', date: '2025-06-16 16:44' },
-        { name: 'malware_sample.exe', type: 'EXE', det: '28/72', threat: 'critical', date: '2025-06-16 14:20' },
-        { name: 'script.js', type: 'JS', det: '4/72', threat: 'suspicious', date: '2025-06-16 11:55' },
-        { name: 'archive_payload.zip', type: 'ZIP', det: '6/72', threat: 'medium', date: '2025-06-15 23:10' },
-        { name: 'invoice_fake.pdf', type: 'PDF', det: '8/72', threat: 'high', date: '2025-06-15 20:35' },
-        { name: 'sysupdate.dll', type: 'DLL', det: '1/72', threat: 'low', date: '2025-06-15 17:00' },
-        { name: 'script_payload.ps1', type: 'PS1', det: '9/72', threat: 'high', date: '2025-06-15 14:25' },
-        { name: 'commercial.docx', type: 'DOCX', det: '0/72', threat: 'safe', date: '2025-06-15 10:50' },
-        { name: 'apk_trojan.apk', type: 'APK', det: '18/72', threat: 'critical', date: '2025-06-14 21:15' },
-        { name: 'config.tar.gz', type: 'GZ', det: '0/72', threat: 'safe', date: '2025-06-14 18:30' },
-        { name: 'exploit_hta.hta', type: 'HTA', det: '11/72', threat: 'critical', date: '2025-06-14 15:45' },
-        { name: 'update_patch.exe', type: 'EXE', det: '2/72', threat: 'low', date: '2025-06-14 12:00' },
-        { name: 'phising_email.docm', type: 'DOC', det: '14/72', threat: 'high', date: '2025-06-13 23:20' },
-        { name: 'python_script.py', type: 'PY', det: '1/72', threat: 'low', date: '2025-06-13 20:05' },
-        { name: 'java_applet.jar', type: 'JAR', det: '5/72', threat: 'suspicious', date: '2025-06-13 16:40' },
-        { name: 'backup_data.7z', type: '7Z', det: '0/72', threat: 'safe', date: '2025-06-13 13:15' },
-        { name: 'crypto_miner.exe', type: 'EXE', det: '22/72', threat: 'critical', date: '2025-06-12 22:50' },
-        { name: 'macro_enabled.xlsm', type: 'XLS', det: '3/72', threat: 'suspicious', date: '2025-06-12 19:30' },
-    ];
 
     var typeIcons = {
         PDF: 'fa-file-pdf', EXE: 'fa-cog', DLL: 'fa-cog', MSI: 'fa-cog',
@@ -1042,6 +970,7 @@ document.addEventListener('DOMContentLoaded', function () {
         high: 'badge-cs-danger', critical: 'badge-cs-danger',
     };
 
+    var sampleScans = [];
     var currentPage = 1;
     var rowsPerPage = 8;
     var filteredData = sampleScans.slice();

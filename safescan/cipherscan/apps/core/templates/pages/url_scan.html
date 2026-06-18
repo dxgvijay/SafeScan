@@ -891,48 +891,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (tableBody) {
         var allRows = [];
 
-        var sampleUrls = [
-            'http://malware-test.com/download?payload=123', 'http://phishing-example.xyz/login',
-            'http://google.com', 'http://example.com', 'http://evil-domain.tk/malware.exe',
-            'http://secure-bank-login.xyz/verify', 'http://legit-site.com/page?ref=abc',
-            'http://drive-google-sharefile.top/doc', 'http://amaz0n-verify.net/account',
-            'http://github.com', 'http://stackoverflow.com', 'http://fake-paypal.com/login',
-            'http://dropbox-file-transfer.xyz/share', 'http://microsoft.com/download',
-            'http://netflix-account-renewal.tk/billing', 'http://bit.ly/3xK9mP2',
-            'http://tinyurl.com/abc123def', 'http://malware-spreader.ru/payload.dll',
-            'http://docs.google.com', 'http://linkedin-request.tk/connect',
-            'http://evil.com/botnet-cnc', 'http://checkout-secure-pay.com/billing',
-            'http://example.org', 'http://apple-id-verify.net/reset',
-            'http://dhl-parcel-tracking.top/delivery'
-        ];
-        var verdicts = [
-            { label: 'Malicious', badge: 'badge-cs-danger' },
-            { label: 'Suspicious', badge: 'badge-cs-suspicious' },
-            { label: 'Clean', badge: 'badge-cs-safe' },
-            { label: 'Clean', badge: 'badge-cs-safe' },
-            { label: 'Clean', badge: 'badge-cs-safe' }
-        ];
-
-        function randomItem(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-        function pad(n) { return n < 10 ? '0' + n : n; }
-
-        function buildRows() {
-            allRows = [];
-            for (var i = 0; i < sampleUrls.length; i++) {
-                var det = Math.floor(Math.random() * 15);
-                var v = det === 0 ? verdicts[2] : (det < 4 ? verdicts[1] : verdicts[0]);
-                var d = new Date();
-                d.setHours(d.getHours() - Math.floor(Math.random() * 72));
-                d.setMinutes(Math.floor(Math.random() * 60));
-                allRows.push({
-                    url: sampleUrls[i],
-                    verdict: v,
-                    detections: det + '/' + (62 + Math.floor(Math.random() * 10)),
-                    date: pad(d.getMonth() + 1) + '/' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes())
-                });
-            }
-        }
-        buildRows();
+        var allRows = [];
 
         var currentPage = 1;
         var perPage = 8;

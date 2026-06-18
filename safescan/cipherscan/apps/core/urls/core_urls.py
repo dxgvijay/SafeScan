@@ -37,5 +37,6 @@ urlpatterns = [
     path("docs/", pages.DocsView.as_view(), name="docs"),
     path("blog/", pages.BlogView.as_view(), name="blog"),
     path("tools/", pages.FeaturesView.as_view(), name="tools"),
+    path("api/stats", home.StatsView.as_view(), name="stats_api"),
     path("api/threats/history", home.ThreatHistoryView.as_view(), name="threat_history_api"),
 ]
