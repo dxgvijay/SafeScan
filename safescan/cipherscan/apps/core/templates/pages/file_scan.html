@@ -1,0 +1,1128 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}File Scanner & Malware Analysis — CipherScan{% endblock %}
+
+{% block body_class %}full-width{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ============================================================
+   FILE SCANNER — Root Variables (Purple Theme)
+   ============================================================ */
+:root {
+    --fs-purple: #a855f7;
+    --fs-purple-light: #c084fc;
+    --fs-purple-dark: #7c3aed;
+    --fs-purple-glow: rgba(168, 85, 247, 0.25);
+    --fs-purple-dim: rgba(168, 85, 247, 0.08);
+    --fs-purple-bg: linear-gradient(135deg, #0a0e1a 0%, #120a1a 35%, #0f1628 70%, #0a0e1a 100%);
+}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.fs-hero {
+    position: relative;
+    padding: 4rem 2rem 3rem;
+    overflow: hidden;
+    background: var(--fs-purple-bg);
+    min-height: 600px;
+    display: flex;
+    align-items: center;
+}
+.fs-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse at 25% 30%, rgba(168, 85, 247, 0.07) 0%, transparent 50%),
+        radial-gradient(ellipse at 75% 70%, rgba(124, 58, 237, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+}
+.fs-hero .hero-inner {
+    position: relative;
+    z-index: 2;
+    max-width: 860px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.fs-hero .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--fs-purple-dim);
+    border: 1px solid rgba(168, 85, 247, 0.15);
+    border-radius: 50px;
+    padding: 0.3125rem 0.875rem 0.3125rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--fs-purple-light);
+    margin-bottom: 1.25rem;
+}
+.fs-hero .hero-badge .badge-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--fs-purple);
+    animation: fs-dot 2s infinite;
+}
+@keyframes fs-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.75); }
+}
+.fs-hero h1 {
+    font-size: clamp(2rem, 4.5vw, 3.25rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.75rem;
+}
+.fs-hero h1 .hl-purple { color: var(--fs-purple-light); }
+.fs-hero .hero-sub {
+    font-size: clamp(0.9375rem, 1.5vw, 1.125rem);
+    color: var(--text-secondary);
+    margin-bottom: 2.25rem;
+    line-height: 1.6;
+    max-width: 560px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* ============================================================
+   DROP ZONE
+   ============================================================ */
+.drop-zone {
+    position: relative;
+    max-width: 640px;
+    margin: 0 auto 1.5rem;
+    border: 2px dashed rgba(168, 85, 247, 0.3);
+    border-radius: var(--radius-lg);
+    padding: 2.75rem 1.5rem;
+    background: rgba(168, 85, 247, 0.03);
+    backdrop-filter: blur(8px);
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    overflow: hidden;
+}
+.drop-zone::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: var(--radius-lg);
+    background: linear-gradient(135deg, rgba(168,85,247,0.15), transparent, rgba(168,85,247,0.08));
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+    pointer-events: none;
+}
+.drop-zone:hover { border-color: rgba(168, 85, 247, 0.5); }
+.drop-zone:hover::before { opacity: 1; }
+.drop-zone.drag-over {
+    border-color: var(--fs-purple);
+    background: rgba(168, 85, 247, 0.08);
+    box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.08), 0 0 50px rgba(168, 85, 247, 0.1);
+}
+.drop-zone.drag-over::before { opacity: 1; }
+.drop-zone .dz-icon {
+    font-size: 3rem;
+    color: var(--fs-purple);
+    margin-bottom: 0.5rem;
+    display: block;
+}
+.drop-zone .dz-icon i {
+    animation: dz-bounce 2s infinite ease-in-out;
+}
+@keyframes dz-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+.drop-zone.drag-over .dz-icon i {
+    animation: none;
+    transform: scale(1.15);
+}
+.drop-zone .dz-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+.drop-zone .dz-sub {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+}
+.drop-zone .dz-btn {
+    background: var(--fs-purple-dim);
+    border: 1px solid rgba(168, 85, 247, 0.2);
+    border-radius: var(--radius-sm);
+    padding: 0.5rem 1.25rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--fs-purple-light);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-family: var(--font-ui);
+}
+.drop-zone .dz-btn:hover {
+    background: rgba(168, 85, 247, 0.15);
+    border-color: var(--fs-purple);
+    box-shadow: 0 0 16px var(--fs-purple-glow);
+}
+.drop-zone #fileInput { display: none; }
+.drop-zone .dz-max {
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+    margin-top: 0.625rem;
+}
+
+/* Supported formats grid */
+.dz-formats {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    max-width: 500px;
+    margin: 1rem auto 0;
+}
+.dz-formats .dz-fmt {
+    display: flex;
+    align-items: center;
+    gap: 0.3125rem;
+    font-size: 0.625rem;
+    color: var(--text-muted);
+    background: rgba(255,255,255,0.02);
+    padding: 0.1875rem 0.5rem;
+    border-radius: 4px;
+    border: 1px solid var(--glass-border);
+    font-family: var(--font-mono);
+    font-weight: 500;
+    transition: all var(--transition-fast);
+}
+.dz-formats .dz-fmt:hover {
+    border-color: rgba(168, 85, 247, 0.3);
+    color: var(--fs-purple-light);
+    background: var(--fs-purple-dim);
+}
+.dz-formats .dz-fmt i { font-size: 0.5625rem; color: var(--fs-purple); }
+
+/* Divider "OR" */
+.fs-or {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    max-width: 400px;
+    margin: 0 auto 1.5rem;
+    color: var(--text-muted);
+    font-size: 0.78125rem;
+    font-weight: 500;
+}
+.fs-or::before,
+.fs-or::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--glass-border);
+}
+
+/* Hash search */
+.hash-search {
+    max-width: 520px;
+    margin: 0 auto;
+    display: flex;
+    gap: 0;
+    background: rgba(10, 14, 26, 0.7);
+    border: 1px solid rgba(168, 85, 247, 0.12);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+    transition: all var(--transition-normal);
+}
+.hash-search:focus-within {
+    border-color: var(--fs-purple);
+    box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.08), 0 0 40px rgba(168, 85, 247, 0.1);
+}
+.hash-search input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 0.875rem 1rem;
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    outline: none;
+    min-width: 0;
+}
+.hash-search input::placeholder {
+    color: var(--text-muted);
+    font-family: var(--font-ui);
+    font-size: 0.8125rem;
+}
+.hash-search .hs-btn {
+    background: var(--fs-purple);
+    border: none;
+    color: #fff;
+    padding: 0.875rem 1.5rem;
+    font-weight: 700;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+    font-family: var(--font-ui);
+}
+.hash-search .hs-btn:hover {
+    background: var(--fs-purple-light);
+    box-shadow: inset 0 0 30px rgba(168,85,247,0.15);
+}
+
+/* ============================================================
+   ANALYSIS CAPABILITIES — 3-Col Grid
+   ============================================================ */
+.cap-section {
+    padding: 4rem 0;
+}
+.cap-section .section-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+.cap-section .section-header h2 {
+    font-size: clamp(1.25rem, 2.5vw, 1.625rem);
+    font-weight: 700;
+}
+.cap-section .section-header p {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    max-width: 500px;
+    margin: 0.5rem auto 0;
+}
+.cap-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+}
+@media (max-width: 992px) { .cap-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 576px) { .cap-grid { grid-template-columns: 1fr; } }
+.cap-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+}
+.cap-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--fs-purple), var(--fs-purple-light));
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+}
+.cap-card:hover {
+    border-color: rgba(168, 85, 247, 0.2);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 32px rgba(168, 85, 247, 0.06);
+}
+.cap-card:hover::before { opacity: 1; }
+.cap-card .cc-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.125rem;
+    margin-bottom: 1rem;
+    background: var(--fs-purple-dim);
+    color: var(--fs-purple-light);
+}
+.cap-card h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+}
+.cap-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.cap-card ul li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    padding: 0.375rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.02);
+}
+.cap-card ul li:last-child { border-bottom: none; }
+.cap-card ul li i {
+    font-size: 0.625rem;
+    color: var(--fs-purple);
+    flex-shrink: 0;
+}
+
+/* ============================================================
+   RECENT PUBLIC SCANS TABLE
+   ============================================================ */
+.recent-section {
+    padding: 2rem 0 4rem;
+}
+.recent-section .section-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+.recent-section .section-header h2 {
+    font-size: clamp(1.125rem, 2.5vw, 1.5rem);
+    font-weight: 700;
+}
+.recent-section .section-header p {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-top: 0.375rem;
+}
+.fs-table-wrap {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+.fs-table-wrap .fst-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.875rem 1.25rem;
+    border-bottom: 1px solid var(--glass-border);
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+.fs-table-wrap .fst-header h5 {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.fs-table-wrap .fst-header .fst-search {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    padding: 0.3125rem 0.75rem;
+    transition: all var(--transition-fast);
+}
+.fs-table-wrap .fst-header .fst-search:focus-within {
+    border-color: var(--fs-purple);
+}
+.fs-table-wrap .fst-header .fst-search i {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+.fs-table-wrap .fst-header .fst-search input {
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: 0.78125rem;
+    font-family: var(--font-ui);
+    outline: none;
+    width: 180px;
+}
+.fs-table-wrap .fst-header .fst-search input::placeholder { color: var(--text-muted); }
+
+.fst-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8125rem;
+}
+.fst-table thead th {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    font-weight: 600;
+    background: rgba(255,255,255,0.015);
+    border-bottom: 1px solid var(--glass-border);
+}
+.fst-table tbody tr { transition: background var(--transition-fast); }
+.fst-table tbody tr:hover { background: var(--fs-purple-dim); }
+.fst-table tbody tr td {
+    padding: 0.625rem 1.25rem;
+    border-bottom: 1px solid rgba(255,255,255,0.02);
+    vertical-align: middle;
+}
+.fst-table tbody tr:last-child td { border-bottom: none; }
+.fst-table .fst-name {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-primary);
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.fst-table .fst-type {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.71875rem;
+    color: var(--text-secondary);
+}
+.fst-table .fst-type i { font-size: 0.75rem; color: var(--fs-purple); }
+.fst-table .fst-detections {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+.fst-table .fst-threat .badge-cs { font-size: 0.65625rem; padding: 0.1875rem 0.5rem; }
+.fst-table .fst-date {
+    font-size: 0.71875rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+}
+
+/* ============================================================
+   UPLOAD PROGRESS MODAL
+   ============================================================ */
+.fs-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(6px);
+    align-items: center;
+    justify-content: center;
+}
+.fs-modal-overlay.active { display: flex; }
+.fs-modal {
+    background: var(--card-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    max-width: 420px;
+    width: 90%;
+    position: relative;
+    animation: fs-modal-in 0.3s ease;
+}
+@keyframes fs-modal-in {
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.fs-modal .fsm-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+.fs-modal .fsm-header h4 {
+    font-size: 1.125rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+.fs-modal .fsm-header p {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+.fs-modal .fsm-step {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.02);
+    opacity: 0.35;
+    transition: all 0.4s ease;
+}
+.fs-modal .fsm-step:last-child { border-bottom: none; }
+.fs-modal .fsm-step.active { opacity: 1; }
+.fs-modal .fsm-step.done { opacity: 0.6; }
+.fs-modal .fsm-step.done .fsm-snum { background: var(--accent-success); color: #fff; }
+.fs-modal .fsm-step.active .fsm-snum {
+    background: var(--fs-purple);
+    color: #fff;
+    box-shadow: 0 0 12px var(--fs-purple-glow);
+}
+.fs-modal .fsm-step .fsm-snum {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    background: var(--bg-tertiary);
+    color: var(--text-muted);
+    flex-shrink: 0;
+    transition: all 0.4s ease;
+}
+.fs-modal .fsm-step .fsm-sinfo {
+    flex: 1;
+}
+.fs-modal .fsm-step .fsm-sinfo .fsm-sl {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+.fs-modal .fsm-step .fsm-sinfo .fsm-ss {
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+}
+.fs-modal .fsm-step .fsm-sst {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+}
+.fs-modal .fsm-step.active .fsm-sst { color: var(--fs-purple-light); }
+.fs-modal .fsm-step.done .fsm-sst { color: var(--accent-success); }
+
+.fs-modal .fsm-progress {
+    height: 4px;
+    background: var(--bg-tertiary);
+    border-radius: 4px;
+    margin: 1rem 0 0;
+    overflow: hidden;
+}
+.fs-modal .fsm-progress .fsm-prog-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--fs-purple-dark), var(--fs-purple-light));
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+.fs-modal .fsm-percent {
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+    font-family: var(--font-mono);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 768px) {
+    .fs-hero { padding: 3rem 1rem 2rem; min-height: auto; }
+    .drop-zone { padding: 2rem 1rem; }
+    .drop-zone .dz-icon { font-size: 2.25rem; }
+    .hash-search { flex-direction: column; border-radius: var(--radius-md); }
+    .hash-search input { padding: 0.75rem 1rem; }
+    .hash-search .hs-btn { justify-content: center; padding: 0.75rem; }
+    .fs-table-wrap .fst-header { flex-direction: column; align-items: stretch; }
+    .fs-table-wrap .fst-header .fst-search input { width: 100%; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- ============================================================
+     HERO
+     ============================================================ -->
+<section class="fs-hero">
+    <div class="hero-inner">
+        <div class="hero-badge">
+            <span class="badge-dot"></span>
+            Powered by 70+ Antivirus Engines
+        </div>
+        <h1>File Scanner &amp; <span class="hl-purple">Malware Analysis</span></h1>
+        <p class="hero-sub">Upload any file. We scan it with 70+ antivirus engines and deep-analyze its structure for threats, macros, and hidden payloads.</p>
+
+        <!-- Drop Zone -->
+        <div class="drop-zone" id="dropZone">
+            <div class="dz-icon"><i class="fas fa-cloud-arrow-up"></i></div>
+            <div class="dz-title">Drag &amp; Drop your file here</div>
+            <div class="dz-sub">or</div>
+            <button class="dz-btn" id="dzBrowseBtn" type="button"><i class="fas fa-folder-open me-1"></i> click to browse</button>
+            <input type="file" id="fileInput">
+            <div class="dz-max"><i class="fas fa-info-circle me-1"></i> Max file size: 100MB</div>
+
+            <!-- Supported formats -->
+            <div class="dz-formats">
+                <span class="dz-fmt"><i class="fas fa-file-pdf"></i> PDF</span>
+                <span class="dz-fmt"><i class="fas fa-file-word"></i> DOCX</span>
+                <span class="dz-fmt"><i class="fas fa-file-word"></i> DOC</span>
+                <span class="dz-fmt"><i class="fas fa-file-excel"></i> XLS</span>
+                <span class="dz-fmt"><i class="fas fa-file-excel"></i> XLSX</span>
+                <span class="dz-fmt"><i class="fas fa-file-powerpoint"></i> PPTX</span>
+                <span class="dz-fmt"><i class="fas fa-cog"></i> EXE</span>
+                <span class="dz-fmt"><i class="fas fa-cog"></i> DLL</span>
+                <span class="dz-fmt"><i class="fas fa-cog"></i> SYS</span>
+                <span class="dz-fmt"><i class="fas fa-cog"></i> MSI</span>
+                <span class="dz-fmt"><i class="fas fa-apple-alt"></i> APP</span>
+                <span class="dz-fmt"><i class="fas fa-terminal"></i> BAT</span>
+                <span class="dz-fmt"><i class="fas fa-terminal"></i> PS1</span>
+                <span class="dz-fmt"><i class="fas fa-terminal"></i> SH</span>
+                <span class="dz-fmt"><i class="fas fa-terminal"></i> CMD</span>
+                <span class="dz-fmt"><i class="fas fa-code"></i> VBS</span>
+                <span class="dz-fmt"><i class="fas fa-code"></i> HTA</span>
+                <span class="dz-fmt"><i class="fas fa-file-archive"></i> ZIP</span>
+                <span class="dz-fmt"><i class="fas fa-file-archive"></i> RAR</span>
+                <span class="dz-fmt"><i class="fas fa-file-archive"></i> 7Z</span>
+                <span class="dz-fmt"><i class="fas fa-file-archive"></i> TAR</span>
+                <span class="dz-fmt"><i class="fas fa-file-archive"></i> GZ</span>
+                <span class="dz-fmt"><i class="fab fa-js"></i> JS</span>
+                <span class="dz-fmt"><i class="fab fa-python"></i> PY</span>
+                <span class="dz-fmt"><i class="fab fa-php"></i> PHP</span>
+                <span class="dz-fmt"><i class="fas fa-code"></i> RB</span>
+                <span class="dz-fmt"><i class="fas fa-code"></i> GO</span>
+                <span class="dz-fmt"><i class="fas fa-code"></i> RS</span>
+                <span class="dz-fmt"><i class="fab fa-java"></i> JAVA</span>
+                <span class="dz-fmt"><i class="fab fa-android"></i> APK</span>
+                <span class="dz-fmt"><i class="fab fa-java"></i> JAR</span>
+                <span class="dz-fmt"><i class="fas fa-cube"></i> DEX</span>
+                <span class="dz-fmt"><i class="fas fa-music"></i> MP3</span>
+                <span class="dz-fmt"><i class="fas fa-video"></i> MP4</span>
+                <span class="dz-fmt"><i class="fas fa-binary"></i> BIN</span>
+            </div>
+        </div>
+
+        <!-- OR divider -->
+        <div class="fs-or">or search by hash</div>
+
+        <!-- Hash search -->
+        <div class="hash-search">
+            <input type="text" id="hashInput" placeholder="Enter MD5, SHA1, or SHA256 hash" autocomplete="off" spellcheck="false">
+            <button class="hs-btn" id="hashSearchBtn"><i class="fas fa-magnifying-glass"></i> Search Existing Report</button>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     ANALYSIS CAPABILITIES
+     ============================================================ -->
+<section class="cap-section">
+    <div class="container">
+        <div class="section-header">
+            <h2>What We <span style="color:var(--fs-purple-light)">Analyze</span></h2>
+            <p>Three layers of deep file inspection to catch every threat</p>
+        </div>
+        <div class="cap-grid">
+            <!-- Column 1 — Static Analysis -->
+            <div class="cap-card">
+                <div class="cc-icon"><i class="fas fa-microscope"></i></div>
+                <h4>Static Analysis</h4>
+                <ul>
+                    <li><i class="fas fa-check-circle"></i> Hash calculation (MD5 / SHA1 / SHA256 / SHA512)</li>
+                    <li><i class="fas fa-check-circle"></i> Magic bytes &amp; MIME detection</li>
+                    <li><i class="fas fa-check-circle"></i> Entropy analysis (packer / encryption detect)</li>
+                    <li><i class="fas fa-check-circle"></i> PE header analysis (EXE / DLL)</li>
+                    <li><i class="fas fa-check-circle"></i> Macro detection (Office files)</li>
+                    <li><i class="fas fa-check-circle"></i> String extraction &amp; pattern matching</li>
+                </ul>
+            </div>
+
+            <!-- Column 2 — Vendor Scanning -->
+            <div class="cap-card">
+                <div class="cc-icon"><i class="fas fa-shield-halo"></i></div>
+                <h4>Vendor Scanning</h4>
+                <ul>
+                    <li><i class="fas fa-check-circle"></i> 70+ AV engines via VirusTotal</li>
+                    <li><i class="fas fa-check-circle"></i> Detection ratio &amp; severity badge</li>
+                    <li><i class="fas fa-check-circle"></i> Per-vendor result breakdown</li>
+                    <li><i class="fas fa-check-circle"></i> Historical scan lookup</li>
+                    <li><i class="fas fa-check-circle"></i> Community vote &amp; reputation</li>
+                    <li><i class="fas fa-check-circle"></i> First-seen / last-analysis timestamps</li>
+                </ul>
+            </div>
+
+            <!-- Column 3 — Deep Analysis -->
+            <div class="cap-card">
+                <div class="cc-icon"><i class="fas fa-brain"></i></div>
+                <h4>Deep Analysis</h4>
+                <ul>
+                    <li><i class="fas fa-check-circle"></i> PDF structure &amp; JavaScript analysis</li>
+                    <li><i class="fas fa-check-circle"></i> Office macro extraction &amp; deobfuscation</li>
+                    <li><i class="fas fa-check-circle"></i> Script deobfuscation (JS / VBS / PS1)</li>
+                    <li><i class="fas fa-check-circle"></i> Archive bomb &amp; zip-slip detection</li>
+                    <li><i class="fas fa-check-circle"></i> APK permission &amp; manifest review</li>
+                    <li><i class="fas fa-check-circle"></i> YARA rule matching (5000+ rules)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     RECENT PUBLIC SCANS
+     ============================================================ -->
+<section class="recent-section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Recent <span style="color:var(--fs-purple-light)">Public Scans</span></h2>
+            <p>Community-shared file analysis results</p>
+        </div>
+        <div class="fs-table-wrap">
+            <div class="fst-header">
+                <h5><i class="fas fa-clock-rotate" style="color:var(--fs-purple);"></i> Latest Submissions</h5>
+                <div class="fst-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="tableSearch" placeholder="Filter by filename or hash..." autocomplete="off">
+                </div>
+            </div>
+            <table class="fst-table" id="scansTable">
+                <thead>
+                    <tr>
+                        <th>Filename</th>
+                        <th>Type</th>
+                        <th>Detections</th>
+                        <th>Threat Level</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody id="scansBody">
+                </tbody>
+            </table>
+            <div class="st-paginate" id="tablePagination">
+                <button class="page-btn" id="prevPage" disabled><i class="fas fa-chevron-left"></i> Prev</button>
+                <span class="page-info" id="pageInfo">Page 1 of 3</span>
+                <button class="page-btn" id="nextPage">Next <i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     UPLOAD PROGRESS MODAL
+     ============================================================ -->
+<div class="fs-modal-overlay" id="uploadModal">
+    <div class="fs-modal">
+        <div class="fsm-header">
+            <h4><i class="fas fa-file-circle-check" style="color:var(--fs-purple);margin-right:0.5rem;"></i> Analyzing File</h4>
+            <p id="fsmFileName">scanning...</p>
+        </div>
+        <div class="fsm-step active" data-step="0">
+            <div class="fsm-snum">1</div>
+            <div class="fsm-sinfo">
+                <div class="fsm-sl">Uploading</div>
+                <div class="fsm-ss">Transferring file to secure engine</div>
+            </div>
+            <div class="fsm-sst" id="fsmStep0">...</div>
+        </div>
+        <div class="fsm-step" data-step="1">
+            <div class="fsm-snum">2</div>
+            <div class="fsm-sinfo">
+                <div class="fsm-sl">Hashing</div>
+                <div class="fsm-ss">Calculating MD5, SHA1, SHA256</div>
+            </div>
+            <div class="fsm-sst" id="fsmStep1">Pending</div>
+        </div>
+        <div class="fsm-step" data-step="2">
+            <div class="fsm-snum">3</div>
+            <div class="fsm-sinfo">
+                <div class="fsm-sl">Scanning</div>
+                <div class="fsm-ss">Checking against 70+ AV engines</div>
+            </div>
+            <div class="fsm-sst" id="fsmStep2">Pending</div>
+        </div>
+        <div class="fsm-step" data-step="3">
+            <div class="fsm-snum">4</div>
+            <div class="fsm-sinfo">
+                <div class="fsm-sl">Deep Analysis</div>
+                <div class="fsm-ss">Inspecting structure, macros, YARA</div>
+            </div>
+            <div class="fsm-sst" id="fsmStep3">Pending</div>
+        </div>
+        <div class="fsm-step" data-step="4">
+            <div class="fsm-snum">5</div>
+            <div class="fsm-sinfo">
+                <div class="fsm-sl">Done</div>
+                <div class="fsm-ss">Results ready for review</div>
+            </div>
+            <div class="fsm-sst" id="fsmStep4">Pending</div>
+        </div>
+        <div class="fsm-progress">
+            <div class="fsm-prog-fill" id="fsmProgressFill"></div>
+        </div>
+        <div class="fsm-percent" id="fsmPercent">0%</div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    // -------------------------------------------------------
+    // 1. DRAG & DROP UPLOAD
+    // -------------------------------------------------------
+    var dropZone = document.getElementById('dropZone');
+    var fileInput = document.getElementById('fileInput');
+    var dzBrowseBtn = document.getElementById('dzBrowseBtn');
+
+    if (dzBrowseBtn && fileInput) {
+        dzBrowseBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            fileInput.click();
+        });
+    }
+    if (dropZone && fileInput) {
+        dropZone.addEventListener('click', function () {
+            fileInput.click();
+        });
+        fileInput.addEventListener('change', function () {
+            if (this.files && this.files[0]) {
+                startUpload(this.files[0]);
+            }
+        });
+        // Drag events
+        ['dragenter', 'dragover'].forEach(function (evt) {
+            dropZone.addEventListener(evt, function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.classList.add('drag-over');
+            });
+        });
+        ['dragleave', 'drop'].forEach(function (evt) {
+            dropZone.addEventListener(evt, function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.classList.remove('drag-over');
+            });
+        });
+        dropZone.addEventListener('drop', function (e) {
+            var files = e.dataTransfer.files;
+            if (files && files[0]) {
+                startUpload(files[0]);
+            }
+        });
+    }
+
+    // -------------------------------------------------------
+    // 2. HASH SEARCH
+    // -------------------------------------------------------
+    var hashInput = document.getElementById('hashInput');
+    var hashSearchBtn = document.getElementById('hashSearchBtn');
+    if (hashSearchBtn && hashInput) {
+        function doHashSearch() {
+            var val = hashInput.value.trim();
+            if (!val) {
+                if (window.CipherScan && window.CipherScan.toast) {
+                    window.CipherScan.toast.warning('Hash Required', 'Please enter an MD5, SHA1, or SHA256 hash.');
+                }
+                return;
+            }
+            if (window.CipherScan && window.CipherScan.toast) {
+                window.CipherScan.toast.info('Searching', 'Looking up report for hash: ' + val.substring(0, 16) + '...');
+            }
+        }
+        hashSearchBtn.addEventListener('click', doHashSearch);
+        hashInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') doHashSearch();
+        });
+    }
+
+    // -------------------------------------------------------
+    // 3. UPLOAD PROGRESS MODAL
+    // -------------------------------------------------------
+    function startUpload(file) {
+        var modal = document.getElementById('uploadModal');
+        var fileName = document.getElementById('fsmFileName');
+        if (!modal || !fileName) return;
+        fileName.textContent = file.name + ' (' + (file.size / 1024 / 1024).toFixed(1) + ' MB)';
+        modal.classList.add('active');
+
+        // Reset steps
+        var steps = document.querySelectorAll('.fsm-step');
+        steps.forEach(function (s, i) {
+            s.classList.remove('active', 'done');
+            if (i === 0) s.classList.add('active');
+            var label = document.getElementById('fsmStep' + i);
+            if (label) label.textContent = i === 0 ? 'Uploading...' : 'Pending';
+        });
+        var fill = document.getElementById('fsmProgressFill');
+        var pct = document.getElementById('fsmPercent');
+        if (fill) fill.style.width = '0%';
+        if (pct) pct.textContent = '0%';
+
+        // Simulate progress through steps
+        var stepDurations = [800, 600, 2000, 1500, 500];
+        var totalDuration = stepDurations.reduce(function (a, b) { return a + b; }, 0);
+        var elapsed = 0;
+
+        function advanceStep(stepIndex) {
+            if (stepIndex > 0 && stepIndex <= steps.length) {
+                var prev = steps[stepIndex - 1];
+                if (prev) { prev.classList.remove('active'); prev.classList.add('done'); }
+            }
+            if (stepIndex < steps.length) {
+                var curr = steps[stepIndex];
+                if (curr) curr.classList.add('active');
+                var label = document.getElementById('fsmStep' + stepIndex);
+                var texts = ['Uploading...', 'Hashing...', 'Scanning...', 'Analyzing...', 'Done!'];
+                if (label) label.textContent = texts[stepIndex] || '...';
+            }
+        }
+
+        advanceStep(0);
+
+        for (var i = 1; i <= steps.length; i++) {
+            (function (stepIdx) {
+                var delay = 0;
+                for (var j = 0; j < stepIdx; j++) { delay += stepDurations[j]; }
+                setTimeout(function () {
+                    advanceStep(stepIdx);
+                    var progress = Math.min(Math.round((delay / totalDuration) * 100), 100);
+                    if (stepIdx === steps.length) progress = 100;
+                    if (fill) fill.style.width = progress + '%';
+                    if (pct) pct.textContent = progress + '%';
+                    if (stepIdx === steps.length) {
+                        // Close modal after showing done
+                        setTimeout(function () {
+                            modal.classList.remove('active');
+                            if (window.CipherScan && window.CipherScan.toast) {
+                                window.CipherScan.toast.success('Scan Complete', file.name + ' — Analysis finished. No threats detected.');
+                            }
+                        }, 1200);
+                    }
+                }, delay);
+            })(i);
+        }
+    }
+
+    // -------------------------------------------------------
+    // 4. RECENT SCANS TABLE (Pagination + Search)
+    // -------------------------------------------------------
+    var sampleScans = [
+        { name: 'invoice_2025.pdf', type: 'PDF', det: '0/72', threat: 'safe', date: '2025-06-17 14:32' },
+        { name: 'setup_installer.exe', type: 'EXE', det: '3/72', threat: 'suspicious', date: '2025-06-17 13:15' },
+        { name: 'document_macro.doc', type: 'DOC', det: '1/72', threat: 'low', date: '2025-06-17 11:48' },
+        { name: 'report_q2.xlsx', type: 'XLSX', det: '0/72', threat: 'safe', date: '2025-06-17 10:05' },
+        { name: 'driver_update.msi', type: 'MSI', det: '2/72', threat: 'low', date: '2025-06-16 22:30' },
+        { name: 'payload_encrypted.bin', type: 'BIN', det: '12/72', threat: 'high', date: '2025-06-16 19:12' },
+        { name: 'presentation.pptx', type: 'PPTX', det: '0/72', threat: 'safe', date: '2025-06-16 16:44' },
+        { name: 'malware_sample.exe', type: 'EXE', det: '28/72', threat: 'critical', date: '2025-06-16 14:20' },
+        { name: 'script.js', type: 'JS', det: '4/72', threat: 'suspicious', date: '2025-06-16 11:55' },
+        { name: 'archive_payload.zip', type: 'ZIP', det: '6/72', threat: 'medium', date: '2025-06-15 23:10' },
+        { name: 'invoice_fake.pdf', type: 'PDF', det: '8/72', threat: 'high', date: '2025-06-15 20:35' },
+        { name: 'sysupdate.dll', type: 'DLL', det: '1/72', threat: 'low', date: '2025-06-15 17:00' },
+        { name: 'script_payload.ps1', type: 'PS1', det: '9/72', threat: 'high', date: '2025-06-15 14:25' },
+        { name: 'commercial.docx', type: 'DOCX', det: '0/72', threat: 'safe', date: '2025-06-15 10:50' },
+        { name: 'apk_trojan.apk', type: 'APK', det: '18/72', threat: 'critical', date: '2025-06-14 21:15' },
+        { name: 'config.tar.gz', type: 'GZ', det: '0/72', threat: 'safe', date: '2025-06-14 18:30' },
+        { name: 'exploit_hta.hta', type: 'HTA', det: '11/72', threat: 'critical', date: '2025-06-14 15:45' },
+        { name: 'update_patch.exe', type: 'EXE', det: '2/72', threat: 'low', date: '2025-06-14 12:00' },
+        { name: 'phising_email.docm', type: 'DOC', det: '14/72', threat: 'high', date: '2025-06-13 23:20' },
+        { name: 'python_script.py', type: 'PY', det: '1/72', threat: 'low', date: '2025-06-13 20:05' },
+        { name: 'java_applet.jar', type: 'JAR', det: '5/72', threat: 'suspicious', date: '2025-06-13 16:40' },
+        { name: 'backup_data.7z', type: '7Z', det: '0/72', threat: 'safe', date: '2025-06-13 13:15' },
+        { name: 'crypto_miner.exe', type: 'EXE', det: '22/72', threat: 'critical', date: '2025-06-12 22:50' },
+        { name: 'macro_enabled.xlsm', type: 'XLS', det: '3/72', threat: 'suspicious', date: '2025-06-12 19:30' },
+    ];
+
+    var typeIcons = {
+        PDF: 'fa-file-pdf', EXE: 'fa-cog', DLL: 'fa-cog', MSI: 'fa-cog',
+        DOC: 'fa-file-word', DOCX: 'fa-file-word', XLS: 'fa-file-excel',
+        XLSX: 'fa-file-excel', PPTX: 'fa-file-powerpoint',
+        ZIP: 'fa-file-archive', RAR: 'fa-file-archive', '7Z': 'fa-file-archive',
+        TAR: 'fa-file-archive', GZ: 'fa-file-archive',
+        JS: 'fab fa-js', PY: 'fab fa-python', PS1: 'fa-terminal',
+        BAT: 'fa-terminal', SH: 'fa-terminal', CMD: 'fa-terminal',
+        VBS: 'fa-code', HTA: 'fa-code',
+        APK: 'fab fa-android', JAR: 'fab fa-java', DEX: 'fa-cube',
+        BIN: 'fa-binary', PHP: 'fab fa-php', RB: 'fa-code',
+        GO: 'fa-code', RS: 'fa-code', JAVA: 'fab fa-java',
+        SYS: 'fa-cog', APP: 'fa-apple-alt',
+        MP3: 'fa-music', MP4: 'fa-video',
+    };
+    var threatBadges = {
+        safe: 'badge-cs-safe', low: 'badge-cs-info',
+        medium: 'badge-cs-warning', suspicious: 'badge-cs-warning',
+        high: 'badge-cs-danger', critical: 'badge-cs-danger',
+    };
+
+    var currentPage = 1;
+    var rowsPerPage = 8;
+    var filteredData = sampleScans.slice();
+
+    function renderTable() {
+        var tbody = document.getElementById('scansBody');
+        var totalPages = Math.max(1, Math.ceil(filteredData.length / rowsPerPage));
+        if (currentPage > totalPages) currentPage = totalPages;
+        var start = (currentPage - 1) * rowsPerPage;
+        var end = Math.min(start + rowsPerPage, filteredData.length);
+        var pageData = filteredData.slice(start, end);
+
+        if (!tbody) return;
+        if (pageData.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text-muted);"><i class="fas fa-inbox" style="font-size:1.5rem;display:block;margin-bottom:0.5rem;"></i>No scans match your filter.</td></tr>';
+        } else {
+            tbody.innerHTML = pageData.map(function (s) {
+                var icon = typeIcons[s.type] || 'fa-file';
+                var badge = threatBadges[s.threat] || 'badge-cs-info';
+                var threatLabel = s.threat.charAt(0).toUpperCase() + s.threat.slice(1);
+                return '<tr>' +
+                    '<td><span class="fst-name">' + s.name + '</span></td>' +
+                    '<td><span class="fst-type"><i class="fas ' + icon + '"></i> ' + s.type + '</span></td>' +
+                    '<td><span class="fst-detections">' + s.det + '</span></td>' +
+                    '<td class="fst-threat"><span class="badge-cs ' + badge + '">' + threatLabel + '</span></td>' +
+                    '<td><span class="fst-date">' + s.date + '</span></td>' +
+                    '</tr>';
+            }).join('');
+        }
+
+        var info = document.getElementById('pageInfo');
+        if (info) info.textContent = 'Page ' + currentPage + ' of ' + totalPages;
+        var prevBtn = document.getElementById('prevPage');
+        var nextBtn = document.getElementById('nextPage');
+        if (prevBtn) prevBtn.disabled = currentPage <= 1;
+        if (nextBtn) nextBtn.disabled = currentPage >= totalPages;
+    }
+
+    document.getElementById('prevPage').addEventListener('click', function () {
+        if (currentPage > 1) { currentPage--; renderTable(); }
+    });
+    document.getElementById('nextPage').addEventListener('click', function () {
+        var totalPages = Math.max(1, Math.ceil(filteredData.length / rowsPerPage));
+        if (currentPage < totalPages) { currentPage++; renderTable(); }
+    });
+    document.getElementById('tableSearch').addEventListener('input', function () {
+        var q = this.value.toLowerCase().trim();
+        filteredData = q ? sampleScans.filter(function (s) {
+            return s.name.toLowerCase().includes(q);
+        }) : sampleScans.slice();
+        currentPage = 1;
+        renderTable();
+    });
+
+    renderTable();
+
+    // -------------------------------------------------------
+    // 5. SCROLL ANIMATIONS
+    // -------------------------------------------------------
+    var animEls = document.querySelectorAll('.cap-card, .drop-zone, .hash-search');
+    if (animEls.length) {
+        var obs = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (e.isIntersecting) {
+                    e.target.style.opacity = '1';
+                    e.target.style.transform = 'translateY(0)';
+                    obs.unobserve(e.target);
+                }
+            });
+        }, { threshold: 0.05, rootMargin: '0px 0px -30px 0px' });
+        animEls.forEach(function (el) {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(16px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            obs.observe(el);
+        });
+    }
+
+    console.log('%cCipherScan%c File Scanner — Loaded',
+        'color:#a855f7;font-weight:700;font-size:1.2em;',
+        'color:#8892b0;font-size:0.9em;');
+});
+</script>
+{% endblock %}
