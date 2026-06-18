@@ -15,19 +15,19 @@
             <div class="scanner-line" style="max-width:400px;margin:0 auto 24px;"></div>
             <div class="auth-stats" style="max-width:400px;margin:0 auto;">
                 <div class="auth-stat-item">
-                    <div class="number">10K+</div>
+                    <div class="number">{{ total_scans|default:0 }}+</div>
                     <div class="label">Scans Completed</div>
                 </div>
                 <div class="auth-stat-item">
-                    <div class="number">99.9%</div>
+                    <div class="number">{{ detection_rate|default:"0" }}%</div>
                     <div class="label">Detection Rate</div>
                 </div>
                 <div class="auth-stat-item">
-                    <div class="number">5K+</div>
+                    <div class="number">{{ users_count|default:0 }}+</div>
                     <div class="label">Active Users</div>
                 </div>
                 <div class="auth-stat-item">
-                    <div class="number">&lt;1s</div>
+                    <div class="number">0ms</div>
                     <div class="label">Avg. Response</div>
                 </div>
             </div>

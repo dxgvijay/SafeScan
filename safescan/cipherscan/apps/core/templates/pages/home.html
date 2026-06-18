@@ -723,7 +723,7 @@
                 <div class="col-xl-8 col-lg-10 text-center">
                     <div class="hero-badge">
                         <span class="badge-dot"></span>
-                        Real-time threat intelligence — 99.7% detection rate
+                        Real-time threat intelligence — {{ detection_rate|default:"0" }}% detection rate
                     </div>
 
                     <h1 class="hero-title">
@@ -748,18 +748,10 @@
                     <div class="hero-stats justify-content-center">
                         <div class="hero-stat">
                             <span class="hero-stat-value">
-                                <span class="counter" data-target="0" data-stat-key="files_scanned">0</span>
+                                <span class="counter" data-target="0" data-stat-key="total_scans">0</span>
                                 <span class="stat-suffix">+</span>
                             </span>
-                            <span class="hero-stat-label">Files Scanned</span>
-                        </div>
-                        <div class="hero-stat-divider"></div>
-                        <div class="hero-stat">
-                            <span class="hero-stat-value">
-                                <span class="counter" data-target="0" data-stat-key="urls_checked">0</span>
-                                <span class="stat-suffix">+</span>
-                            </span>
-                            <span class="hero-stat-label">URLs Checked</span>
+                            <span class="hero-stat-label">URLs Scanned</span>
                         </div>
                         <div class="hero-stat-divider"></div>
                         <div class="hero-stat">
@@ -768,6 +760,22 @@
                                 <span class="stat-suffix">+</span>
                             </span>
                             <span class="hero-stat-label">Threats Detected</span>
+                        </div>
+                        <div class="hero-stat-divider"></div>
+                        <div class="hero-stat">
+                            <span class="hero-stat-value">
+                                <span class="counter" data-target="0" data-stat-key="users_protected">0</span>
+                                <span class="stat-suffix">+</span>
+                            </span>
+                            <span class="hero-stat-label">Users</span>
+                        </div>
+                        <div class="hero-stat-divider"></div>
+                        <div class="hero-stat">
+                            <span class="hero-stat-value">
+                                <span class="counter" data-target="0" data-stat-key="vendors_count">0</span>
+                                <span class="stat-suffix">+</span>
+                            </span>
+                            <span class="hero-stat-label">Vendors</span>
                         </div>
                     </div>
 
@@ -935,30 +943,30 @@
         <div class="row g-4 mb-5 stagger-children" id="trustCounters">
             <div class="col-6 col-lg-3">
                 <div class="trust-counter">
-                    <div class="counter-icon cyan"><i class="fas fa-file"></i></div>
-                    <div class="counter-value"><span class="counter" data-target="0" data-stat-key="files_scanned">0</span></div>
-                    <div class="counter-label">Files Scanned</div>
+                    <div class="counter-icon cyan"><i class="fas fa-link"></i></div>
+                    <div class="counter-value"><span class="counter" data-target="0" data-stat-key="total_scans">0</span></div>
+                    <div class="counter-label">URLs Scanned</div>
                 </div>
             </div>
             <div class="col-6 col-lg-3">
                 <div class="trust-counter">
-                    <div class="counter-icon orange"><i class="fas fa-link"></i></div>
-                    <div class="counter-value"><span class="counter" data-target="0" data-stat-key="urls_checked">0</span></div>
-                    <div class="counter-label">URLs Checked</div>
-                </div>
-            </div>
-            <div class="col-6 col-lg-3">
-                <div class="trust-counter">
-                    <div class="counter-icon success"><i class="fas fa-shield"></i></div>
+                    <div class="counter-icon orange"><i class="fas fa-shield"></i></div>
                     <div class="counter-value"><span class="counter" data-target="0" data-stat-key="threats_detected">0</span></div>
-                    <div class="counter-label">Threats Blocked</div>
+                    <div class="counter-label">Threats Detected</div>
                 </div>
             </div>
             <div class="col-6 col-lg-3">
                 <div class="trust-counter">
-                    <div class="counter-icon purple"><i class="fas fa-users"></i></div>
+                    <div class="counter-icon success"><i class="fas fa-users"></i></div>
                     <div class="counter-value"><span class="counter" data-target="0" data-stat-key="users_protected">0</span></div>
-                    <div class="counter-label">Users Protected</div>
+                    <div class="counter-label">Users</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="trust-counter">
+                    <div class="counter-icon purple"><i class="fas fa-building"></i></div>
+                    <div class="counter-value"><span class="counter" data-target="0" data-stat-key="vendors_count">0</span></div>
+                    <div class="counter-label">Vendors</div>
                 </div>
             </div>
         </div>

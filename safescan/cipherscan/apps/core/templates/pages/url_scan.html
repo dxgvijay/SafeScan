@@ -402,36 +402,65 @@
 }
 .st-table .st-paginate {
     display: flex;
-    justify-content: center;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.25rem;
+    justify-content: center;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
     border-top: 1px solid var(--glass-border);
 }
 .st-table .st-paginate .page-btn {
-    background: rgba(255,255,255,0.02);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    height: 32px;
+    min-width: 80px;
+    background: transparent;
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-sm);
     color: var(--text-secondary);
-    padding: 0.3125rem 0.75rem;
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
+    line-height: 1;
+    padding: 0 0.875rem;
     cursor: pointer;
     transition: all var(--transition-fast);
     font-family: var(--font-ui);
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 .st-table .st-paginate .page-btn:hover {
     background: var(--accent-cyan-dim);
-    border-color: var(--accent-cyan);
+    border-color: var(--glass-border-hover);
     color: var(--accent-cyan);
 }
 .st-table .st-paginate .page-btn:disabled {
-    opacity: 0.3;
+    opacity: 0.5;
     cursor: default;
+    color: var(--text-muted);
+    border-color: var(--glass-border);
+    pointer-events: none;
 }
 .st-table .st-paginate .page-info {
-    font-size: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 600;
     color: var(--text-muted);
     font-family: var(--font-mono);
+    padding: 0 0.25rem;
+    white-space: nowrap;
+}
+@media (max-width: 767.98px) {
+    .st-table .st-paginate {
+        gap: 0.75rem;
+        padding: 0.625rem 0.75rem;
+    }
+    .st-table .st-paginate .page-btn {
+        font-size: 0.75rem;
+        min-width: 64px;
+        padding: 0 0.625rem;
+    }
+    .st-table .st-paginate .page-info {
+        font-size: 0.75rem;
+    }
 }
 
 /* ============================================================
@@ -622,7 +651,7 @@
             <div class="uir-row" id="uirRow">
                 <span class="uir-icon"><i class="fas fa-link"></i></span>
                 <input type="url" id="urlInput" placeholder="https://example.com" autocomplete="off" spellcheck="false" autofocus>
-                <button class="uir-btn" id="urlScanBtn"><i class="fas fa-shield-halo"></i> Scan URL</button>
+                <button class="uir-btn" id="urlScanBtn"><i class="fas fa-shield-virus"></i> Scan URL</button>
             </div>
             <div class="uir-hint">
                 <i class="fas fa-cloud-arrow-up"></i>
@@ -651,7 +680,7 @@
             <h2>What we <span class="text-cyan">check</span></h2>
         </div>
         <div class="vendor-scroll fade-in-up" id="vendorScroll">
-            <div class="vendor-card"><div class="vc-icon"><i class="fas fa-shield-halo"></i></div><div class="vc-name">VirusTotal</div><div class="vc-desc">70+ antivirus engines</div></div>
+            <div class="vendor-card"><div class="vc-icon"><i class="fas fa-shield-virus"></i></div><div class="vc-name">VirusTotal</div><div class="vc-desc">70+ antivirus engines</div></div>
             <div class="vendor-card"><div class="vc-icon"><i class="fas fa-shield"></i></div><div class="vc-name">Google Safe Browsing</div><div class="vc-desc">Malware &amp; phishing blocks</div></div>
             <div class="vendor-card"><div class="vc-icon"><i class="fas fa-fish"></i></div><div class="vc-name">PhishTank</div><div class="vc-desc">Community phishing database</div></div>
             <div class="vendor-card"><div class="vc-icon"><i class="fas fa-bug"></i></div><div class="vc-name">URLhaus</div><div class="vc-desc">Malware distribution URLs</div></div>
@@ -716,17 +745,17 @@
     <div class="container">
         <div class="stat-grid fade-in-up">
             <div class="sg-item">
-                <div class="sg-val"><span class="counter" data-target="3215847">0</span><span class="sg-sfx">+</span></div>
+                <div class="sg-val"><span class="counter" data-target="0" data-stat-key="urls_scanned">0</span><span class="sg-sfx">+</span></div>
                 <div class="sg-label">URLs Scanned</div>
-                <div class="sg-sub">Last 30 days: 284,731</div>
+                <div class="sg-sub" id="urlsLast30">Last 30 days: 0</div>
             </div>
             <div class="sg-item">
-                <div class="sg-val"><span class="counter" data-target="128479">0</span><span class="sg-sfx">+</span></div>
+                <div class="sg-val"><span class="counter" data-target="0" data-stat-key="threats_detected">0</span><span class="sg-sfx">+</span></div>
                 <div class="sg-label">Malicious Found</div>
-                <div class="sg-sub">3.99% detection rate</div>
+                <div class="sg-sub" id="detectionRate">0% detection rate</div>
             </div>
             <div class="sg-item">
-                <div class="sg-val"><span class="counter" data-target="72">0</span><span class="sg-sfx"></span></div>
+                <div class="sg-val"><span class="counter" data-target="0" data-stat-key="vendors_count">0</span><span class="sg-sfx"></span></div>
                 <div class="sg-label">Vendors Integrated</div>
                 <div class="sg-sub">Including all major vendors</div>
             </div>
@@ -952,7 +981,33 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // -------------------------------------------------------
-    // 4. COUNTER ANIMATION
+    // 4. FETCH REAL STATS FROM API
+    // -------------------------------------------------------
+    fetch('/api/stats/')
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            document.querySelectorAll('.counter[data-stat-key]').forEach(function (el) {
+                var key = el.dataset.statKey;
+                if (data[key] !== undefined) {
+                    el.dataset.target = data[key];
+                }
+            });
+            var urlsSub = document.getElementById('urlsLast30');
+            if (urlsSub && data.urls_last_30_days !== undefined) {
+                urlsSub.textContent = 'Last 30 days: ' + data.urls_last_30_days.toLocaleString();
+            }
+            var detRate = document.getElementById('detectionRate');
+            if (detRate && data.detection_rate !== undefined) {
+                detRate.textContent = data.detection_rate + '% detection rate';
+            }
+            animateCounters();
+        })
+        .catch(function () {
+            animateCounters();
+        });
+
+    // -------------------------------------------------------
+    // 5. COUNTER ANIMATION
     // -------------------------------------------------------
     function animateCounters() {
         document.querySelectorAll('.counter[data-target]').forEach(function (el) {
@@ -971,7 +1026,6 @@ document.addEventListener('DOMContentLoaded', function () {
             requestAnimationFrame(step);
         });
     }
-    animateCounters();
 
     // -------------------------------------------------------
     // 5. SCROLL ANIMATIONS

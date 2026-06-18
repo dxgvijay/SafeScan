@@ -1,6 +1,6 @@
-import json
-from datetime import datetime, timedelta
-from random import randint, choice
+from datetime import timedelta
+
+from django.contrib.auth import get_user_model
 from django.db.models import Count
 from django.db.models.functions import TruncMonth
 from django.utils import timezone
@@ -8,6 +8,7 @@ from django.views.generic import TemplateView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from apps.accounts.accounts.models import ScanHistory
+from apps.core.context_processors import global_stats
 
 
 class HomeView(TemplateView):
@@ -15,14 +16,8 @@ class HomeView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["total_scans"] = ScanHistory.objects.count()
-        context["threats_found"] = ScanHistory.objects.exclude(threat_level='safe').count()
-        context["files_scanned"] = ScanHistory.objects.filter(scan_type='file').count()
-        context["urls_scanned"] = ScanHistory.objects.filter(scan_type='url').count()
-        context["scan_change"] = "+12.5"
-        context["threat_change"] = "+8.3"
-        context["file_change"] = "+5.2"
-        context["url_change"] = "+15.7"
+        stats = global_stats(self.request)
+        context.update(stats)
         return context
 
 
@@ -30,16 +25,30 @@ class StatsView(APIView):
     def get(self, request):
         total_scans = ScanHistory.objects.count()
         files_scanned = ScanHistory.objects.filter(scan_type='file').count()
-        urls_checked = ScanHistory.objects.filter(scan_type='url').count()
+        urls_scanned = ScanHistory.objects.filter(scan_type='url').count()
         threats_detected = ScanHistory.objects.exclude(threat_level='safe').count()
-        from django.contrib.auth import get_user_model
         User = get_user_model()
         users_protected = User.objects.count()
+
+        now = timezone.now()
+        last_30 = now - timedelta(days=30)
+        urls_last_30 = ScanHistory.objects.filter(
+            created_at__gte=last_30, scan_type='url'
+        ).count()
+
+        detection_rate = 0.0
+        if total_scans > 0:
+            detection_rate = round((threats_detected / total_scans) * 100, 2)
+
         return Response({
+            'total_scans': total_scans,
             'files_scanned': files_scanned,
-            'urls_checked': urls_checked,
+            'urls_scanned': urls_scanned,
             'threats_detected': threats_detected,
             'users_protected': users_protected,
+            'vendors_count': 0,
+            'urls_last_30_days': urls_last_30,
+            'detection_rate': detection_rate,
         })
 
 

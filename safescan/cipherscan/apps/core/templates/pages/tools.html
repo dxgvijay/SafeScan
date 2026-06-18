@@ -763,10 +763,10 @@
                         <p class="tool-desc">Deep scan any URL against 70+ threat databases. Detect phishing, malware, and malicious redirects.</p>
                         <div class="tool-scan-counter">
                             <span class="counter-dot"></span>
-                            <span class="count-num" id="urlCount">8,112</span> scans today
+                            <span class="count-num" id="urlCount">{{ total_scans|default:0 }}</span> scans today
                         </div>
                         <div class="tool-badges">
-                            <span class="tb">70+ Vendors</span>
+                            <span class="tb">{{ vendors_count|default:0 }}+ Vendors</span>
                             <span class="tb">WHOIS Lookup</span>
                             <span class="tb">SSL Check</span>
                             <span class="tb">Redirect Trace</span>

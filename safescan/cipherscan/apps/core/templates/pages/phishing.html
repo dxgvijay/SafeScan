@@ -459,17 +459,17 @@
 
         <div class="ph-stats">
             <div class="phs-item">
-                <div class="phs-val"><span class="counter" data-target="284739">0</span><span class="phs-sfx">+</span></div>
+                <div class="phs-val"><span class="counter" data-target="0" data-stat-key="total_scans">0</span><span class="phs-sfx">+</span></div>
                 <div class="phs-label">Headers Analyzed</div>
             </div>
             <div class="phs-div"></div>
             <div class="phs-item">
-                <div class="phs-val"><span class="counter" data-target="52194">0</span><span class="phs-sfx">+</span></div>
+                <div class="phs-val"><span class="counter" data-target="0" data-stat-key="threats_detected">0</span><span class="phs-sfx">+</span></div>
                 <div class="phs-label">Emails Blocked</div>
             </div>
             <div class="phs-div"></div>
             <div class="phs-item">
-                <div class="phs-val"><span class="counter" data-target="18347">0</span><span class="phs-sfx">+</span></div>
+                <div class="phs-val"><span class="counter" data-target="0" data-stat-key="files_scanned">0</span><span class="phs-sfx">+</span></div>
                 <div class="phs-label">Domains Checked</div>
             </div>
         </div>
@@ -639,8 +639,23 @@
 document.addEventListener('DOMContentLoaded', function () {
 
     // -------------------------------------------------------
-    // 1. COUNTER ANIMATION
+    // 1. FETCH REAL STATS & COUNTER ANIMATION
     // -------------------------------------------------------
+    fetch('/api/stats/')
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            document.querySelectorAll('.counter[data-stat-key]').forEach(function (el) {
+                var key = el.dataset.statKey;
+                if (data[key] !== undefined) {
+                    el.dataset.target = data[key];
+                }
+            });
+            animateCounters();
+        })
+        .catch(function () {
+            animateCounters();
+        });
+
     function animateCounters() {
         document.querySelectorAll('.counter[data-target]').forEach(function (el) {
             var target = parseInt(el.dataset.target, 10);
@@ -658,7 +673,6 @@ document.addEventListener('DOMContentLoaded', function () {
             requestAnimationFrame(step);
         });
     }
-    animateCounters();
 
     // -------------------------------------------------------
     // 2. QUICK HEADER ANALYZER
