@@ -1,8 +1,9 @@
+from django.conf import settings
 from django.db import models
 from apps.core.models.base import BaseModel
 
 class LoginAudit(BaseModel):
-    user = models.ForeignKey("accounts.User", on_delete=models.CASCADE, related_name="login_audits")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="login_audits")
     ip_address = models.GenericIPAddressField()
     user_agent = models.TextField(blank=True)
     location = models.CharField(max_length=255, blank=True)

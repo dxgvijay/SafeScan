@@ -237,7 +237,7 @@
 .file-drop-zone {
     display: none;
     max-width: 640px;
-    margin-top: 0.75rem;
+    margin: 0.75rem auto 0;
     border: 2px dashed var(--glass-border);
     border-radius: var(--radius-lg);
     padding: 2rem;
@@ -584,6 +584,17 @@
     width: 100% !important;
     height: auto !important;
     max-height: 280px;
+}
+.chart-wrapper .chart-loading {
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
 }
 
 /* ============================================================
@@ -1073,9 +1084,12 @@
                 <div class="chart-wrapper fade-in-up">
                     <div class="chart-header">
                         <h4><i class="fas fa-chart-line text-cyan me-2"></i> Threats Detected — Last 6 Months</h4>
-                        <span class="chart-badge"><i class="fas fa-arrow-up"></i> +12.4%</span>
+                        <span class="chart-badge" id="threatChangeBadge"><i class="fas fa-arrow-up"></i> <span id="threatChangeValue">--</span></span>
                     </div>
-                    <canvas id="threatChart"></canvas>
+                    <div id="threatChartLoading" class="chart-loading">
+                        <div class="chart-loading-bar" style="width: 100%; height: 200px; border-radius: 8px; background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.03) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite;"></div>
+                    </div>
+                    <canvas id="threatChart" style="display:none"></canvas>
                 </div>
             </div>
         </div>
@@ -1306,20 +1320,31 @@ document.addEventListener('DOMContentLoaded', function () {
     }, 1500);
 
     // -------------------------------------------------------
-    // 4. CHART.JS — Threat Trends
+    // 4. CHART.JS — Threat Trends (live data from API)
     // -------------------------------------------------------
     var chartCanvas = document.getElementById('threatChart');
-    if (chartCanvas && typeof Chart !== 'undefined') {
-        var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-        var dataValues = [2847, 3215, 2984, 3621, 4178, 4692];
+    var chartLoading = document.getElementById('threatChartLoading');
+    var threatChangeEl = document.getElementById('threatChangeValue');
+    var threatChartInstance = null;
 
-        new Chart(chartCanvas, {
+    function renderChart(labels, data) {
+        if (!chartCanvas || typeof Chart === 'undefined') return;
+
+        if (threatChartInstance) {
+            threatChartInstance.destroy();
+            threatChartInstance = null;
+        }
+
+        chartCanvas.style.display = 'block';
+        if (chartLoading) chartLoading.style.display = 'none';
+
+        threatChartInstance = new Chart(chartCanvas, {
             type: 'line',
             data: {
-                labels: months,
+                labels: labels,
                 datasets: [{
                     label: 'Threats Detected',
-                    data: dataValues,
+                    data: data,
                     borderColor: '#00d4ff',
                     backgroundColor: function (ctx) {
                         var gradient = ctx.chart.ctx.createLinearGradient(0, 0, 0, 280);
@@ -1375,6 +1400,34 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
+
+    function loadThreatData() {
+        if (!chartCanvas || typeof Chart === 'undefined') return;
+
+        fetch('/api/threats/history')
+            .then(function (res) {
+                if (!res.ok) throw new Error('Failed to fetch threat data');
+                return res.json();
+            })
+            .then(function (data) {
+                if (data.labels && data.labels.length) {
+                    renderChart(data.labels, data.data);
+                } else {
+                    renderChart(['No Data'], [0]);
+                }
+                if (threatChangeEl && data.change_percent !== undefined) {
+                    var sign = data.change_percent >= 0 ? '+' : '';
+                    threatChangeEl.textContent = sign + data.change_percent + '%';
+                }
+            })
+            .catch(function () {
+                if (chartLoading) {
+                    chartLoading.innerHTML = '<p style="color:var(--text-muted);margin:0;font-size:0.875rem;">Unable to load threat data.</p>';
+                }
+            });
+    }
+
+    loadThreatData();
 
     // -------------------------------------------------------
     // 5. LIVE THREAT FEED

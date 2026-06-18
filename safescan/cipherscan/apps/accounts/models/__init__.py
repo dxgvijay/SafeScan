@@ -1,4 +1,5 @@
 from apps.accounts.models.user import User
+from apps.accounts.accounts.models import CustomUser
 from apps.accounts.models.profile import Profile
 from apps.accounts.models.login_audit import LoginAudit
 from apps.accounts.models.two_factor import TwoFactorAuth

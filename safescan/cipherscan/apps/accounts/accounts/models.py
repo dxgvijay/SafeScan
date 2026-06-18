@@ -25,6 +25,21 @@ class CustomUser(AbstractUser):
     two_factor_enabled = models.BooleanField(_('two-factor enabled'), default=False)
     email_verification_token = models.CharField(_('email verification token'), max_length=64, blank=True, null=True)
 
+    groups = models.ManyToManyField(
+        'auth.Group',
+        verbose_name=_('groups'),
+        blank=True,
+        related_name='customuser_groups',
+        related_query_name='customuser',
+    )
+    user_permissions = models.ManyToManyField(
+        'auth.Permission',
+        verbose_name=_('user permissions'),
+        blank=True,
+        related_name='customuser_permissions',
+        related_query_name='customuser',
+    )
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
 

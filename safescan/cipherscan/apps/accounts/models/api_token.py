@@ -1,8 +1,9 @@
+from django.conf import settings
 from django.db import models
 from apps.core.models.base import BaseModel
 
 class ApiToken(BaseModel):
-    user = models.ForeignKey("accounts.User", on_delete=models.CASCADE, related_name="api_tokens")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="api_tokens")
     name = models.CharField(max_length=100)
     token = models.CharField(max_length=64, unique=True)
     scopes = models.JSONField(default=list)
