@@ -763,8 +763,6 @@ document.addEventListener('DOMContentLoaded', function () {
           if (stepIdx === steps.length) {
             setTimeout(function () {
               modal.classList.remove('active');
-              if (window.CipherScan && window.CipherScan.toast)
-                window.CipherScan.toast.success('Scan Complete', file.name + ' — Analysis finished.');
             }, 1200);
           }
         }, delay);

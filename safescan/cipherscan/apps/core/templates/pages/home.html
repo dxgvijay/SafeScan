@@ -269,48 +269,6 @@
     color: var(--accent-cyan);
 }
 
-/* Hero scroll indicator */
-.hero-scroll-indicator {
-    position: absolute;
-    bottom: 2rem;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.375rem;
-    color: var(--text-muted);
-    font-size: 0.6875rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    animation: fade-in-up 0.8s 1s ease both;
-}
-.hero-scroll-indicator .scroll-mouse {
-    width: 22px;
-    height: 34px;
-    border: 2px solid var(--text-muted);
-    border-radius: 12px;
-    position: relative;
-}
-.hero-scroll-indicator .scroll-mouse::after {
-    content: '';
-    position: absolute;
-    top: 6px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 3px;
-    height: 8px;
-    background: var(--accent-cyan);
-    border-radius: 2px;
-    animation: scroll-wheel 2s infinite;
-}
-@keyframes scroll-wheel {
-    0% { opacity: 1; transform: translateX(-50%) translateY(0); }
-    80% { opacity: 0; transform: translateX(-50%) translateY(12px); }
-    100% { opacity: 0; transform: translateX(-50%) translateY(12px); }
-}
-
 /* ============================================================
    SECTION COMMON
    ============================================================ */
@@ -799,9 +757,6 @@
         justify-content: center;
         border-radius: 0 0 var(--radius-md) var(--radius-md);
     }
-    .hero-scroll-indicator {
-        display: none;
-    }
     #hero {
         min-height: auto;
     }
@@ -815,6 +770,31 @@
     .threat-feed-body .threat-feed-table tbody tr td {
         padding: 0.5rem 0.75rem;
     }
+}
+
+/* ------------------------------------------------------------
+   STAT SKELETON LOADING
+   ------------------------------------------------------------ */
+@keyframes stat-skeleton-pulse {
+    0% { opacity: 0.3; }
+    50% { opacity: 0.7; }
+    100% { opacity: 0.3; }
+}
+.stat-skeleton {
+    display: inline-block;
+    min-width: 100px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 4px;
+    animation: stat-skeleton-pulse 1.5s ease-in-out infinite;
+}
+.hero-stat-value .stat-skeleton {
+    min-width: 140px;
+    height: 48px;
+    vertical-align: middle;
+}
+.trust-counter .stat-skeleton {
+    min-width: 80px;
+    height: 36px;
 }
 </style>
 {% endblock %}
@@ -857,7 +837,7 @@
                     <div class="hero-stats justify-content-center">
                         <div class="hero-stat">
                             <span class="hero-stat-value">
-                                <span class="counter" data-target="1847293">0</span>
+                                <span class="counter" data-stat-type="files_scanned"><span class="stat-skeleton">&nbsp;</span></span>
                                 <span class="stat-suffix">+</span>
                             </span>
                             <span class="hero-stat-label">Files Scanned</span>
@@ -865,7 +845,7 @@
                         <div class="hero-stat-divider"></div>
                         <div class="hero-stat">
                             <span class="hero-stat-value">
-                                <span class="counter" data-target="3215847">0</span>
+                                <span class="counter" data-stat-type="urls_checked"><span class="stat-skeleton">&nbsp;</span></span>
                                 <span class="stat-suffix">+</span>
                             </span>
                             <span class="hero-stat-label">URLs Checked</span>
@@ -873,7 +853,7 @@
                         <div class="hero-stat-divider"></div>
                         <div class="hero-stat">
                             <span class="hero-stat-value">
-                                <span class="counter" data-target="52194">0</span>
+                                <span class="counter" data-stat-type="threats_detected"><span class="stat-skeleton">&nbsp;</span></span>
                                 <span class="stat-suffix">+</span>
                             </span>
                             <span class="hero-stat-label">Threats Detected</span>
@@ -904,10 +884,6 @@
         </div>
     </div>
 
-    <div class="hero-scroll-indicator">
-        <div class="scroll-mouse"></div>
-        <span>Scroll</span>
-    </div>
 </section>
 {% endblock %}
 
@@ -1042,28 +1018,28 @@
             <div class="col-6 col-lg-3">
                 <div class="trust-counter">
                     <div class="counter-icon cyan"><i class="fas fa-file"></i></div>
-                    <div class="counter-value"><span class="counter" data-target="1847293">0</span></div>
+                    <div class="counter-value"><span class="counter" data-stat-type="files_scanned"><span class="stat-skeleton">&nbsp;</span></span></div>
                     <div class="counter-label">Files Scanned</div>
                 </div>
             </div>
             <div class="col-6 col-lg-3">
                 <div class="trust-counter">
                     <div class="counter-icon orange"><i class="fas fa-link"></i></div>
-                    <div class="counter-value"><span class="counter" data-target="3215847">0</span></div>
+                    <div class="counter-value"><span class="counter" data-stat-type="urls_checked"><span class="stat-skeleton">&nbsp;</span></span></div>
                     <div class="counter-label">URLs Checked</div>
                 </div>
             </div>
             <div class="col-6 col-lg-3">
                 <div class="trust-counter">
                     <div class="counter-icon success"><i class="fas fa-shield"></i></div>
-                    <div class="counter-value"><span class="counter" data-target="52194">0</span></div>
+                    <div class="counter-value"><span class="counter" data-stat-type="threats_detected"><span class="stat-skeleton">&nbsp;</span></span></div>
                     <div class="counter-label">Threats Blocked</div>
                 </div>
             </div>
             <div class="col-6 col-lg-3">
                 <div class="trust-counter">
                     <div class="counter-icon purple"><i class="fas fa-users"></i></div>
-                    <div class="counter-value"><span class="counter" data-target="127483">0</span></div>
+                    <div class="counter-value"><span class="counter" data-stat-type="users_protected"><span class="stat-skeleton">&nbsp;</span></span></div>
                     <div class="counter-label">Users Protected</div>
                 </div>
             </div>
@@ -1253,57 +1229,75 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // -------------------------------------------------------
-    // 3. ANIMATED COUNTERS
+    // 3. LIVE STATS — fetch from /api/core/stats/
     // -------------------------------------------------------
-    function animateCounters() {
-        document.querySelectorAll('.counter[data-target]').forEach(function (el) {
-            var target = parseInt(el.dataset.target, 10);
-            if (isNaN(target)) return;
-            var current = parseInt(el.textContent.replace(/,/g, ''), 10) || 0;
-            if (current >= target) return;
-            var duration = 2000;
-            var startTime = null;
-            function step(timestamp) {
-                if (!startTime) startTime = timestamp;
-                var progress = Math.min((timestamp - startTime) / duration, 1);
-                var eased = 1 - Math.pow(1 - progress, 3);
-                var value = Math.floor(eased * target);
-                el.textContent = value.toLocaleString();
-                if (progress < 1) {
-                    requestAnimationFrame(step);
-                } else {
-                    el.textContent = target.toLocaleString();
+    var statsData = null;
+
+    function animateCounter(el, target) {
+        var duration = 2000;
+        var startTime = null;
+        function step(timestamp) {
+            if (!startTime) startTime = timestamp;
+            var progress = Math.min((timestamp - startTime) / duration, 1);
+            var eased = 1 - Math.pow(1 - progress, 3);
+            el.textContent = Math.floor(eased * target).toLocaleString();
+            if (progress < 1) {
+                requestAnimationFrame(step);
+            } else {
+                el.textContent = target.toLocaleString();
+            }
+        }
+        requestAnimationFrame(step);
+    }
+
+    function renderStats(stats) {
+        document.querySelectorAll('.counter[data-stat-type]').forEach(function (el) {
+            var key = el.dataset.statType;
+            var val = stats[key];
+            if (val === undefined || val === null) {
+                el.textContent = '\u2014';
+                return;
+            }
+            var skeleton = el.querySelector('.stat-skeleton');
+            if (skeleton) skeleton.remove();
+            animateCounter(el, val);
+        });
+    }
+
+    function fetchStats() {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', '/api/core/stats/');
+        xhr.onload = function () {
+            if (xhr.status >= 200 && xhr.status < 400) {
+                try {
+                    statsData = JSON.parse(xhr.responseText);
+                } catch (_) {
+                    statsData = null;
                 }
+            } else {
+                statsData = null;
             }
-            requestAnimationFrame(step);
-        });
+            if (statsData) {
+                renderStats(statsData);
+            } else {
+                document.querySelectorAll('.counter[data-stat-type]').forEach(function (el) {
+                    var skeleton = el.querySelector('.stat-skeleton');
+                    if (skeleton) skeleton.remove();
+                    el.textContent = '\u2014';
+                });
+            }
+        };
+        xhr.onerror = function () {
+            document.querySelectorAll('.counter[data-stat-type]').forEach(function (el) {
+                var skeleton = el.querySelector('.stat-skeleton');
+                if (skeleton) skeleton.remove();
+                el.textContent = '\u2014';
+            });
+        };
+        xhr.send();
     }
 
-    // Intersection Observer for counters
-    var counterObserver = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-            if (entry.isIntersecting) {
-                animateCounters();
-                counterObserver.unobserve(entry.target);
-            }
-        });
-    }, { threshold: 0.3 });
-
-    var counters = document.querySelectorAll('.counter[data-target]');
-    if (counters.length) {
-        // Observe the parent of the first counter
-        counterObserver.observe(counters[0].closest('.hero-stats') || counters[0].parentElement);
-    }
-
-    // Also trigger counters immediately for hero stats (they're in viewport)
-    setTimeout(function () {
-        var heroStatCounters = document.querySelectorAll('#hero .counter[data-target]');
-        var allDone = true;
-        heroStatCounters.forEach(function (el) {
-            if (parseInt(el.textContent.replace(/,/g, ''), 10) === 0) allDone = false;
-        });
-        if (allDone) animateCounters();
-    }, 1500);
+    fetchStats();
 
     // -------------------------------------------------------
     // 4. CHART.JS — Threat Trends
@@ -1497,12 +1491,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 countEl.textContent = threatFeedBody.children.length + ' threats detected';
             }
 
-            if (window.CipherScan && window.CipherScan.toast && Math.random() > 0.6) {
-                window.CipherScan.toast.warning(
-                    'Threat Detected',
-                    newThreat.type.label + ' — ' + newThreat.target
-                );
-            }
         }, 4000);
     }
 
@@ -1527,22 +1515,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
     initScrollAnimations();
-
-    // -------------------------------------------------------
-    // 7. HERO SCROLL INDICATOR HIDE ON SCROLL
-    // -------------------------------------------------------
-    var scrollIndicator = document.querySelector('.hero-scroll-indicator');
-    if (scrollIndicator) {
-        window.addEventListener('scroll', function () {
-            if (window.scrollY > 100) {
-                scrollIndicator.style.opacity = '0';
-                scrollIndicator.style.pointerEvents = 'none';
-            } else {
-                scrollIndicator.style.opacity = '1';
-                scrollIndicator.style.pointerEvents = 'auto';
-            }
-        }, { passive: true });
-    }
 
     console.log('%cCipherScan%c Landing Page — Loaded',
         'color:#00d4ff;font-weight:700;font-size:1.2em;',

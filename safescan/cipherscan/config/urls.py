@@ -25,6 +25,7 @@ urlpatterns = [
     path("sandbox/", include("apps.sandbox.urls.sandbox_urls")),
     path("sandbox/snippets/", include("apps.sandbox.urls.snippet_urls")),
     path("api/sandbox/", include("apps.sandbox.urls.api_urls")),
+    path("api/core/", include("apps.core.urls.api_urls")),
 ]
 
 if settings.DEBUG:
