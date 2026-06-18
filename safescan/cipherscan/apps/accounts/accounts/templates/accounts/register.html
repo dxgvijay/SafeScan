@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Create Account - CipherScan{% endblock %}
+
+{% block content %}
+<div style="display:flex;gap:0;min-height:calc(100vh - 64px);margin:-32px -24px;background:var(--bg-secondary);border-radius:0;">
+    <div class="auth-bg" style="flex:1 1 50%;max-width:50%;display:flex;">
+        <div class="auth-graphic" style="text-align:center;">
+            <div style="margin-bottom:24px;">
+                <span style="font-size:12px;color:var(--accent-cyan);font-weight:600;letter-spacing:2px;text-transform:uppercase;background:rgba(0,240,255,0.08);padding:6px 14px;border-radius:20px;border:1px solid rgba(0,240,255,0.15);">Advanced Security Platform</span>
+            </div>
+            <div class="globe"></div>
+            <h2 style="font-size:28px;font-weight:800;margin-bottom:8px;background:var(--gradient-main);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Join the Future of<br>Cyber Security</h2>
+            <p style="color:var(--text-secondary);font-size:15px;max-width:400px;margin:0 auto 32px;line-height:1.7;">Real-time threat analysis, phishing detection, file sandboxing, and URL scanning — all in one platform.</p>
+            <div class="scanner-line" style="max-width:400px;margin:0 auto 24px;"></div>
+            <div class="auth-stats" style="max-width:400px;margin:0 auto;">
+                <div class="auth-stat-item">
+                    <div class="number">10K+</div>
+                    <div class="label">Scans Completed</div>
+                </div>
+                <div class="auth-stat-item">
+                    <div class="number">99.9%</div>
+                    <div class="label">Detection Rate</div>
+                </div>
+                <div class="auth-stat-item">
+                    <div class="number">5K+</div>
+                    <div class="label">Active Users</div>
+                </div>
+                <div class="auth-stat-item">
+                    <div class="number">&lt;1s</div>
+                    <div class="label">Avg. Response</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="auth-form" style="flex:1 1 50%;max-width:50%;display:flex;align-items:center;justify-content:center;padding:48px;background:var(--bg-primary);border-left:1px solid var(--border-color);">
+        <div style="width:100%;max-width:440px;">
+            <div style="margin-bottom:32px;">
+                <h1 style="font-size:24px;font-weight:700;margin-bottom:6px;">Create your account</h1>
+                <p style="color:var(--text-secondary);font-size:14px;">Start securing your digital world in minutes.</p>
+            </div>
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                <div class="alert alert-error" style="margin-bottom:20px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                    {{ form.non_field_errors.0 }}
+                </div>
+                {% endif %}
+
+                <div class="floating-label-group">
+                    <input type="email" name="email" id="id_email" placeholder=" " value="{{ form.email.value|default:'' }}" required autocomplete="email" class="form-input {% if form.email.errors %}error{% endif %}">
+                    <label for="id_email">Email Address</label>
+                    {% if form.email.errors %}<div class="form-error">{{ form.email.errors.0 }}</div>{% endif %}
+                </div>
+
+                <div class="floating-label-group">
+                    <input type="text" name="username" id="id_username" placeholder=" " value="{{ form.username.value|default:'' }}" required autocomplete="username" class="form-input {% if form.username.errors %}error{% endif %}">
+                    <label for="id_username">Username</label>
+                    {% if form.username.errors %}<div class="form-error">{{ form.username.errors.0 }}</div>{% endif %}
+                </div>
+
+                <div class="floating-label-group">
+                    <input type="password" name="password1" id="id_password1" placeholder=" " required autocomplete="new-password" class="form-input {% if form.password1.errors %}error{% endif %}" onkeyup="updatePasswordStrength(this.value)">
+                    <label for="id_password1">Password</label>
+                    {% if form.password1.errors %}<div class="form-error">{{ form.password1.errors.0 }}</div>{% endif %}
+                    <div class="password-strength">
+                        <div class="password-strength-bar">
+                            <div class="password-strength-fill"></div>
+                        </div>
+                        <span class="password-strength-text"></span>
+                    </div>
+                </div>
+
+                <div class="floating-label-group">
+                    <input type="password" name="password2" id="id_password2" placeholder=" " required autocomplete="new-password" class="form-input {% if form.password2.errors %}error{% endif %}">
+                    <label for="id_password2">Confirm Password</label>
+                    {% if form.password2.errors %}<div class="form-error">{{ form.password2.errors.0 }}</div>{% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-check">
+                        <input type="checkbox" name="terms_accepted" id="id_terms_accepted" required>
+                        <span style="font-size:13px;color:var(--text-secondary);">I accept the <a href="#" style="color:var(--accent-cyan);text-decoration:none;">Terms of Service</a> and <a href="#" style="color:var(--accent-cyan);text-decoration:none;">Privacy Policy</a></span>
+                    </label>
+                    {% if form.terms_accepted.errors %}<div class="form-error">{{ form.terms_accepted.errors.0 }}</div>{% endif %}
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg" style="width:100%;margin-bottom:16px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                    Create Account
+                </button>
+
+                <div style="position:relative;text-align:center;margin:20px 0;">
+                    <div style="position:absolute;top:50%;left:0;right:0;height:1px;background:var(--border-color);"></div>
+                    <span style="position:relative;background:var(--bg-primary);padding:0 12px;color:var(--text-muted);font-size:13px;z-index:1;">or continue with</span>
+                </div>
+
+                <div style="display:flex;gap:12px;">
+                    <button type="button" class="btn btn-secondary" style="flex:1;padding:10px;" onclick="alert('Google OAuth coming soon!')">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="21.17" y1="8" x2="12" y2="8"/><line x1="3.95" y1="6.06" x2="8.54" y2="14"/><line x1="10.88" y1="21.94" x2="15.46" y2="14"/></svg>
+                        Google
+                    </button>
+                    <button type="button" class="btn btn-secondary" style="flex:1;padding:10px;" onclick="alert('GitHub OAuth coming soon!')">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+                        GitHub
+                    </button>
+                </div>
+
+                <p style="text-align:center;margin-top:24px;color:var(--text-muted);font-size:14px;">
+                    Already have an account?
+                    <a href="{% url 'accounts:login' %}" style="color:var(--accent-cyan);text-decoration:none;font-weight:600;">Sign in</a>
+                </p>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

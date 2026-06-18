@@ -1,0 +1,230 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Profile - CipherScan{% endblock %}
+
+{% block content %}
+<div style="max-width:960px;margin:0 auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;">
+        <div>
+            <h1 style="font-size:24px;font-weight:700;margin-bottom:4px;">Profile Settings</h1>
+            <p style="color:var(--text-secondary);font-size:14px;">Manage your account, security, and preferences.</p>
+        </div>
+        <span class="badge {% if user.plan == 'pro' %}badge-pro{% else %}badge-free{% endif %}" style="font-size:13px;padding:6px 16px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;">
+                {% if user.plan == 'pro' %}
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                {% else %}
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+                {% endif %}
+            </svg>
+            {{ user.get_plan_display }}
+        </span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:32px;">
+        <div class="stat-card">
+            <div class="stat-value">{{ total_scans|default:'0' }}</div>
+            <div class="stat-label">Total Scans</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ today_scans|default:'0' }}</div>
+            <div class="stat-label">Today</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ malicious_finds|default:'0' }}</div>
+            <div class="stat-label">Threats Found</div>
+        </div>
+    </div>
+
+    <div class="card" style="margin-bottom:24px;">
+        <div class="card-header">
+            <span>Personal Information</span>
+            <span class="badge {% if user.is_verified %}badge-success{% else %}badge-warning{% endif %}">
+                {% if user.is_verified %}Verified{% else %}Unverified{% endif %}
+            </span>
+        </div>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div style="display:grid;grid-template-columns:200px 1fr;gap:32px;">
+                <div class="avatar-upload">
+                    {% if user.avatar %}
+                        <img src="{{ user.avatar.url }}" alt="Avatar" class="avatar-preview" id="avatarPreview">
+                        <div class="avatar-preview-placeholder" id="avatarPlaceholder" style="display:none;">{{ user.username|first|upper }}</div>
+                    {% else %}
+                        <div class="avatar-preview-placeholder" id="avatarPlaceholder">{{ user.username|first|upper }}</div>
+                        <img src="" alt="Avatar Preview" class="avatar-preview" id="avatarPreview" style="display:none;">
+                    {% endif %}
+                    <label class="btn btn-secondary btn-sm" style="cursor:pointer;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                        Change Photo
+                        <input type="file" name="avatar" id="id_avatar" accept="image/jpeg,image/png,image/gif,image/webp" style="display:none;" onchange="previewAvatar(this)">
+                    </label>
+                    <span style="font-size:11px;color:var(--text-muted);">JPEG, PNG, GIF, WebP. Max 5MB.</span>
+                    {% if form.avatar.errors %}<div class="form-error">{{ form.avatar.errors.0 }}</div>{% endif %}
+                </div>
+
+                <div>
+                    <div class="form-group">
+                        <label class="form-label" for="id_email">Email Address</label>
+                        <input type="email" name="email" id="id_email" value="{{ form.email.value|default:user.email }}" class="form-input {% if form.email.errors %}error{% endif %}" required>
+                        {% if form.email.errors %}<div class="form-error">{{ form.email.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="id_username">Username</label>
+                        <input type="text" name="username" id="id_username" value="{{ form.username.value|default:user.username }}" class="form-input {% if form.username.errors %}error{% endif %}" required>
+                        {% if form.username.errors %}<div class="form-error">{{ form.username.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="id_bio">Bio</label>
+                        <textarea name="bio" id="id_bio" class="form-input {% if form.bio.errors %}error{% endif %}" rows="4" placeholder="Tell us about yourself...">{{ form.bio.value|default:user.bio }}</textarea>
+                        {% if form.bio.errors %}<div class="form-error">{{ form.bio.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border-color);display:flex;justify-content:flex-end;">
+                <button type="submit" class="btn btn-primary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px;">
+        <div class="card">
+            <div class="card-header">
+                <span>Security</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+
+            <div style="margin-bottom:20px;">
+                <h3 style="font-size:14px;font-weight:600;margin-bottom:12px;color:var(--text-secondary);">Change Password</h3>
+                <form method="post" action="{% url 'accounts:change_password' %}">
+                    {% csrf_token %}
+                    <div style="display:flex;flex-direction:column;gap:12px;">
+                        <input type="password" name="old_password" placeholder="Current password" class="form-input" required>
+                        <input type="password" name="new_password1" placeholder="New password" class="form-input" required>
+                        <input type="password" name="new_password2" placeholder="Confirm new password" class="form-input" required>
+                    </div>
+                    <button type="submit" class="btn btn-secondary btn-sm" style="margin-top:12px;width:100%;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        Update Password
+                    </button>
+                </form>
+            </div>
+
+            <div style="padding-top:16px;border-top:1px solid var(--border-color);">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                    <div>
+                        <h3 style="font-size:14px;font-weight:600;color:var(--text-primary);">Two-Factor Authentication</h3>
+                        <p style="font-size:12px;color:var(--text-muted);margin-top:2px;">Add an extra layer of security to your account.</p>
+                    </div>
+                    <form method="post" action="{% url 'accounts:two_factor' %}">
+                        {% csrf_token %}
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="2fa_toggle" id="2faToggle" onchange="this.form.submit()" {% if user.two_factor_enabled %}checked{% endif %}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <input type="hidden" name="action" value="{% if user.two_factor_enabled %}disable{% else %}enable{% endif %}">
+                    </form>
+                </div>
+                {% if user.two_factor_enabled %}
+                <div style="margin-top:12px;display:flex;align-items:center;gap:8px;">
+                    <span class="badge badge-success">Enabled</span>
+                    <span style="font-size:12px;color:var(--text-muted);">You'll be prompted for a code on login.</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span>API Keys</span>
+                <button class="btn btn-primary btn-sm" onclick="alert('Generate new API key feature coming soon!')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    New Key
+                </button>
+            </div>
+            {% if api_keys %}
+                {% for key in api_keys %}
+                <div style="margin-bottom:12px;padding:12px;background:var(--bg-input);border-radius:var(--radius-sm);border:1px solid var(--border-color);">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                        <span style="font-size:14px;font-weight:600;">{{ key.name }}</span>
+                        <span class="badge badge-success" style="font-size:11px;">Active</span>
+                    </div>
+                    <div class="api-key-display">
+                        <span class="key-text">{{ key.key }}</span>
+                        <button class="copy-btn" onclick="copyToClipboard('{{ key.key }}', this)" title="Copy to clipboard">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                        </button>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;margin-top:6px;">
+                        <span style="font-size:11px;color:var(--text-muted);">Created: {{ key.created_at|date:"M d, Y" }}</span>
+                        {% if key.last_used_at %}
+                        <span style="font-size:11px;color:var(--text-muted);">Last used: {{ key.last_used_at|date:"M d, Y" }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+            <div style="text-align:center;padding:32px 16px;">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" style="margin-bottom:12px;">
+                    <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+                </svg>
+                <p style="color:var(--text-muted);font-size:14px;">No API keys yet.</p>
+                <p style="color:var(--text-muted);font-size:13px;margin-top:4px;">Create one to integrate CipherScan with your tools.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <span>Recent Activity</span>
+            <a href="{% url 'accounts:dashboard' %}" class="btn btn-ghost btn-sm">View All</a>
+        </div>
+        {% if recent_scans %}
+        <div style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;font-size:14px;">
+                <thead>
+                    <tr style="border-bottom:1px solid var(--border-color);color:var(--text-muted);font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">
+                        <th style="padding:10px 12px;text-align:left;">Type</th>
+                        <th style="padding:10px 12px;text-align:left;">Target</th>
+                        <th style="padding:10px 12px;text-align:left;">Threat</th>
+                        <th style="padding:10px 12px;text-align:right;">Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for scan in recent_scans %}
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                        <td style="padding:12px;">
+                            <span class="badge" style="background:rgba(0,240,255,0.08);color:var(--accent-cyan);text-transform:capitalize;">{{ scan.get_scan_type_display }}</span>
+                        </td>
+                        <td style="padding:12px;color:var(--text-primary);max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ scan.target }}">{{ scan.target }}</td>
+                        <td style="padding:12px;">
+                            {% if scan.threat_level == 'malicious' %}
+                            <span class="badge badge-danger">Malicious</span>
+                            {% elif scan.threat_level == 'suspicious' %}
+                            <span class="badge badge-warning">Suspicious</span>
+                            {% else %}
+                            <span class="badge badge-success">Safe</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding:12px;text-align:right;color:var(--text-muted);font-size:13px;">{{ scan.created_at|timesince }} ago</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div style="text-align:center;padding:32px 16px;">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" style="margin-bottom:12px;">
+                <circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/>
+            </svg>
+            <p style="color:var(--text-muted);font-size:14px;">No scan history yet.</p>
+            <p style="color:var(--text-muted);font-size:13px;margin-top:4px;">Start scanning to see your activity here.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

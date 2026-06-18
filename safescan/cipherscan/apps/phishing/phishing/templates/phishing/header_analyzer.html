@@ -1,0 +1,567 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Email Header Analyzer - CipherScan{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hop-node {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        background: var(--bg-input);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        transition: all 0.2s;
+    }
+
+    .hop-node:hover {
+        border-color: var(--accent-cyan);
+        background: rgba(0, 240, 255, 0.03);
+    }
+
+    .hop-index {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--gradient-main);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 700;
+        color: #fff;
+        flex-shrink: 0;
+    }
+
+    .hop-connector {
+        width: 2px;
+        height: 24px;
+        background: linear-gradient(to bottom, var(--accent-cyan), var(--accent-purple));
+        margin: 0 auto;
+        opacity: 0.4;
+    }
+
+    .hop-connector-dashed {
+        width: 2px;
+        height: 24px;
+        border-left: 2px dashed var(--text-muted);
+        margin: 0 auto;
+        opacity: 0.3;
+    }
+
+    .hop-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .hop-info .hop-from {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-primary);
+        word-break: break-all;
+    }
+
+    .hop-info .hop-meta {
+        font-size: 11px;
+        color: var(--text-muted);
+        margin-top: 2px;
+    }
+
+    .hop-info .hop-date {
+        font-size: 11px;
+        color: var(--text-muted);
+        margin-top: 2px;
+    }
+
+    .ip-rep-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .rep-safe {
+        background: rgba(0, 255, 136, 0.12);
+        color: var(--accent-green);
+    }
+
+    .rep-suspicious {
+        background: rgba(245, 158, 11, 0.12);
+        color: var(--accent-amber);
+    }
+
+    .rep-malicious {
+        background: rgba(239, 68, 68, 0.12);
+        color: var(--accent-red);
+    }
+
+    .rep-unknown {
+        background: rgba(136, 136, 170, 0.12);
+        color: var(--text-muted);
+    }
+
+    .auth-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .auth-pass {
+        background: rgba(0, 255, 136, 0.12);
+        border: 1px solid rgba(0, 255, 136, 0.25);
+        color: var(--accent-green);
+    }
+
+    .auth-fail {
+        background: rgba(239, 68, 68, 0.12);
+        border: 1px solid rgba(239, 68, 68, 0.25);
+        color: var(--accent-red);
+    }
+
+    .auth-missing {
+        background: rgba(245, 158, 11, 0.12);
+        border: 1px solid rgba(245, 158, 11, 0.25);
+        color: var(--accent-amber);
+    }
+
+    .auth-error {
+        background: rgba(136, 136, 170, 0.12);
+        border: 1px solid rgba(136, 136, 170, 0.25);
+        color: var(--text-secondary);
+    }
+
+    .threat-gauge {
+        position: relative;
+        width: 180px;
+        height: 180px;
+        margin: 0 auto;
+    }
+
+    .threat-gauge svg {
+        transform: rotate(-90deg);
+    }
+
+    .threat-gauge .bg-circle {
+        fill: none;
+        stroke: var(--border-color);
+        stroke-width: 12;
+    }
+
+    .threat-gauge .progress-circle {
+        fill: none;
+        stroke-width: 12;
+        stroke-linecap: round;
+        transition: stroke-dashoffset 1s ease, stroke 0.5s ease;
+    }
+
+    .threat-gauge .center-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+    }
+
+    .threat-gauge .center-text .score {
+        font-size: 42px;
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    .threat-gauge .center-text .label {
+        font-size: 12px;
+        color: var(--text-muted);
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-top: 4px;
+    }
+
+    .spoofing-alert {
+        padding: 16px 20px;
+        border-radius: var(--radius-md);
+        border-left: 4px solid;
+        margin-bottom: 12px;
+    }
+
+    .spoofing-critical {
+        background: rgba(239, 68, 68, 0.06);
+        border-left-color: var(--accent-red);
+    }
+
+    .spoofing-high {
+        background: rgba(245, 158, 11, 0.06);
+        border-left-color: var(--accent-amber);
+    }
+
+    .spoofing-medium {
+        background: rgba(0, 240, 255, 0.06);
+        border-left-color: var(--accent-cyan);
+    }
+
+    .header-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+
+    .header-table td {
+        padding: 8px 12px;
+        border-bottom: 1px solid var(--border-color);
+        vertical-align: top;
+    }
+
+    .header-table .key {
+        color: var(--accent-cyan);
+        font-weight: 600;
+        white-space: nowrap;
+        width: 200px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+    }
+
+    .header-table .value {
+        color: var(--text-primary);
+        word-break: break-all;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+    }
+
+    .copy-area {
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .copy-area:hover {
+        background: rgba(0, 240, 255, 0.03);
+    }
+
+    .json-view {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        line-height: 1.5;
+        color: var(--text-secondary);
+        white-space: pre-wrap;
+        word-break: break-all;
+        max-height: 400px;
+        overflow-y: auto;
+        padding: 16px;
+        background: var(--bg-input);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="max-width:960px;margin:0 auto;">
+    <div style="margin-bottom:32px;">
+        <h1 style="font-size:24px;font-weight:700;margin-bottom:4px;">Email Header Analyzer</h1>
+        <p style="color:var(--text-secondary);font-size:14px;">Paste raw email headers to analyze routing, authentication, and detect spoofing or phishing attempts.</p>
+    </div>
+
+    <div class="card" style="margin-bottom:32px;">
+        <form method="post" id="headerForm">
+            {% csrf_token %}
+            <div class="form-group">
+                <label class="form-label" for="raw_headers">Paste Email Headers</label>
+                <textarea name="raw_headers" id="raw_headers" class="form-input" rows="12"
+                    placeholder="Paste the full raw email headers here...&#10;&#10;Example:&#10;From: &quot;Support Team&quot; &lt;support@example.com&gt;&#10;Reply-To: phishing@evil.com&#10;Return-Path: bounce@evil.com&#10;Received: from mail.evil.com (192.168.1.1) by mx.google.com with ESMTP id abc123 for &lt;you@gmail.com&gt;; Thu, 01 Jan 2026 10:00:00 -0800 (PST)&#10;DKIM-Signature: v=1; a=rsa-sha256; d=evil.com; s=selector1;&#10;Authentication-Results: mx.google.com; spf=fail; dkim=fail; dmarc=fail&#10;Received-SPF: fail" required></textarea>
+            </div>
+            <div style="display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap;">
+                <span id="headerCount" style="font-size:12px;color:var(--text-muted);">0 chars</span>
+                <button type="submit" class="btn btn-primary btn-lg" id="analyzeBtn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                    </svg>
+                    Analyze Headers
+                </button>
+            </div>
+        </form>
+    </div>
+
+    {% if result %}
+    <div style="margin-top:32px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+            <h2 style="font-size:20px;font-weight:700;">Analysis Results</h2>
+            <span class="badge {% if threat_level == 'critical' %}badge-danger{% elif threat_level == 'high' %}badge-warning{% elif threat_level == 'suspicious' %}badge-warning{% else %}badge-success{% endif %}" style="font-size:13px;padding:6px 16px;text-transform:uppercase;">
+                {{ threat_level }}
+            </span>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px;">
+            <div class="card" style="text-align:center;">
+                <div class="threat-gauge">
+                    {% with score=threat_score|default:0 %}
+                    {% with circumference=502.65 %}
+                    {% with offset=circumference|floatformat:0 %}
+                    <svg width="180" height="180" viewBox="0 0 180 180">
+                        <circle class="bg-circle" cx="90" cy="90" r="80"></circle>
+                        <circle class="progress-circle" cx="90" cy="90" r="80"
+                            stroke="{% if score >= 70 %}#ef4444{% elif score >= 45 %}#f59e0b{% elif score >= 20 %}#f59e0b{% else %}#00ff88{% endif %}"
+                            stroke-dasharray="502.65"
+                            stroke-dashoffset="{{ circumference|floatformat:0 }}">
+                        </circle>
+                    </svg>
+                    {% endwith %}
+                    {% endwith %}
+                    {% endwith %}
+                    <div class="center-text">
+                        <div class="score" style="color:{% if score >= 70 %}#ef4444{% elif score >= 45 %}#f59e0b{% elif score >= 20 %}#f59e0b{% else %}#00ff88{% endif %};">{{ threat_score }}</div>
+                        <div class="label">Threat Score</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" style="margin-bottom:16px;font-size:16px;">Authentication Results</div>
+                <div style="display:flex;flex-direction:column;gap:12px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;">
+                        <span style="font-size:14px;font-weight:500;">SPF</span>
+                        {% with spf_result=result.spf.result|default:'error' %}
+                        <span class="auth-badge auth-{% if spf_result == 'pass' %}pass{% elif spf_result in 'fail,softfail' %}fail{% elif spf_result == 'missing' %}missing{% else %}error{% endif %}">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                {% if spf_result == 'pass' %}<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                                {% elif spf_result in 'fail,softfail' %}<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                                {% else %}<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                                {% endif %}
+                            </svg>
+                            {{ spf_result|upper }}
+                        </span>
+                        {% endwith %}
+                    </div>
+                    <div style="display:flex;align-items:center;justify-content:space-between;">
+                        <span style="font-size:14px;font-weight:500;">DKIM</span>
+                        {% with dkim_result=result.dkim.result|default:'error' %}
+                        <span class="auth-badge auth-{% if dkim_result == 'pass' %}pass{% elif dkim_result == 'fail' %}fail{% elif dkim_result == 'missing' %}missing{% else %}error{% endif %}">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                {% if dkim_result == 'pass' %}<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                                {% elif dkim_result == 'fail' %}<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                                {% else %}<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                                {% endif %}
+                            </svg>
+                            {{ dkim_result|upper }}
+                        </span>
+                        {% endwith %}
+                    </div>
+                    <div style="display:flex;align-items:center;justify-content:space-between;">
+                        <span style="font-size:14px;font-weight:500;">DMARC</span>
+                        {% with dmarc_result=result.dmarc.result|default:'error' %}
+                        <span class="auth-badge auth-{% if dmarc_result == 'pass' %}pass{% elif dmarc_result == 'fail' %}fail{% elif dmarc_result == 'missing' %}missing{% else %}error{% endif %}">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                {% if dmarc_result == 'pass' %}<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                                {% elif dmarc_result == 'fail' %}<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                                {% else %}<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                                {% endif %}
+                            </svg>
+                            {{ dmarc_result|upper }}
+                        </span>
+                        {% endwith %}
+                    </div>
+                </div>
+                {% if result.from_domain %}
+                <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border-color);font-size:12px;color:var(--text-muted);">
+                    Domain: <strong style="color:var(--text-secondary);">{{ result.from_domain }}</strong>
+                    {% if result.from_email %}
+                    <br>From: <strong style="color:var(--text-secondary);">{{ result.from_email }}</strong>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if spoofing_issues %}
+        <div class="card" style="margin-bottom:24px;">
+            <div class="card-header" style="font-size:16px;color:var(--accent-red);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                Spoofing & Phishing Indicators
+            </div>
+            {% for issue in spoofing_issues %}
+            <div class="spoofing-alert spoofing-{{ issue.severity }}">
+                <div style="display:flex;align-items:flex-start;gap:10px;">
+                    <span class="badge {% if issue.severity == 'critical' %}badge-danger{% elif issue.severity == 'high' %}badge-warning{% elif issue.severity == 'medium' %}badge-warning{% else %}badge-success{% endif %}" style="text-transform:capitalize;flex-shrink:0;">
+                        {{ issue.severity }}
+                    </span>
+                    <div>
+                        <p style="font-size:14px;color:var(--text-primary);">{{ issue.message }}</p>
+                        <p style="font-size:11px;color:var(--text-muted);margin-top:4px;font-family:'JetBrains Mono',monospace;">{{ issue.type }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="card" style="margin-bottom:24px;">
+            <div style="display:flex;align-items:center;gap:12px;padding:8px 0;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent-green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                <span style="color:var(--accent-green);font-weight:600;">No spoofing indicators detected</span>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="card" style="margin-bottom:24px;">
+            <div class="card-header" style="font-size:16px;">
+                <span>Email Routing Path</span>
+                <span style="font-size:13px;color:var(--text-muted);font-weight:400;">{{ hops|length }} hop(s)</span>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:stretch;">
+                <div style="text-align:center;padding:12px 0;">
+                    <span class="badge" style="background:rgba(0,240,255,0.08);color:var(--accent-cyan);font-size:12px;">Origin</span>
+                </div>
+                {% for hop in hops %}
+                <div style="display:flex;flex-direction:column;gap:0;">
+                    <div class="hop-node">
+                        <div class="hop-index">{{ forloop.counter }}</div>
+                        <div class="hop-info">
+                            {% if hop.from %}
+                            <div class="hop-from">{{ hop.from }}</div>
+                            {% endif %}
+                            <div class="hop-meta">
+                                {% if hop.by %}via {{ hop.by }}{% endif %}
+                                {% if hop.with %} | {{ hop.with }}{% endif %}
+                                {% if hop.id %} | id {{ hop.id }}{% endif %}
+                            </div>
+                            {% if hop.date %}
+                            <div class="hop-date">{{ hop.date }}</div>
+                            {% endif %}
+                        </div>
+                        <div style="text-align:right;flex-shrink:0;">
+                            {% for ip in hop.ips %}
+                            <div style="margin-bottom:4px;">
+                                <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-primary);">{{ ip }}</span>
+                                {% if ip_reputations %}
+                                {% for rep in ip_reputations %}
+                                {% if rep.ip == ip %}
+                                <span class="ip-rep-badge rep-{{ rep.category }}" style="margin-left:6px;">
+                                    {{ rep.score }}
+                                </span>
+                                {% endif %}
+                                {% endfor %}
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                            {% if hop.is_private %}
+                            <span class="ip-rep-badge rep-unknown">Private</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if not forloop.last %}
+                    <div style="display:flex;justify-content:center;">
+                        <div class="hop-connector"></div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                <div style="text-align:center;padding:12px 0;">
+                    <span class="badge" style="background:rgba(0,255,136,0.08);color:var(--accent-green);font-size:12px;">Recipient (You)</span>
+                </div>
+            </div>
+        </div>
+
+        {% if ip_reputations %}
+        <div class="card" style="margin-bottom:24px;">
+            <div class="card-header" style="font-size:16px;">
+                <span>IP Reputation</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                {% for rep in ip_reputations %}
+                <div style="padding:16px;background:var(--bg-input);border:1px solid var(--border-color);border-radius:var(--radius-sm);">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                        <code style="color:var(--text-primary);font-size:13px;">{{ rep.ip }}</code>
+                        <span class="ip-rep-badge rep-{{ rep.category }}">
+                            {{ rep.score }}/100
+                        </span>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:12px;color:var(--text-muted);">
+                        {% if rep.country %}<div>Country: <span style="color:var(--text-secondary);">{{ rep.country }}</span></div>{% endif %}
+                        {% if rep.isp %}<div>ISP: <span style="color:var(--text-secondary);">{{ rep.isp }}</span></div>{% endif %}
+                        {% if rep.usage_type %}<div>Usage: <span style="color:var(--text-secondary);">{{ rep.usage_type }}</span></div>{% endif %}
+                        {% if rep.domain %}<div>Domain: <span style="color:var(--text-secondary);">{{ rep.domain }}</span></div>{% endif %}
+                    </div>
+                    <div style="margin-top:8px;">
+                        <div style="height:4px;border-radius:2px;background:var(--border-color);overflow:hidden;">
+                            <div style="height:100%;width:{{ rep.score }}%;border-radius:2px;
+                                background:{% if rep.score >= 50 %}#ef4444{% elif rep.score >= 20 %}#f59e0b{% else %}#00ff88{% endif %};">
+                            </div>
+                        </div>
+                    </div>
+                    {% if rep.is_whitelisted %}
+                    <div style="margin-top:6px;font-size:11px;color:var(--accent-green);">Whitelisted</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="card" style="margin-bottom:24px;">
+            <div class="card-header" style="font-size:16px;">
+                <span>Full Header Details</span>
+                <div style="display:flex;gap:8px;">
+                    <button class="btn btn-secondary btn-sm" onclick="copyResults()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                        Copy
+                    </button>
+                    <button class="btn btn-secondary btn-sm" onclick="alert('PDF export coming soon!')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                        Export PDF
+                    </button>
+                </div>
+            </div>
+            <div class="json-view" id="headerJson">{{ parsed_json }}</div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const textarea = document.getElementById('raw_headers');
+        const count = document.getElementById('headerCount');
+
+        if (textarea && count) {
+            function updateCount() {
+                const len = textarea.value.length;
+                count.textContent = len.toLocaleString() + ' chars';
+            }
+            textarea.addEventListener('input', updateCount);
+            updateCount();
+        }
+
+        const gauge = document.querySelector('.threat-gauge');
+        if (gauge) {
+            const circle = gauge.querySelector('.progress-circle');
+            if (circle) {
+                const score = {{ threat_score|default:0 }};
+                const circumference = 502.65;
+                const offset = circumference - (score / 100) * circumference;
+                requestAnimationFrame(function() {
+                    circle.style.strokeDashoffset = offset;
+                });
+            }
+        }
+    });
+
+    function copyResults() {
+        const jsonEl = document.getElementById('headerJson');
+        if (!jsonEl) return;
+        navigator.clipboard.writeText(jsonEl.textContent).then(function() {
+            const btn = event.target.closest('button');
+            if (!btn) return;
+            const original = btn.innerHTML;
+            btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent-green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
+            setTimeout(function() { btn.innerHTML = original; }, 2000);
+        });
+    }
+</script>
+{% endblock %}
