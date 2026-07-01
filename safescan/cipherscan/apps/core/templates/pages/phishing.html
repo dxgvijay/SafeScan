@@ -150,7 +150,37 @@
    TOOL CARDS — Big, Prominent
    ============================================================ */
 .ph-tools {
-    padding: 4rem 0 2rem;
+    padding: 4rem 24px 2rem;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    box-sizing: border-box;
+}
+.ph-tools .tools-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+.ph-tools .tools-grid > * {
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+@media (min-width: 640px) {
+    .ph-tools .tools-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (min-width: 1024px) {
+    .ph-tools .tools-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
 }
 .ph-tools .section-header {
     text-align: center;
@@ -174,11 +204,15 @@
     border-radius: var(--radius-lg);
     padding: 2rem;
     height: 100%;
+    min-height: 480px;
     transition: all var(--transition-normal);
     position: relative;
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
 }
 .ph-tool-card::before {
     content: '';
@@ -256,10 +290,12 @@
 .tc-quick .tcq-row {
     display: flex;
     gap: 0.5rem;
+    align-items: center;
 }
 .tc-quick .tcq-row textarea,
 .tc-quick .tcq-row input {
     flex: 1;
+    min-width: 0;
     background: rgba(255,255,255,0.03);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-sm);
@@ -269,8 +305,13 @@
     font-size: 0.78125rem;
     outline: none;
     transition: all var(--transition-fast);
+}
+.tc-quick .tcq-row textarea {
     resize: vertical;
-    min-height: 52px;
+    min-height: 44px;
+}
+.tc-quick .tcq-row input {
+    min-height: 44px;
 }
 .tc-quick .tcq-row textarea:focus,
 .tc-quick .tcq-row input:focus {
@@ -294,6 +335,10 @@
     transition: all var(--transition-fast);
     white-space: nowrap;
     font-family: var(--font-ui);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    flex-shrink: 0;
 }
 .tc-quick .tcq-row .tcq-btn:hover {
     background: #ff8255;
@@ -409,7 +454,7 @@
     .ph-tools { padding: 3rem 0 1.5rem; }
     .ph-stats { gap: 1.5rem; }
     .ph-stats .phs-div { display: none; }
-    .ph-tool-card { padding: 1.5rem; }
+    .ph-tool-card { padding: 1.5rem; min-height: auto; }
 }
 @media (max-width: 767.98px) {
     .ph-hero { padding: 2.5rem 1rem 2rem; }
@@ -459,17 +504,17 @@
 
         <div class="ph-stats">
             <div class="phs-item">
-                <div class="phs-val"><span class="counter" data-target="284739">0</span><span class="phs-sfx">+</span></div>
+                <div class="phs-val"><span class="counter" data-target="0" data-stat-key="headers_analyzed">—</span><span class="phs-sfx">+</span></div>
                 <div class="phs-label">Headers Analyzed</div>
             </div>
             <div class="phs-div"></div>
             <div class="phs-item">
-                <div class="phs-val"><span class="counter" data-target="52194">0</span><span class="phs-sfx">+</span></div>
+                <div class="phs-val"><span class="counter" data-target="0" data-stat-key="emails_blocked">—</span><span class="phs-sfx">+</span></div>
                 <div class="phs-label">Emails Blocked</div>
             </div>
             <div class="phs-div"></div>
             <div class="phs-item">
-                <div class="phs-val"><span class="counter" data-target="18347">0</span><span class="phs-sfx">+</span></div>
+                <div class="phs-val"><span class="counter" data-target="0" data-stat-key="domains_checked">—</span><span class="phs-sfx">+</span></div>
                 <div class="phs-label">Domains Checked</div>
             </div>
         </div>
@@ -488,9 +533,9 @@
             <p>Each tool targets a specific attack vector. Pick the one you need.</p>
         </div>
 
-        <div class="row g-4">
+        <div class="tools-grid">
             <!-- Card A — Email Header Analyzer -->
-            <div class="col-lg-4">
+            <div>
                 <div class="ph-tool-card tc-red fade-in-up">
                     <div class="tc-icon ic-orange"><i class="fas fa-envelope-open-text"></i></div>
                     <h3>Email Header Analyzer</h3>
@@ -519,7 +564,7 @@
             </div>
 
             <!-- Card B — Email Health Checker -->
-            <div class="col-lg-4">
+            <div>
                 <div class="ph-tool-card tc-green fade-in-up">
                     <div class="tc-icon ic-green"><i class="fas fa-heart-pulse"></i></div>
                     <h3>Email Health Checker</h3>
@@ -548,7 +593,7 @@
             </div>
 
             <!-- Card C — Suspicious Email Blocker -->
-            <div class="col-lg-4">
+            <div>
                 <div class="ph-tool-card tc-red fade-in-up">
                     <div class="tc-icon ic-red"><i class="fas fa-shield"></i></div>
                     <h3>Suspicious Email Blocker</h3>
@@ -658,7 +703,25 @@ document.addEventListener('DOMContentLoaded', function () {
             requestAnimationFrame(step);
         });
     }
-    animateCounters();
+
+    // Fetch phishing stats from API
+    fetch('/api/phishing/stats/')
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            document.querySelectorAll('.phs-val .counter[data-stat-key]').forEach(function (el) {
+                var key = el.dataset.statKey;
+                if (data[key] !== undefined) {
+                    el.textContent = '0';
+                    el.dataset.target = data[key];
+                }
+            });
+            animateCounters();
+        })
+        .catch(function () {
+            document.querySelectorAll('.phs-val .counter').forEach(function (el) {
+                el.textContent = '0';
+            });
+        });
 
     // -------------------------------------------------------
     // 2. QUICK HEADER ANALYZER

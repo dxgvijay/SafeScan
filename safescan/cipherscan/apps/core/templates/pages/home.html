@@ -1048,18 +1048,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function activateUrlMode() {
         if (scanTypeUrl.classList.contains('active')) return;
-        var fileMC = document.getElementById('fileModeContent');
-        var urlMC = document.getElementById('urlModeContent');
-        if (fileMC && fileMC.parentNode) fileMC.replaceWith(urlMC);
+        if (fileModeContent && fileModeContent.parentNode) fileModeContent.replaceWith(urlModeContent);
         scanTypeUrl.classList.add('active');
         scanTypeFile.classList.remove('active');
     }
 
     function activateFileMode() {
         if (scanTypeFile.classList.contains('active')) return;
-        var urlMC = document.getElementById('urlModeContent');
-        var fileMC = document.getElementById('fileModeContent');
-        if (urlMC && urlMC.parentNode) urlMC.replaceWith(fileMC);
+        if (urlModeContent && urlModeContent.parentNode) urlModeContent.replaceWith(fileModeContent);
+        fileModeContent.style.display = '';
         scanTypeFile.classList.add('active');
         scanTypeUrl.classList.remove('active');
     }
