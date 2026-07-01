@@ -1012,6 +1012,48 @@ document.addEventListener('DOMContentLoaded', function () {
         if (fill) fill.style.width = '0%';
         if (pct) pct.textContent = '0%';
 
+<<<<<<< HEAD
+=======
+        // Simulate progress through steps
+        var stepDurations = [800, 600, 2000, 1500, 500];
+        var totalDuration = stepDurations.reduce(function (a, b) { return a + b; }, 0);
+        var elapsed = 0;
+
+        function advanceStep(stepIndex) {
+            if (stepIndex > 0 && stepIndex <= steps.length) {
+                var prev = steps[stepIndex - 1];
+                if (prev) { prev.classList.remove('active'); prev.classList.add('done'); }
+            }
+            if (stepIndex < steps.length) {
+                var curr = steps[stepIndex];
+                if (curr) curr.classList.add('active');
+                var label = document.getElementById('fsmStep' + stepIndex);
+                var texts = ['Uploading...', 'Hashing...', 'Scanning...', 'Analyzing...', 'Done!'];
+                if (label) label.textContent = texts[stepIndex] || '...';
+            }
+        }
+
+        advanceStep(0);
+
+        for (var i = 1; i <= steps.length; i++) {
+            (function (stepIdx) {
+                var delay = 0;
+                for (var j = 0; j < stepIdx; j++) { delay += stepDurations[j]; }
+                setTimeout(function () {
+                    advanceStep(stepIdx);
+                    var progress = Math.min(Math.round((delay / totalDuration) * 100), 100);
+                    if (stepIdx === steps.length) progress = 100;
+                    if (fill) fill.style.width = progress + '%';
+                    if (pct) pct.textContent = progress + '%';
+                    if (stepIdx === steps.length) {
+                        setTimeout(function () {
+                            modal.classList.remove('active');
+                        }, 1200);
+                    }
+                }, delay);
+            })(i);
+        }
+>>>>>>> b6062812c96d3b9950c91754df7bfb627ec5b377
     }
 
 

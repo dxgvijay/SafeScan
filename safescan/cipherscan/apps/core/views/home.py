@@ -1,9 +1,12 @@
+<<<<<<< HEAD
 from datetime import timedelta
 
 from django.contrib.auth import get_user_model
 from django.db.models import Count
 from django.db.models.functions import TruncMonth
 from django.utils import timezone
+=======
+>>>>>>> b6062812c96d3b9950c91754df7bfb627ec5b377
 from django.views.generic import TemplateView
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -13,6 +16,7 @@ from apps.core.context_processors import global_stats
 
 class HomeView(TemplateView):
     template_name = "pages/home.html"
+<<<<<<< HEAD
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -83,3 +87,5 @@ class ThreatHistoryView(APIView):
             'data': data,
             'change_percent': change_percent,
         })
+=======
+>>>>>>> b6062812c96d3b9950c91754df7bfb627ec5b377

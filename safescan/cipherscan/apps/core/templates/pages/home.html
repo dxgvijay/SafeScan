@@ -273,6 +273,7 @@
 #fileModeContent .file-drop-zone p strong {
     color: var(--accent-cyan);
 }
+<<<<<<< HEAD
 #fileModeContent .file-drop-zone .btn-scan-submit {
     background: var(--accent-cyan);
     border: none;
@@ -292,6 +293,8 @@
 #fileModeContent .file-drop-zone .btn-scan-submit:hover {
     background: #33ddff;
 }
+=======
+>>>>>>> b6062812c96d3b9950c91754df7bfb627ec5b377
 
 /* ============================================================
    SECTION COMMON
@@ -707,6 +710,31 @@
         padding: 0.5rem 0.75rem;
     }
 }
+
+/* ------------------------------------------------------------
+   STAT SKELETON LOADING
+   ------------------------------------------------------------ */
+@keyframes stat-skeleton-pulse {
+    0% { opacity: 0.3; }
+    50% { opacity: 0.7; }
+    100% { opacity: 0.3; }
+}
+.stat-skeleton {
+    display: inline-block;
+    min-width: 100px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 4px;
+    animation: stat-skeleton-pulse 1.5s ease-in-out infinite;
+}
+.hero-stat-value .stat-skeleton {
+    min-width: 140px;
+    height: 48px;
+    vertical-align: middle;
+}
+.trust-counter .stat-skeleton {
+    min-width: 80px;
+    height: 36px;
+}
 </style>
 {% endblock %}
 
@@ -748,7 +776,11 @@
                     <div class="hero-stats justify-content-center">
                         <div class="hero-stat">
                             <span class="hero-stat-value">
+<<<<<<< HEAD
                                 <span class="counter" data-target="0" data-stat-key="total_scans">0</span>
+=======
+                                <span class="counter" data-stat-type="files_scanned"><span class="stat-skeleton">&nbsp;</span></span>
+>>>>>>> b6062812c96d3b9950c91754df7bfb627ec5b377
                                 <span class="stat-suffix">+</span>
                             </span>
                             <span class="hero-stat-label">URLs Scanned</span>
@@ -756,7 +788,19 @@
                         <div class="hero-stat-divider"></div>
                         <div class="hero-stat">
                             <span class="hero-stat-value">
+<<<<<<< HEAD
                                 <span class="counter" data-target="0" data-stat-key="threats_detected">0</span>
+=======
+                                <span class="counter" data-stat-type="urls_checked"><span class="stat-skeleton">&nbsp;</span></span>
+                                <span class="stat-suffix">+</span>
+                            </span>
+                            <span class="hero-stat-label">URLs Checked</span>
+                        </div>
+                        <div class="hero-stat-divider"></div>
+                        <div class="hero-stat">
+                            <span class="hero-stat-value">
+                                <span class="counter" data-stat-type="threats_detected"><span class="stat-skeleton">&nbsp;</span></span>
+>>>>>>> b6062812c96d3b9950c91754df7bfb627ec5b377
                                 <span class="stat-suffix">+</span>
                             </span>
                             <span class="hero-stat-label">Threats Detected</span>
@@ -943,30 +987,54 @@
         <div class="row g-4 mb-5 stagger-children" id="trustCounters">
             <div class="col-6 col-lg-3">
                 <div class="trust-counter">
+<<<<<<< HEAD
                     <div class="counter-icon cyan"><i class="fas fa-link"></i></div>
                     <div class="counter-value"><span class="counter" data-target="0" data-stat-key="total_scans">0</span></div>
                     <div class="counter-label">URLs Scanned</div>
+=======
+                    <div class="counter-icon cyan"><i class="fas fa-file"></i></div>
+                    <div class="counter-value"><span class="counter" data-stat-type="files_scanned"><span class="stat-skeleton">&nbsp;</span></span></div>
+                    <div class="counter-label">Files Scanned</div>
+>>>>>>> b6062812c96d3b9950c91754df7bfb627ec5b377
                 </div>
             </div>
             <div class="col-6 col-lg-3">
                 <div class="trust-counter">
+<<<<<<< HEAD
                     <div class="counter-icon orange"><i class="fas fa-shield"></i></div>
                     <div class="counter-value"><span class="counter" data-target="0" data-stat-key="threats_detected">0</span></div>
                     <div class="counter-label">Threats Detected</div>
+=======
+                    <div class="counter-icon orange"><i class="fas fa-link"></i></div>
+                    <div class="counter-value"><span class="counter" data-stat-type="urls_checked"><span class="stat-skeleton">&nbsp;</span></span></div>
+                    <div class="counter-label">URLs Checked</div>
+>>>>>>> b6062812c96d3b9950c91754df7bfb627ec5b377
                 </div>
             </div>
             <div class="col-6 col-lg-3">
                 <div class="trust-counter">
+<<<<<<< HEAD
                     <div class="counter-icon success"><i class="fas fa-users"></i></div>
                     <div class="counter-value"><span class="counter" data-target="0" data-stat-key="users_protected">0</span></div>
                     <div class="counter-label">Users</div>
+=======
+                    <div class="counter-icon success"><i class="fas fa-shield"></i></div>
+                    <div class="counter-value"><span class="counter" data-stat-type="threats_detected"><span class="stat-skeleton">&nbsp;</span></span></div>
+                    <div class="counter-label">Threats Blocked</div>
+>>>>>>> b6062812c96d3b9950c91754df7bfb627ec5b377
                 </div>
             </div>
             <div class="col-6 col-lg-3">
                 <div class="trust-counter">
+<<<<<<< HEAD
                     <div class="counter-icon purple"><i class="fas fa-building"></i></div>
                     <div class="counter-value"><span class="counter" data-target="0" data-stat-key="vendors_count">0</span></div>
                     <div class="counter-label">Vendors</div>
+=======
+                    <div class="counter-icon purple"><i class="fas fa-users"></i></div>
+                    <div class="counter-value"><span class="counter" data-stat-type="users_protected"><span class="stat-skeleton">&nbsp;</span></span></div>
+                    <div class="counter-label">Users Protected</div>
+>>>>>>> b6062812c96d3b9950c91754df7bfb627ec5b377
                 </div>
             </div>
         </div>
@@ -1133,32 +1201,75 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // -------------------------------------------------------
-    // 3. ANIMATED COUNTERS
+    // 3. LIVE STATS — fetch from /api/core/stats/
     // -------------------------------------------------------
-    function animateCounters() {
-        document.querySelectorAll('.counter[data-target]').forEach(function (el) {
-            var target = parseInt(el.dataset.target, 10);
-            if (isNaN(target)) return;
-            var current = parseInt(el.textContent.replace(/,/g, ''), 10) || 0;
-            if (current >= target) return;
-            var duration = 2000;
-            var startTime = null;
-            function step(timestamp) {
-                if (!startTime) startTime = timestamp;
-                var progress = Math.min((timestamp - startTime) / duration, 1);
-                var eased = 1 - Math.pow(1 - progress, 3);
-                var value = Math.floor(eased * target);
-                el.textContent = value.toLocaleString();
-                if (progress < 1) {
-                    requestAnimationFrame(step);
-                } else {
-                    el.textContent = target.toLocaleString();
-                }
+    var statsData = null;
+
+    function animateCounter(el, target) {
+        var duration = 2000;
+        var startTime = null;
+        function step(timestamp) {
+            if (!startTime) startTime = timestamp;
+            var progress = Math.min((timestamp - startTime) / duration, 1);
+            var eased = 1 - Math.pow(1 - progress, 3);
+            el.textContent = Math.floor(eased * target).toLocaleString();
+            if (progress < 1) {
+                requestAnimationFrame(step);
+            } else {
+                el.textContent = target.toLocaleString();
             }
-            requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+    }
+
+    function renderStats(stats) {
+        document.querySelectorAll('.counter[data-stat-type]').forEach(function (el) {
+            var key = el.dataset.statType;
+            var val = stats[key];
+            if (val === undefined || val === null) {
+                el.textContent = '\u2014';
+                return;
+            }
+            var skeleton = el.querySelector('.stat-skeleton');
+            if (skeleton) skeleton.remove();
+            animateCounter(el, val);
         });
     }
 
+    function fetchStats() {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', '/api/core/stats/');
+        xhr.onload = function () {
+            if (xhr.status >= 200 && xhr.status < 400) {
+                try {
+                    statsData = JSON.parse(xhr.responseText);
+                } catch (_) {
+                    statsData = null;
+                }
+            } else {
+                statsData = null;
+            }
+            if (statsData) {
+                renderStats(statsData);
+            } else {
+                document.querySelectorAll('.counter[data-stat-type]').forEach(function (el) {
+                    var skeleton = el.querySelector('.stat-skeleton');
+                    if (skeleton) skeleton.remove();
+                    el.textContent = '\u2014';
+                });
+            }
+        };
+        xhr.onerror = function () {
+            document.querySelectorAll('.counter[data-stat-type]').forEach(function (el) {
+                var skeleton = el.querySelector('.stat-skeleton');
+                if (skeleton) skeleton.remove();
+                el.textContent = '\u2014';
+            });
+        };
+        xhr.send();
+    }
+
+<<<<<<< HEAD
     // Fetch real stats from API and animate counters
     fetch('/api/stats/')
         .then(function (r) { return r.json(); })
@@ -1172,6 +1283,9 @@ document.addEventListener('DOMContentLoaded', function () {
             animateCounters();
         })
         .catch(function () {});
+=======
+    fetchStats();
+>>>>>>> b6062812c96d3b9950c91754df7bfb627ec5b377
 
     // -------------------------------------------------------
     // 4. CHART.JS — Threat Trends (live data from API)
@@ -1279,6 +1393,22 @@ document.addEventListener('DOMContentLoaded', function () {
                     chartLoading.innerHTML = '<p style="color:var(--text-muted);margin:0;font-size:0.875rem;">Unable to load threat data.</p>';
                 }
             });
+<<<<<<< HEAD
+=======
+
+            // Keep max 20 rows
+            while (threatFeedBody.children.length > 20) {
+                threatFeedBody.removeChild(threatFeedBody.lastChild);
+            }
+
+            // Update counter
+            var countEl = document.querySelector('.threat-count');
+            if (countEl) {
+                countEl.textContent = threatFeedBody.children.length + ' threats detected';
+            }
+
+        }, 4000);
+>>>>>>> b6062812c96d3b9950c91754df7bfb627ec5b377
     }
 
     loadThreatData();

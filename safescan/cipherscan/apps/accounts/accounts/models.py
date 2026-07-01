@@ -9,6 +9,21 @@ from django.conf import settings
 
 
 class CustomUser(AbstractUser):
+    groups = models.ManyToManyField(
+        'auth.Group',
+        related_name='customuser_set',
+        blank=True,
+        verbose_name=_('groups'),
+        help_text=_('The groups this user belongs to.'),
+    )
+    user_permissions = models.ManyToManyField(
+        'auth.Permission',
+        related_name='customuser_set',
+        blank=True,
+        verbose_name=_('user permissions'),
+        help_text=_('Specific permissions for this user.'),
+    )
+
     PLAN_CHOICES = [
         ('free', 'Free'),
         ('pro', 'Pro'),
