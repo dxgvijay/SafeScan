@@ -1,0 +1,1393 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Regex Tester — CipherScan{% endblock %}
+
+{% block body_class %}full-width{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {
+    --rgx-cyan: #00D4FF;
+    --rgx-cyan-dim: rgba(0, 212, 255, 0.08);
+    --rgx-purple: #7C5CFF;
+    --rgx-purple-dim: rgba(124, 92, 255, 0.08);
+    --rgx-green: #00FF9D;
+    --rgx-green-dim: rgba(0, 255, 157, 0.08);
+    --rgx-orange: #FF6B35;
+    --rgx-orange-dim: rgba(255, 107, 53, 0.08);
+    --rgx-red: #FF4D6D;
+    --rgx-red-dim: rgba(255, 77, 109, 0.08);
+    --rgx-match-bg: rgba(0, 212, 255, 0.15);
+    --rgx-match-border: rgba(0, 212, 255, 0.3);
+    --rgx-group-bg: rgba(124, 92, 255, 0.12);
+    --rgx-bg: linear-gradient(135deg, #0a0e1a 0%, #0e0a1a 35%, #0f1628 70%, #0a0e1a 100%);
+}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.rgx-hero {
+    position: relative;
+    padding: 3rem 2rem 2.5rem;
+    overflow: hidden;
+    background: var(--rgx-bg);
+    display: flex;
+    align-items: center;
+}
+.rgx-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse at 20% 40%, rgba(0, 212, 255, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 60%, rgba(124, 92, 255, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+}
+.rgx-hero .hero-inner {
+    position: relative;
+    z-index: 2;
+    max-width: 720px;
+    margin: 0 auto;
+    text-align: center;
+}
+.rgx-hero .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--rgx-cyan-dim);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(0, 212, 255, 0.15);
+    border-radius: 100px;
+    padding: 6px 18px 6px 10px;
+    font-size: 0.8rem;
+    color: var(--rgx-cyan);
+    margin-bottom: 1.25rem;
+}
+.rgx-hero .badge-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--rgx-cyan);
+    animation: rgx-pulse 2s ease-in-out infinite;
+}
+@keyframes rgx-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+.rgx-hero h1 {
+    font-size: clamp(1.75rem, 4vw, 2.75rem);
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    line-height: 1.15;
+}
+.rgx-hero h1 .hl-cyan { color: var(--rgx-cyan); }
+.rgx-hero h1 .hl-purple { color: var(--rgx-purple); }
+.rgx-hero .hero-sub {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin-bottom: 0;
+    line-height: 1.6;
+}
+
+/* ============================================================
+   TOOLBAR
+   ============================================================ */
+.rgx-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+.rgx-toolbar .rgx-left {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+.rgx-templates {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.rgx-templates label {
+    font-size: 0.71875rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    white-space: nowrap;
+}
+.rgx-templates select {
+    background: var(--bg-secondary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 0.78125rem;
+    padding: 0.3125rem 1.5rem 0.3125rem 0.5rem;
+    font-family: var(--font-ui);
+    cursor: pointer;
+    outline: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%238892B0' d='M1 1l4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    min-width: 140px;
+}
+.rgx-templates select:focus {
+    border-color: var(--rgx-cyan);
+    box-shadow: 0 0 12px var(--rgx-cyan-dim);
+}
+
+/* ============================================================
+   INPUT LAYOUT
+   ============================================================ */
+.rgx-input-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+@media (min-width: 900px) {
+    .rgx-input-grid { grid-template-columns: 1fr 1fr; }
+}
+
+.rgx-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.rgx-field label {
+    font-size: 0.78125rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.rgx-field label .rgx-label-action {
+    font-weight: 400;
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color var(--transition-fast);
+}
+.rgx-field label .rgx-label-action:hover {
+    color: var(--rgx-cyan);
+}
+
+.rgx-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: var(--bg-secondary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
+}
+.rgx-input-wrap:focus-within {
+    border-color: var(--rgx-cyan-glow);
+    box-shadow: 0 0 20px var(--rgx-cyan-dim);
+}
+.rgx-input-wrap .rgx-prefix {
+    padding: 0 0 0 0.875rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    user-select: none;
+    flex-shrink: 0;
+}
+.rgx-input-wrap input,
+.rgx-input-wrap textarea {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    padding: 0.75rem 0.875rem;
+    min-height: 44px;
+}
+.rgx-input-wrap input::placeholder,
+.rgx-input-wrap textarea::placeholder {
+    color: var(--text-muted);
+    font-family: var(--font-ui);
+}
+.rgx-input-wrap textarea {
+    resize: vertical;
+    min-height: 120px;
+    line-height: 1.5;
+}
+
+.rgx-flags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding-right: 6px;
+    flex-shrink: 0;
+}
+.rgx-flag-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    border: 1px solid var(--glass-border);
+    background: transparent;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 0.71875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.rgx-flag-btn:hover {
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-primary);
+}
+.rgx-flag-btn.active {
+    background: var(--rgx-cyan);
+    color: #0a0e1a;
+    border-color: var(--rgx-cyan);
+}
+
+/* ============================================================
+   ERROR
+   ============================================================ */
+.rgx-error {
+    display: none;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: var(--rgx-red-dim);
+    border: 1px solid rgba(255, 77, 109, 0.2);
+    border-radius: var(--radius-md);
+    color: var(--rgx-red);
+    font-size: 0.8125rem;
+    margin-bottom: 1rem;
+}
+.rgx-error.visible { display: flex; }
+.rgx-error i { font-size: 1rem; flex-shrink: 0; }
+.rgx-error .rgx-err-detail {
+    font-family: var(--font-mono);
+    font-size: 0.71875rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+/* ============================================================
+   RESULTS
+   ============================================================ */
+.rgx-results {
+    display: none;
+}
+.rgx-results.visible { display: block; }
+
+.rgx-results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--glass-border);
+}
+.rgx-results-header .rh-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+.rgx-results-header .rh-left h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.rgx-results-header .rh-match-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 10px;
+    border-radius: 50px;
+    font-size: 0.71875rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+}
+.rgx-results-header .rh-match-count.some {
+    background: var(--rgx-green-dim);
+    color: var(--rgx-green);
+    border: 1px solid rgba(0, 255, 157, 0.15);
+}
+.rgx-results-header .rh-match-count.none {
+    background: var(--rgx-red-dim);
+    color: var(--rgx-red);
+    border: 1px solid rgba(255, 77, 109, 0.15);
+}
+.rgx-results-header .rh-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+/* ============================================================
+   HIGHLIGHTED TEXT
+   ============================================================ */
+.rgx-highlight-wrap {
+    background: var(--bg-secondary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+.rgx-highlight-wrap .rgx-hl-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.625rem 1rem;
+    border-bottom: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.015);
+}
+.rgx-highlight-wrap .rgx-hl-header span {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+.rgx-highlight-wrap .rgx-hl-body {
+    padding: 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.8;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 300px;
+    overflow-y: auto;
+    color: var(--text-primary);
+}
+.rgx-highlight-wrap .rgx-hl-body mark {
+    background: var(--rgx-match-bg);
+    border: 1px solid var(--rgx-match-border);
+    border-radius: 3px;
+    padding: 1px 0;
+    color: var(--rgx-cyan);
+    transition: all var(--transition-fast);
+}
+.rgx-highlight-wrap .rgx-hl-body mark:hover {
+    background: rgba(0, 212, 255, 0.25);
+    box-shadow: 0 0 8px rgba(0, 212, 255, 0.15);
+}
+.rgx-highlight-wrap .rgx-hl-body .rgx-hl-group {
+    background: var(--rgx-group-bg);
+    border: 1px solid rgba(124, 92, 255, 0.2);
+    border-radius: 3px;
+    padding: 1px 0;
+    color: var(--rgx-purple);
+}
+
+/* ============================================================
+   MATCHES TABLE
+   ============================================================ */
+.rgx-matches-section {
+    margin-bottom: 1rem;
+}
+.rgx-matches-section .rgx-ms-header {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.rgx-matches-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.rgx-match-item {
+    background: var(--bg-secondary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    transition: all var(--transition-fast);
+}
+.rgx-match-item:hover {
+    border-color: var(--rgx-cyan-glow);
+    background: var(--rgx-cyan-dim);
+}
+.rgx-match-item .rgx-mi-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    gap: 0.5rem;
+}
+.rgx-match-item .rgx-mi-header .rgx-mi-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--rgx-cyan-dim);
+    color: var(--rgx-cyan);
+    font-size: 0.65625rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-family: var(--font-mono);
+}
+.rgx-match-item .rgx-mi-header .rgx-mi-value {
+    flex: 1;
+    min-width: 0;
+    font-family: var(--font-mono);
+    font-size: 0.78125rem;
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.rgx-match-item .rgx-mi-header .rgx-mi-pos {
+    font-size: 0.65625rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    flex-shrink: 0;
+}
+.rgx-match-item .rgx-mi-header .rgx-mi-arrow {
+    font-size: 0.625rem;
+    color: var(--text-muted);
+    transition: transform var(--transition-fast);
+    flex-shrink: 0;
+}
+.rgx-match-item.open .rgx-mi-header .rgx-mi-arrow {
+    transform: rotate(180deg);
+}
+
+.rgx-match-item .rgx-mi-body {
+    display: none;
+    padding: 0.5rem 0.75rem 0.75rem;
+    border-top: 1px solid var(--glass-border);
+}
+.rgx-match-item.open .rgx-mi-body {
+    display: block;
+    animation: rgx-slide 0.2s ease;
+}
+@keyframes rgx-slide {
+    from { opacity: 0; max-height: 0; }
+    to { opacity: 1; max-height: 500px; }
+}
+
+.rgx-mi-body .rgx-groups-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.75rem;
+}
+.rgx-mi-body .rgx-groups-table th {
+    padding: 0.375rem 0.5rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--glass-border);
+    font-size: 0.65625rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.rgx-mi-body .rgx-groups-table td {
+    padding: 0.375rem 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    word-break: break-all;
+}
+.rgx-mi-body .rgx-groups-table tr:last-child td {
+    border-bottom: none;
+}
+.rgx-mi-body .rgx-groups-table .g-val {
+    color: var(--rgx-green);
+}
+.rgx-mi-body .rgx-groups-table .g-null {
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* ============================================================
+   CHEAT SHEET
+   ============================================================ */
+.rgx-cheat-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(6px);
+    align-items: center;
+    justify-content: center;
+}
+.rgx-cheat-overlay.active { display: flex; }
+.rgx-cheat-modal {
+    background: var(--bg-card-solid);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    max-width: 720px;
+    width: 92%;
+    max-height: 85vh;
+    overflow-y: auto;
+    animation: rgx-modal-in 0.3s ease;
+}
+@keyframes rgx-modal-in {
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.rgx-cheat-modal .rgx-cm-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--glass-border);
+}
+.rgx-cheat-modal .rgx-cm-header h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.rgx-cheat-modal .rgx-cm-header .rgx-cm-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    transition: all var(--transition-fast);
+}
+.rgx-cheat-modal .rgx-cm-header .rgx-cm-close:hover {
+    background: var(--rgx-red-dim);
+    color: var(--rgx-red);
+}
+.rgx-cheat-modal .rgx-cm-body {
+    padding: 1.25rem;
+}
+.rgx-cheat-modal .rgx-cm-section {
+    margin-bottom: 1.25rem;
+}
+.rgx-cheat-modal .rgx-cm-section:last-child { margin-bottom: 0; }
+.rgx-cheat-modal .rgx-cm-section h4 {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--rgx-cyan);
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.375rem;
+    border-bottom: 1px solid var(--glass-border);
+}
+.rgx-cheat-modal .rgx-cm-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 4px;
+}
+.rgx-cheat-modal .rgx-cm-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3125rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+}
+.rgx-cheat-modal .rgx-cm-item:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+.rgx-cheat-modal .rgx-cm-item .cm-pattern {
+    font-family: var(--font-mono);
+    color: var(--rgx-green);
+    font-weight: 600;
+    font-size: 0.71875rem;
+    min-width: 60px;
+}
+.rgx-cheat-modal .rgx-cm-item .cm-desc {
+    color: var(--text-secondary);
+}
+
+/* ============================================================
+   EMPTY / NO MATCH
+   ============================================================ */
+.rgx-no-matches {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+.rgx-no-matches i {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--glass-border);
+}
+
+.rgx-empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-muted);
+}
+.rgx-empty i {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: 0.75rem;
+    color: var(--glass-border);
+}
+.rgx-empty p {
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 768px) {
+    .rgx-hero { padding: 2rem 1.25rem 1.5rem; }
+    .rgx-toolbar { flex-direction: column; align-items: stretch; }
+    .rgx-left { width: 100%; }
+    .rgx-templates { width: 100%; }
+    .rgx-templates select { flex: 1; min-width: 0; }
+    .rgx-results-header { flex-direction: column; align-items: flex-start; }
+    .rgx-input-wrap textarea { min-height: 90px; }
+    .rgx-highlight-wrap .rgx-hl-body { max-height: 200px; font-size: 0.8125rem; }
+}
+
+@media (max-width: 480px) {
+    .rgx-flag-btn { width: 26px; height: 26px; font-size: 0.65625rem; }
+    .rgx-input-wrap input { font-size: 0.8125rem; padding: 0.5rem 0.625rem; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- ============================================================
+     HERO
+     ============================================================ -->
+<section class="rgx-hero">
+    <div class="hero-inner">
+        <div class="hero-badge">
+            <span class="badge-dot"></span>
+            Development Tool
+        </div>
+        <h1>Regex <span class="hl-cyan">Tester</span></h1>
+        <p class="hero-sub">
+            Test regular expressions in real-time. Supports flags, capture groups, and common
+            patterns. All matching is performed server-side using Python's <span class="font-mono" style="color:var(--rgx-green);">re</span> module.
+        </p>
+    </div>
+</section>
+
+<!-- ============================================================
+     MAIN SECTION
+     ============================================================ -->
+<section style="padding: 0 2rem 4rem; max-width: 1100px; margin: 0 auto;">
+
+    <!-- Toolbar -->
+    <div class="rgx-toolbar">
+        <div class="rgx-left">
+            <div class="rgx-templates">
+                <label for="rgxTemplateSelect"><i class="bi bi-bookmark"></i> Common Patterns</label>
+                <select id="rgxTemplateSelect">
+                    <option value="">— Select a pattern —</option>
+                    <option value="email">Email Address</option>
+                    <option value="url">URL</option>
+                    <option value="ipv4">IPv4 Address</option>
+                    <option value="ipv6">IPv6 Address</option>
+                    <option value="phone">Phone Number</option>
+                    <option value="credit_card">Credit Card</option>
+                    <option value="password">Strong Password</option>
+                    <option value="username">Username</option>
+                    <option value="hex_color">Hex Color</option>
+                    <option value="mac_address">MAC Address</option>
+                    <option value="uuid">UUID</option>
+                </select>
+            </div>
+            <button class="btn-cs btn-cs-ghost btn-cs-sm" id="rgxCheatBtn" title="Regex Cheat Sheet">
+                <i class="bi bi-book"></i> Cheat Sheet
+            </button>
+        </div>
+        <div style="display:flex;gap:0.5rem;">
+            <button class="btn-cs btn-cs-ghost btn-cs-sm" id="rgxClear" title="Clear all">
+                <i class="bi bi-trash3"></i> Clear
+            </button>
+        </div>
+    </div>
+
+    <!-- Error -->
+    <div class="rgx-error" id="rgxError" role="alert">
+        <i class="bi bi-exclamation-circle"></i>
+        <div>
+            <div id="rgxErrorText"></div>
+            <div class="rgx-err-detail" id="rgxErrorDetail"></div>
+        </div>
+    </div>
+
+    <!-- Input Grid -->
+    <div class="rgx-input-grid">
+        <!-- Pattern -->
+        <div class="rgx-field">
+            <label>
+                <i class="bi bi-code-slash" style="color:var(--rgx-cyan);"></i> Regex Pattern
+                <span class="rgx-label-action" id="rgxCopyPattern" title="Copy pattern"><i class="bi bi-clipboard"></i> Copy</span>
+            </label>
+            <div class="rgx-input-wrap">
+                <span class="rgx-prefix">/</span>
+                <input type="text" id="rgxPattern" placeholder="Enter regex pattern..." spellcheck="false" autocomplete="off">
+                <span class="rgx-prefix" style="padding:0 2px 0 0;">/</span>
+                <div class="rgx-flags" id="rgxFlags">
+                    <button class="rgx-flag-btn" data-flag="g" title="Global (all matches)">g</button>
+                    <button class="rgx-flag-btn" data-flag="i" title="Case insensitive">i</button>
+                    <button class="rgx-flag-btn" data-flag="m" title="Multiline">m</button>
+                    <button class="rgx-flag-btn" data-flag="s" title="Dotall">s</button>
+                    <button class="rgx-flag-btn" data-flag="u" title="Unicode">u</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Text -->
+        <div class="rgx-field">
+            <label>
+                <i class="bi bi-text-paragraph" style="color:var(--rgx-purple);"></i> Test Text
+                <span class="rgx-label-action" id="rgxStatChars">0 chars</span>
+            </label>
+            <div class="rgx-input-wrap">
+                <textarea id="rgxText" placeholder="Enter test text to match against..." spellcheck="false"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results -->
+    <div class="rgx-results" id="rgxResults">
+        <div class="rgx-results-header">
+            <div class="rh-left">
+                <h3><i class="bi bi-check-circle" style="color:var(--rgx-green);"></i> Matches</h3>
+                <span class="rh-match-count" id="rgxMatchCount"></span>
+            </div>
+            <div class="rh-actions">
+                <button class="btn-cs btn-cs-outline btn-cs-sm" id="rgxCopyMatches" disabled><i class="bi bi-files"></i> Copy Matches</button>
+                <button class="btn-cs btn-cs-outline btn-cs-sm" id="rgxDownload" disabled><i class="bi bi-download"></i> Download</button>
+            </div>
+        </div>
+
+        <!-- Highlighted Text -->
+        <div class="rgx-highlight-wrap" id="rgxHighlight">
+            <div class="rgx-hl-header">
+                <span><i class="bi bi-highlighter"></i> Highlighted Matches</span>
+                <span id="rgxHlCount">0 matches</span>
+            </div>
+            <div class="rgx-hl-body" id="rgxHlBody">
+                <span class="rgx-no-matches">No matches found</span>
+            </div>
+        </div>
+
+        <!-- Matches List -->
+        <div class="rgx-matches-section">
+            <div class="rgx-ms-header"><i class="bi bi-list-ol"></i> Match Details</div>
+            <div class="rgx-matches-list" id="rgxMatchList">
+                <div class="rgx-no-matches">No matches</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="rgx-empty" id="rgxEmpty">
+        <i class="bi bi-code-slash"></i>
+        <p>Enter a regex pattern and test text to see matches</p>
+    </div>
+</section>
+
+<!-- ============================================================
+     CHEAT SHEET MODAL
+     ============================================================ -->
+<div class="rgx-cheat-overlay" id="rgxCheatOverlay">
+    <div class="rgx-cheat-modal">
+        <div class="rgx-cm-header">
+            <h3><i class="bi bi-book" style="color:var(--rgx-cyan);"></i> Regex Cheat Sheet</h3>
+            <button class="rgx-cm-close" id="rgxCheatClose" aria-label="Close cheat sheet">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div class="rgx-cm-body" id="rgxCheatBody">
+            <div class="rgx-no-matches">Loading...</div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    'use strict';
+
+    // -------------------------------------------------------
+    // DOM refs
+    // -------------------------------------------------------
+    var patternInput = document.getElementById('rgxPattern');
+    var textInput = document.getElementById('rgxText');
+    var flagBtns = document.querySelectorAll('.rgx-flag-btn');
+    var templateSelect = document.getElementById('rgxTemplateSelect');
+    var errorEl = document.getElementById('rgxError');
+    var errorText = document.getElementById('rgxErrorText');
+    var errorDetail = document.getElementById('rgxErrorDetail');
+    var resultsEl = document.getElementById('rgxResults');
+    var emptyEl = document.getElementById('rgxEmpty');
+    var hlBody = document.getElementById('rgxHlBody');
+    var hlCount = document.getElementById('rgxHlCount');
+    var matchCount = document.getElementById('rgxMatchCount');
+    var matchList = document.getElementById('rgxMatchList');
+    var statChars = document.getElementById('rgxStatChars');
+    var copyPatternBtn = document.getElementById('rgxCopyPattern');
+    var copyMatchesBtn = document.getElementById('rgxCopyMatches');
+    var downloadBtn = document.getElementById('rgxDownload');
+    var clearBtn = document.getElementById('rgxClear');
+    var cheatBtn = document.getElementById('rgxCheatBtn');
+    var cheatOverlay = document.getElementById('rgxCheatOverlay');
+    var cheatClose = document.getElementById('rgxCheatClose');
+    var cheatBody = document.getElementById('rgxCheatBody');
+
+    // -------------------------------------------------------
+    // State
+    // -------------------------------------------------------
+    var debounceTimer = null;
+    var currentMatches = [];
+    var currentPattern = '';
+
+    // -------------------------------------------------------
+    // Utility
+    // -------------------------------------------------------
+    function getCSRF() {
+        var meta = document.querySelector('meta[name="csrf-token"]');
+        return meta ? meta.getAttribute('content') : '';
+    }
+
+    function escapeHtml(str) {
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+    }
+
+    function getFlags() {
+        var flags = [];
+        flagBtns.forEach(function (btn) {
+            if (btn.classList.contains('active')) {
+                flags.push(btn.dataset.flag);
+            }
+        });
+        return flags;
+    }
+
+    // -------------------------------------------------------
+    // Toast
+    // -------------------------------------------------------
+    function toastSuccess(msg) {
+        if (window.CipherScan && window.CipherScan.toast) {
+            window.CipherScan.toast.success('Done', msg);
+        }
+    }
+
+    function toastError(msg) {
+        if (window.CipherScan && window.CipherScan.toast) {
+            window.CipherScan.toast.error('Error', msg);
+        }
+    }
+
+    // -------------------------------------------------------
+    // Copy
+    // -------------------------------------------------------
+    function copyToClipboard(text, btnEl, successMsg) {
+        if (!text) return;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(function () {
+                if (btnEl) {
+                    var orig = btnEl.innerHTML;
+                    btnEl.innerHTML = '<i class="bi bi-check-lg"></i> Copied!';
+                    setTimeout(function () { btnEl.innerHTML = orig; }, 1800);
+                }
+                toastSuccess(successMsg || 'Copied to clipboard');
+            }).catch(function () {
+                fallbackCopy(text, btnEl, successMsg);
+            });
+        } else {
+            fallbackCopy(text, btnEl, successMsg);
+        }
+    }
+
+    function fallbackCopy(text, btnEl, successMsg) {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+            document.execCommand('copy');
+            if (btnEl) {
+                var orig = btnEl.innerHTML;
+                btnEl.innerHTML = '<i class="bi bi-check-lg"></i> Copied!';
+                setTimeout(function () { btnEl.innerHTML = orig; }, 1800);
+            }
+            toastSuccess(successMsg || 'Copied to clipboard');
+        } catch (e) {
+            toastError('Could not copy');
+        }
+        document.body.removeChild(ta);
+    }
+
+    // -------------------------------------------------------
+    // Build highlighted text
+    // -------------------------------------------------------
+    function buildHighlight(text, matches) {
+        if (!text || !matches || matches.length === 0) {
+            hlBody.innerHTML = '<span class="rgx-no-matches">No matches found</span>';
+            hlCount.textContent = '0 matches';
+            return;
+        }
+
+        var html = '';
+        var lastIdx = 0;
+        var matchIdx = 0;
+
+        matches.forEach(function (m) {
+            var start = m.start;
+            var end = m.end;
+
+            // Text before match
+            if (start > lastIdx) {
+                html += escapeHtml(text.substring(lastIdx, start));
+            }
+
+            // The match
+            html += '<mark title="Match ' + (matchIdx + 1) + ': [' + start + '-' + end + ']">' + escapeHtml(text.substring(start, end)) + '</mark>';
+            lastIdx = end;
+            matchIdx++;
+        });
+
+        // Remaining text
+        if (lastIdx < text.length) {
+            html += escapeHtml(text.substring(lastIdx));
+        }
+
+        hlBody.innerHTML = html;
+        hlCount.textContent = matches.length + ' match' + (matches.length !== 1 ? 'es' : '');
+    }
+
+    // -------------------------------------------------------
+    // Build match details
+    // -------------------------------------------------------
+    function buildMatchDetails(matches, groupsCount, namedGroupsList) {
+        if (!matches || matches.length === 0) {
+            matchList.innerHTML = '<div class="rgx-no-matches">No matches</div>';
+            return;
+        }
+
+        var html = '';
+        matches.forEach(function (m, idx) {
+            var isOpen = idx === 0 ? 'open' : '';
+            html += '<div class="rgx-match-item ' + isOpen + '" data-idx="' + idx + '">';
+            html += '<div class="rgx-mi-header">';
+            html += '<span class="rgx-mi-num">' + (idx + 1) + '</span>';
+            html += '<span class="rgx-mi-value">' + escapeHtml(m.full.substring(0, 60)) + (m.full.length > 60 ? '...' : '') + '</span>';
+            html += '<span class="rgx-mi-pos">[' + m.start + ' &ndash; ' + m.end + ']</span>';
+            html += '<span class="rgx-mi-arrow"><i class="bi bi-chevron-down"></i></span>';
+            html += '</div>';
+            html += '<div class="rgx-mi-body">';
+            html += '<table class="rgx-groups-table">';
+            html += '<thead><tr><th>Group</th><th>Value</th><th>Position</th></tr></thead>';
+            html += '<tbody>';
+
+            // Full match as group 0
+            html += '<tr><td style="color:var(--rgx-cyan);font-weight:600;">0</td><td class="g-val">' + escapeHtml(m.full) + '</td><td>[' + m.start + '–' + m.end + ']</td></tr>';
+
+            // Named groups first
+            var namedKeys = Object.keys(m.named_groups || {});
+            namedKeys.forEach(function (name) {
+                var g = m.named_groups[name];
+                html += '<tr>';
+                html += '<td style="color:var(--rgx-purple);">?P&lt;' + escapeHtml(name) + '&gt;</td>';
+                html += '<td class="' + (g.value !== null ? 'g-val' : 'g-null') + '">' + (g.value !== null ? escapeHtml(g.value) : '(null)') + '</td>';
+                html += '<td>' + (g.value !== null ? '[' + g.start + '–' + g.end + ']' : '—') + '</td>';
+                html += '</tr>';
+            });
+
+            // Numbered groups
+            var groupKeys = Object.keys(m.groups || {});
+            groupKeys.forEach(function (key) {
+                var g = m.groups[key];
+                // Skip if already shown as named
+                if (g.name && namedKeys.indexOf(g.name) !== -1) return;
+                html += '<tr>';
+                html += '<td>' + key + '</td>';
+                html += '<td class="' + (g.value !== null ? 'g-val' : 'g-null') + '">' + (g.value !== null ? escapeHtml(g.value) : '(null)') + '</td>';
+                html += '<td>' + (g.value !== null ? '[' + g.start + '–' + g.end + ']' : '—') + '</td>';
+                html += '</tr>';
+            });
+
+            if (!Object.keys(m.groups || {}).length && !Object.keys(m.named_groups || {}).length) {
+                html += '<tr><td colspan="3" style="color:var(--text-muted);font-style:italic;text-align:center;">No capture groups</td></tr>';
+            }
+
+            html += '</tbody></table>';
+            html += '</div>';
+            html += '</div>';
+        });
+
+        matchList.innerHTML = html;
+
+        // Toggle details
+        matchList.querySelectorAll('.rgx-match-item').forEach(function (item) {
+            item.querySelector('.rgx-mi-header').addEventListener('click', function () {
+                item.classList.toggle('open');
+            });
+        });
+    }
+
+    // -------------------------------------------------------
+    // Display results
+    // -------------------------------------------------------
+    function showResults(data) {
+        hideError();
+        resultsEl.classList.add('visible');
+        emptyEl.style.display = 'none';
+
+        currentMatches = data.matches;
+        currentPattern = data.pattern;
+
+        // Match count badge
+        var count = data.match_count;
+        if (count > 0) {
+            matchCount.className = 'rh-match-count some';
+            matchCount.innerHTML = '<i class="bi bi-check-circle"></i> ' + count + ' match' + (count !== 1 ? 'es' : '');
+        } else {
+            matchCount.className = 'rh-match-count none';
+            matchCount.innerHTML = '<i class="bi bi-x-circle"></i> No matches';
+        }
+
+        // Enable/disable buttons
+        copyMatchesBtn.disabled = count === 0;
+        downloadBtn.disabled = count === 0;
+
+        // Highlighted text
+        buildHighlight(textInput.value, data.matches);
+
+        // Match details
+        buildMatchDetails(data.matches, data.groups_count, data.named_groups_list);
+
+        // Update chars
+        statChars.textContent = textInput.value.length + ' chars';
+    }
+
+    // -------------------------------------------------------
+    // API call
+    // -------------------------------------------------------
+    function testRegex() {
+        hideError();
+        var pattern = patternInput.value;
+        var text = textInput.value;
+
+        if (!pattern) {
+            resultsEl.classList.remove('visible');
+            emptyEl.style.display = 'block';
+            copyMatchesBtn.disabled = true;
+            downloadBtn.disabled = true;
+            statChars.textContent = text.length + ' chars';
+            return;
+        }
+
+        var flags = getFlags();
+
+        var url = '{% url "regex_test_api" %}';
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRF()
+            },
+            body: JSON.stringify({
+                pattern: pattern,
+                text: text,
+                flags: flags
+            })
+        })
+        .then(function (res) {
+            return res.json().then(function (json) {
+                if (!res.ok) {
+                    throw { message: json.error || 'Request failed', detail: json.error_detail };
+                }
+                return json;
+            });
+        })
+        .then(function (json) {
+            if (json.error) {
+                showError(json.error, null);
+                return;
+            }
+            showResults(json);
+        })
+        .catch(function (err) {
+            if (err && err.message) {
+                showError(err.message, err.detail);
+            } else {
+                showError(err.message || 'An unexpected error occurred', null);
+            }
+            resultsEl.classList.remove('visible');
+            copyMatchesBtn.disabled = true;
+            downloadBtn.disabled = true;
+        });
+    }
+
+    function debouncedTest() {
+        if (debounceTimer) clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(function () {
+            testRegex();
+        }, 300);
+    }
+
+    // -------------------------------------------------------
+    // Error
+    // -------------------------------------------------------
+    function showError(msg, detail) {
+        errorText.textContent = msg;
+        if (detail) {
+            var d = '';
+            if (detail.position !== undefined && detail.position >= 0) {
+                d += ' at position ' + detail.position;
+            }
+            if (detail.line !== undefined && detail.line >= 0) {
+                d += ' (line ' + detail.line + ', col ' + (detail.col >= 0 ? detail.col : '?') + ')';
+            }
+            errorDetail.textContent = d ? 'Error' + d : '';
+        } else {
+            errorDetail.textContent = '';
+        }
+        errorEl.classList.add('visible');
+    }
+
+    function hideError() {
+        errorEl.classList.remove('visible');
+        errorText.textContent = '';
+        errorDetail.textContent = '';
+    }
+
+    // -------------------------------------------------------
+    // Cheat Sheet
+    // -------------------------------------------------------
+    function loadCheatSheet() {
+        cheatBody.innerHTML = '<div class="rgx-no-matches">Loading...</div>';
+        var url = '{% url "regex_templates_api" %}';
+        fetch(url)
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                var html = '';
+                (data.cheat_sheet || []).forEach(function (section) {
+                    html += '<div class="rgx-cm-section">';
+                    html += '<h4>' + escapeHtml(section.section) + '</h4>';
+                    html += '<div class="rgx-cm-grid">';
+                    (section.items || []).forEach(function (item) {
+                        html += '<div class="rgx-cm-item">';
+                        html += '<span class="cm-pattern">' + escapeHtml(item.pattern) + '</span>';
+                        html += '<span class="cm-desc">' + escapeHtml(item.desc) + '</span>';
+                        html += '</div>';
+                    });
+                    html += '</div></div>';
+                });
+                cheatBody.innerHTML = html;
+            })
+            .catch(function () {
+                cheatBody.innerHTML = '<div class="rgx-no-matches">Failed to load cheat sheet</div>';
+            });
+    }
+
+    function openCheatSheet() {
+        cheatOverlay.classList.add('active');
+        loadCheatSheet();
+    }
+
+    function closeCheatSheet() {
+        cheatOverlay.classList.remove('active');
+    }
+
+    // -------------------------------------------------------
+    // Template select
+    // -------------------------------------------------------
+    function applyTemplate(templateId) {
+        if (!templateId) return;
+        var url = '{% url "regex_templates_api" %}';
+        fetch(url)
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                var templates = data.templates || [];
+                var found = null;
+                templates.forEach(function (t) {
+                    if (t.id === templateId) found = t;
+                });
+                if (found) {
+                    patternInput.value = found.pattern;
+                    testRegex();
+                }
+            })
+            .catch(function () {});
+    }
+
+    // -------------------------------------------------------
+    // Download
+    // -------------------------------------------------------
+    function downloadResults() {
+        if (!currentMatches || currentMatches.length === 0) return;
+        var lines = [];
+        lines.push('=== CipherScan Regex Tester Results ===');
+        lines.push('Pattern: /' + currentPattern + '/' + getFlags().join(''));
+        lines.push('Test Text: ' + textInput.value.length + ' chars');
+        lines.push('Total Matches: ' + currentMatches.length);
+        lines.push('');
+
+        currentMatches.forEach(function (m, idx) {
+            lines.push('--- Match ' + (idx + 1) + ' ---');
+            lines.push('Value: ' + m.full);
+            lines.push('Position: [' + m.start + ' - ' + m.end + ']');
+            var groupKeys = Object.keys(m.groups || {});
+            if (groupKeys.length) {
+                lines.push('Groups:');
+                groupKeys.forEach(function (k) {
+                    var g = m.groups[k];
+                    var label = g.name ? '?P<' + g.name + '>' : k;
+                    lines.push('  ' + label + ': ' + (g.value !== null ? g.value : '(null)') + ' [' + g.start + '-' + g.end + ']');
+                });
+            }
+            lines.push('');
+        });
+
+        lines.push('=== Generated by CipherScan (https://cipherscan.app) ===');
+        var blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'regex-matches.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        toastSuccess('Results downloaded');
+    }
+
+    // -------------------------------------------------------
+    // Copy matches
+    // -------------------------------------------------------
+    function copyMatches() {
+        if (!currentMatches || currentMatches.length === 0) return;
+        var lines = currentMatches.map(function (m, idx) {
+            return 'Match ' + (idx + 1) + ' [' + m.start + '-' + m.end + ']: ' + m.full;
+        });
+        copyToClipboard(lines.join('\n'), copyMatchesBtn, 'Matches copied to clipboard');
+    }
+
+    // -------------------------------------------------------
+    // Clear
+    // -------------------------------------------------------
+    function clearAll() {
+        patternInput.value = '';
+        textInput.value = '';
+        flagBtns.forEach(function (btn) { btn.classList.remove('active'); });
+        currentMatches = [];
+        currentPattern = '';
+        resultsEl.classList.remove('visible');
+        emptyEl.style.display = 'block';
+        hideError();
+        copyMatchesBtn.disabled = true;
+        downloadBtn.disabled = true;
+        statChars.textContent = '0 chars';
+        templateSelect.value = '';
+        patternInput.focus();
+    }
+
+    // -------------------------------------------------------
+    // Events
+    // -------------------------------------------------------
+
+    // Pattern input
+    patternInput.addEventListener('input', debouncedTest);
+    patternInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            if (debounceTimer) clearTimeout(debounceTimer);
+            testRegex();
+        }
+    });
+
+    // Text input
+    textInput.addEventListener('input', debouncedTest);
+    textInput.addEventListener('keydown', function (e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            e.preventDefault();
+            if (debounceTimer) clearTimeout(debounceTimer);
+            testRegex();
+        }
+    });
+
+    // Flag buttons
+    flagBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            this.classList.toggle('active');
+            if (patternInput.value) debouncedTest();
+        });
+    });
+
+    // Template select
+    templateSelect.addEventListener('change', function () {
+        applyTemplate(this.value);
+    });
+
+    // Copy pattern
+    copyPatternBtn.addEventListener('click', function () {
+        if (patternInput.value) {
+            copyToClipboard(patternInput.value, this, 'Pattern copied to clipboard');
+        }
+    });
+
+    // Copy matches
+    copyMatchesBtn.addEventListener('click', copyMatches);
+
+    // Download
+    downloadBtn.addEventListener('click', downloadResults);
+
+    // Clear
+    clearBtn.addEventListener('click', clearAll);
+
+    // Cheat sheet
+    cheatBtn.addEventListener('click', openCheatSheet);
+    cheatClose.addEventListener('click', closeCheatSheet);
+    cheatOverlay.addEventListener('click', function (e) {
+        if (e.target === cheatOverlay) closeCheatSheet();
+    });
+
+    // Keyboard: Escape closes cheat sheet
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && cheatOverlay.classList.contains('active')) {
+            closeCheatSheet();
+        }
+    });
+
+    // -------------------------------------------------------
+    // Init
+    // -------------------------------------------------------
+    emptyEl.style.display = 'block';
+    resultsEl.classList.remove('visible');
+    copyMatchesBtn.disabled = true;
+    downloadBtn.disabled = true;
+    patternInput.focus();
+
+})();
+</script>
+{% endblock %}

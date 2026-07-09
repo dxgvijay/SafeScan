@@ -1,1 +1,1251 @@
-{% extends 'base.html' %}{% load static %}{% block title %}Threat Intelligence — CipherScan{% endblock %}{% block body_class %}full-width{% endblock %}{% block content %}<div class="container py-5"><div class="text-center py-5"><i class="fas fa-shield-halo" style="font-size:3rem;color:var(--accent-cyan);margin-bottom:1rem;"></i><h2>Threat Intelligence</h2><p class="text-muted">Coming soon — Real-time threat feeds, IoC analysis, and contextual threat data.</p></div></div>{% endblock %}
+﻿{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Threat Intelligence — CipherScan{% endblock %}
+{% block body_class %}full-width{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {
+    --ti-cyan: #00d4ff;
+    --ti-cyan-light: #66e3ff;
+    --ti-cyan-dark: #0099cc;
+    --ti-cyan-glow: rgba(0, 212, 255, 0.25);
+    --ti-cyan-dim: rgba(0, 212, 255, 0.08);
+    --ti-purple: #a855f7;
+    --ti-purple-glow: rgba(168, 85, 247, 0.2);
+    --ti-purple-dim: rgba(168, 85, 247, 0.08);
+    --ti-orange: #f97316;
+    --ti-red: #ef4444;
+    --ti-green: #22c55e;
+    --ti-bg: linear-gradient(135deg, #0a0e1a 0%, #0a141e 35%, #0f1628 70%, #0a0e1a 100%);
+    --ti-shimmer: rgba(255,255,255,0.04);
+}
+/* Hero */
+.ti-hero {
+    position: relative;
+    padding: 3.5rem 2rem 2.5rem;
+    overflow: hidden;
+    background: var(--ti-bg);
+    min-height: 360px;
+    display: flex;
+    align-items: center;
+}
+.ti-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse at 30% 40%, rgba(0, 212, 255, 0.05) 0%, transparent 50%),
+        radial-gradient(ellipse at 70% 60%, rgba(168, 85, 247, 0.03) 0%, transparent 50%);
+    pointer-events: none;
+}
+.ti-hero .hero-inner { position: relative; z-index: 2; max-width: 800px; margin: 0 auto; text-align: center; }
+.ti-hero .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--ti-cyan-dim); backdrop-filter: blur(8px);
+    border: 1px solid var(--ti-cyan-glow); border-radius: 100px;
+    padding: 5px 16px 5px 8px; font-size: 0.75rem; color: var(--ti-cyan-light);
+    margin-bottom: 1.25rem;
+}
+.ti-hero .badge-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ti-cyan); animation: pulse-dot 2s ease-in-out infinite; }
+@keyframes pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+.ti-hero h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 0.6rem; line-height: 1.2; }
+.ti-hero .hl-cyan { color: var(--ti-cyan); }
+.ti-hero .hl-purple { color: var(--ti-purple); }
+.ti-hero .hero-sub { color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1.5rem; max-width: 600px; margin-left: auto; margin-right: auto; }
+
+/* Search Card */
+.ti-search-card {
+    max-width: 800px;
+    margin: -2rem auto 1.5rem;
+    position: relative;
+    z-index: 3;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 1.25rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+.ti-search-row {
+    display: flex; gap: 10px; align-items: center;
+    background: var(--bg-tertiary); border: 1px solid var(--border-color);
+    border-radius: 10px; padding: 5px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+.ti-search-row:focus-within { border-color: var(--ti-cyan-glow); box-shadow: 0 0 20px var(--ti-cyan-dim); }
+.ti-search-row input {
+    flex: 1; background: transparent; border: none; outline: none;
+    color: var(--text-primary); font-size: 0.92rem; padding: 9px 12px; min-width: 0;
+}
+.ti-search-row input::placeholder { color: var(--text-muted); }
+.ti-search-row .ti-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--ti-cyan); color: #000; border: none;
+    border-radius: 7px; padding: 9px 18px; font-weight: 600; font-size: 0.85rem;
+    cursor: pointer; transition: all 0.25s; white-space: nowrap;
+}
+.ti-search-row .ti-btn:hover { background: var(--ti-cyan-light); box-shadow: 0 0 20px var(--ti-cyan-glow); transform: translateY(-1px); }
+.ti-search-row .ti-btn:active { transform: translateY(0); }
+.ti-search-row .ti-btn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; transform: none; }
+
+/* Type Badge */
+.ti-type-badge {
+    display: none; align-items: center; gap: 5px;
+    padding: 3px 10px; border-radius: 100px;
+    font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+    white-space: nowrap; letter-spacing: 0.3px;
+    margin-left: 8px; flex-shrink: 0;
+}
+.ti-type-badge.visible { display: inline-flex; }
+.ti-type-badge.ipv4 { background: rgba(0, 212, 255, 0.12); color: var(--ti-cyan); border: 1px solid rgba(0, 212, 255, 0.2); }
+.ti-type-badge.ipv6 { background: rgba(168, 85, 247, 0.12); color: var(--ti-purple); border: 1px solid rgba(168, 85, 247, 0.2); }
+.ti-type-badge.domain { background: rgba(34, 197, 94, 0.12); color: var(--ti-green); border: 1px solid rgba(34, 197, 94, 0.2); }
+.ti-type-badge.url { background: rgba(249, 115, 22, 0.12); color: var(--ti-orange); border: 1px solid rgba(249, 115, 22, 0.2); }
+.ti-type-badge.hash { background: rgba(239, 68, 68, 0.12); color: var(--ti-red); border: 1px solid rgba(239, 68, 68, 0.2); }
+.ti-type-badge.cve { background: rgba(168, 85, 247, 0.12); color: var(--ti-purple); border: 1px solid rgba(168, 85, 247, 0.2); }
+
+/* Search History */
+.ti-history { display: none; margin-top: 0.75rem; }
+.ti-history.visible { display: block; }
+.ti-history-label { font-size: 0.7rem; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
+.ti-history-label .clear-btn { font-size: 0.6rem; color: var(--text-muted); cursor: pointer; text-transform: none; letter-spacing: 0; margin-left: auto; }
+.ti-history-label .clear-btn:hover { color: var(--ti-red); }
+.ti-history-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+.ti-history-pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 12px; border-radius: 100px;
+    font-size: 0.78rem; color: var(--text-secondary);
+    background: var(--bg-tertiary); border: 1px solid var(--border-color);
+    cursor: pointer; transition: all 0.2s; max-width: 100%;
+}
+.ti-history-pill:hover { border-color: var(--ti-cyan-glow); color: var(--text-primary); }
+.ti-history-pill .ti-h-type {
+    font-size: 0.55rem; font-weight: 700; text-transform: uppercase;
+    padding: 1px 5px; border-radius: 3px; flex-shrink: 0;
+}
+.ti-history-pill .ti-h-value { overflow: hidden; text-overflow: ellipsis; max-width: 180px; white-space: nowrap; }
+.ti-history-pill .ti-h-del {
+    font-size: 0.7rem; color: var(--text-muted); cursor: pointer; padding: 0 2px;
+    transition: color 0.2s;
+}
+.ti-history-pill .ti-h-del:hover { color: var(--ti-red); }
+
+/* Loading Skeletons */
+.ti-loading { display: none; padding: 1rem 0; }
+.ti-loading.visible { display: block; }
+.ti-skeleton { border-radius: 14px; border: 1px solid var(--border-color); background: var(--bg-secondary); overflow: hidden; margin-bottom: 1.25rem; }
+.ti-skeleton-hdr { height: 44px; background: var(--bg-tertiary); border-bottom: 1px solid var(--border-color); }
+.ti-skeleton-body { padding: 1.25rem; }
+.ti-skeleton-row { display: flex; gap: 12px; margin-bottom: 10px; }
+.ti-skeleton-row:last-child { margin-bottom: 0; }
+.ti-skeleton-box { border-radius: 8px; background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--ti-shimmer) 50%, var(--bg-tertiary) 75%); background-size: 200% 100%; animation: ti-shimmer 1.5s ease-in-out infinite; }
+.ti-skeleton-circle { width: 100px; height: 100px; border-radius: 50%; flex-shrink: 0; }
+.ti-skeleton-line { height: 14px; border-radius: 4px; flex: 1; }
+.ti-skeleton-line-sm { height: 10px; border-radius: 3px; flex: 1; max-width: 120px; }
+@keyframes ti-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+.ti-loading-txt { text-align: center; color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.75rem; animation: ti-pulse-txt 1.5s ease-in-out infinite; }
+@keyframes ti-pulse-txt { 0%,100% { opacity: 0.6; } 50% { opacity: 1; } }
+
+/* Results */
+.ti-results { display: none; padding: 1.5rem 0 3rem; }
+.ti-results.visible { display: block; }
+
+/* Action bar */
+.ti-action-bar {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-bottom: 1.25rem; justify-content: flex-end;
+}
+.ti-action-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 6px 14px; border-radius: 8px;
+    font-size: 0.78rem; font-weight: 500;
+    background: var(--bg-tertiary); color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    cursor: pointer; transition: all 0.2s;
+}
+.ti-action-btn:hover { border-color: var(--ti-cyan-glow); color: var(--text-primary); background: var(--ti-cyan-dim); }
+.ti-action-btn i { font-size: 0.9rem; }
+.ti-action-btn .toast-msg { display: none; }
+.ti-action-btn.copied { border-color: var(--ti-green); color: var(--ti-green); }
+
+.ti-card {
+    background: var(--bg-secondary); border: 1px solid var(--border-color);
+    border-radius: 14px; overflow: hidden; margin-bottom: 1.25rem;
+    opacity: 0; transform: translateY(16px); transition: opacity 0.45s ease, transform 0.45s ease;
+}
+.ti-card.fade-in { opacity: 1; transform: translateY(0); }
+.ti-card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.85rem 1.25rem; border-bottom: 1px solid var(--border-color);
+    background: var(--bg-tertiary); gap: 8px; flex-wrap: wrap;
+}
+.ti-card-header h5 { margin: 0; font-size: 0.88rem; font-weight: 600; display: flex; align-items: center; gap: 7px; }
+.ti-card-body { padding: 1.25rem; }
+.ti-card-body p.empty-state { color: var(--text-muted); text-align: center; padding: 1.5rem 0; margin: 0; font-size: 0.85rem; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.ti-card-body p.empty-state i { font-size: 1.8rem; opacity: 0.4; }
+
+/* Dashboard Overview Card */
+.ti-ov-dash { display: flex; gap: 1.5rem; align-items: stretch; flex-wrap: wrap; }
+.ti-ov-left { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 140px; flex-shrink: 0; }
+.ti-threat-gauge {
+    width: 110px; height: 110px; border-radius: 50%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    position: relative; margin-bottom: 8px;
+}
+.ti-threat-gauge .score-val { font-size: 1.75rem; font-weight: 800; line-height: 1; }
+.ti-threat-gauge .score-lbl { font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.7; margin-top: 2px; }
+.ti-threat-gauge.safe { background: conic-gradient(var(--ti-green) 0deg 360deg, transparent 360deg); color: var(--ti-green); border: 3px solid var(--ti-green); }
+.ti-threat-gauge.suspicious { background: conic-gradient(var(--ti-orange) 0deg 180deg, rgba(249,115,22,0.15) 180deg 360deg); color: var(--ti-orange); border: 3px solid var(--ti-orange); }
+.ti-threat-gauge.malicious { background: conic-gradient(var(--ti-red) 0deg 360deg, transparent 360deg); color: var(--ti-red); border: 3px solid var(--ti-red); }
+.ti-threat-gauge.critical { background: conic-gradient(#7f1d1d 0deg 360deg, transparent 360deg); color: #fca5a5; border: 3px solid #fca5a5; }
+.ti-threat-gauge.unknown { background: rgba(148,163,184,0.15); color: #94a3b8; border: 3px solid #94a3b8; }
+.ti-risk-badge {
+    display: inline-block; padding: 3px 14px; border-radius: 100px;
+    font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+}
+.ti-risk-badge.safe { background: rgba(34,197,94,0.15); color: var(--ti-green); border: 1px solid rgba(34,197,94,0.3); }
+.ti-risk-badge.suspicious { background: rgba(249,115,22,0.15); color: var(--ti-orange); border: 1px solid rgba(249,115,22,0.3); }
+.ti-risk-badge.malicious { background: rgba(239,68,68,0.15); color: var(--ti-red); border: 1px solid rgba(239,68,68,0.3); }
+.ti-risk-badge.critical { background: rgba(127,29,29,0.25); color: #fca5a5; border: 1px solid rgba(252,165,165,0.3); }
+.ti-risk-badge.unknown { background: rgba(148,163,184,0.1); color: #94a3b8; border: 1px solid rgba(148,163,184,0.2); }
+
+.ti-ov-right { flex: 1; min-width: 260px; display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; }
+.ti-ov-metric {
+    background: var(--bg-tertiary); border-radius: 8px; padding: 12px 14px;
+    border: 1px solid var(--border-color);
+}
+.ti-ov-metric .m-lbl { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-muted); margin-bottom: 3px; }
+.ti-ov-metric .m-val { font-size: 0.85rem; color: var(--text-primary); font-weight: 500; word-break: break-all; }
+.ti-ov-metric .m-val small { font-weight: 400; }
+.ti-ov-indicator { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; }
+.ti-ov-indicator .m-val { font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace; font-size: 0.78rem; flex: 1; }
+.ti-copy-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 6px;
+    background: transparent; color: var(--text-muted);
+    border: 1px solid var(--border-color);
+    cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+    font-size: 0.75rem; padding: 0;
+}
+.ti-copy-btn:hover { border-color: var(--ti-cyan-glow); color: var(--ti-cyan); background: var(--ti-cyan-dim); }
+.ti-copy-btn.copied { border-color: var(--ti-green); color: var(--ti-green); }
+
+/* Confidence bar */
+.ti-conf-bar-wrap { margin-top: 6px; }
+.ti-conf-bar-bg { height: 5px; border-radius: 3px; background: var(--border-color); overflow: hidden; }
+.ti-conf-bar-fill { height: 100%; border-radius: 3px; transition: width 0.8s ease; }
+.ti-conf-bar-fill.high { background: var(--ti-green); }
+.ti-conf-bar-fill.medium { background: var(--ti-orange); }
+.ti-conf-bar-fill.low { background: var(--ti-red); }
+.ti-conf-bar-label { font-size: 0.55rem; color: var(--text-muted); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.3px; }
+
+/* Severity bar (CVE) */
+.ti-sev-bar { height: 7px; border-radius: 4px; margin-top: 5px; overflow: hidden; }
+.ti-sev-bar-fill { height: 100%; border-radius: 4px; }
+.ti-sev-bar-fill.critical { background: linear-gradient(90deg, #7f1d1d, #dc2626); }
+.ti-sev-bar-fill.high { background: linear-gradient(90deg, #dc2626, #f97316); }
+.ti-sev-bar-fill.medium { background: linear-gradient(90deg, #f97316, #eab308); }
+.ti-sev-bar-fill.low { background: linear-gradient(90deg, #22c55e, #16a34a); }
+
+/* Source Checklist */
+.ti-src-checklist { display: flex; flex-direction: column; gap: 3px; }
+.ti-src-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 5px 10px; border-radius: 7px; font-size: 0.8rem;
+    background: var(--bg-tertiary); border: 1px solid var(--border-color);
+}
+.ti-src-item .src-icon { font-size: 0.9rem; flex-shrink: 0; }
+.ti-src-item .src-name { flex: 1; color: var(--text-primary); font-weight: 500; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ti-src-item .src-summary { font-size: 0.7rem; color: var(--text-secondary); text-align: right; white-space: nowrap; }
+.ti-src-item.found { border-left: 3px solid var(--ti-green); }
+.ti-src-item.no-data { border-left: 3px solid var(--text-muted); }
+.ti-src-item.error { border-left: 3px solid var(--ti-orange); }
+.ti-src-item.found .src-icon { color: var(--ti-green); }
+.ti-src-item.no-data .src-icon { color: var(--text-muted); }
+.ti-src-item.error .src-icon { color: var(--ti-orange); }
+
+/* Timeline */
+.ti-timeline { position: relative; padding-left: 20px; }
+.ti-timeline::before {
+    content: ''; position: absolute; left: 6px; top: 0; bottom: 0;
+    width: 2px; background: var(--border-color);
+}
+.ti-tl-item { position: relative; padding-bottom: 16px; }
+.ti-tl-item:last-child { padding-bottom: 0; }
+.ti-tl-item::before {
+    content: ''; position: absolute; left: -14px; top: 4px;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--ti-cyan); border: 2px solid var(--bg-secondary);
+}
+.ti-tl-item .tl-date { font-size: 0.7rem; color: var(--text-muted); margin-bottom: 2px; }
+.ti-tl-item .tl-event { font-size: 0.82rem; color: var(--text-secondary); }
+
+/* Technical details grid */
+.ti-tech-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+.ti-tech-item {
+    background: var(--bg-tertiary); border-radius: 8px; padding: 10px 12px;
+    border: 1px solid var(--border-color); position: relative;
+}
+.ti-tech-item .lbl { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-muted); margin-bottom: 3px; }
+.ti-tech-item .val { font-size: 0.84rem; color: var(--text-primary); font-weight: 500; word-break: break-all; }
+.ti-tech-item .ti-copy-btn { position: absolute; top: 6px; right: 6px; width: 22px; height: 22px; font-size: 0.65rem; opacity: 0; transition: opacity 0.2s; }
+.ti-tech-item:hover .ti-copy-btn { opacity: 1; }
+
+/* Provenance badge */
+.ti-provenance-badge {
+    display: inline-block; font-size: 0.5rem; font-weight: 600;
+    padding: 1px 5px; border-radius: 3px; margin-left: 4px;
+    background: var(--ti-cyan-dim); color: var(--ti-cyan-light);
+    border: 1px solid var(--ti-cyan-glow); vertical-align: middle;
+    text-transform: uppercase; letter-spacing: 0.3px;
+}
+
+/* Tech block section (VT stats) */
+.ti-tech-block {
+    grid-column: 1 / -1; background: var(--bg-tertiary); border-radius: 8px;
+    padding: 10px 12px; border: 1px solid var(--border-color);
+}
+.ti-tech-block .block-title { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.4px; color: var(--ti-cyan); margin-bottom: 6px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+.ti-tech-block .block-inner { display: flex; flex-wrap: wrap; gap: 10px; }
+.ti-tech-block .block-stat { min-width: 70px; }
+.ti-tech-block .block-stat .bs-val { font-size: 1rem; font-weight: 700; }
+.ti-tech-block .block-stat .bs-lbl { font-size: 0.55rem; text-transform: uppercase; color: var(--text-muted); }
+
+/* Recommendations */
+.ti-rec-item {
+    display: flex; gap: 10px; padding: 8px 0;
+    border-bottom: 1px solid var(--border-color); font-size: 0.82rem; align-items: flex-start;
+}
+.ti-rec-item:last-child { border-bottom: none; }
+.ti-rec-item .rec-icon { font-size: 0.9rem; flex-shrink: 0; margin-top: 2px; width: 18px; text-align: center; }
+.ti-rec-item .rec-text { color: var(--text-secondary); flex: 1; }
+
+/* Error state */
+.ti-error-wrap {
+    display: none; text-align: center; padding: 1rem 0;
+}
+.ti-error-wrap.visible { display: block; }
+.ti-error-box {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2);
+    border-radius: 10px; padding: 12px 20px; font-size: 0.85rem;
+    color: #f48771; max-width: 600px;
+}
+.ti-error-box i { font-size: 1.1rem; }
+.ti-retry-btn {
+    display: inline-block; margin-left: auto;
+    padding: 4px 12px; border-radius: 6px;
+    background: rgba(239,68,68,0.1); color: #f48771;
+    border: 1px solid rgba(239,68,68,0.2); cursor: pointer;
+    font-size: 0.75rem; font-weight: 600; transition: all 0.2s;
+}
+.ti-retry-btn:hover { background: rgba(239,68,68,0.2); }
+
+/* Empty state illustration */
+.ti-empty-illustration { text-align: center; padding: 2.5rem 1rem; }
+.ti-empty-illustration .ei-icon { font-size: 3rem; opacity: 0.15; margin-bottom: 0.75rem; }
+.ti-empty-illustration .ei-title { font-size: 1rem; color: var(--text-primary); font-weight: 600; margin-bottom: 0.25rem; }
+.ti-empty-illustration .ei-sub { font-size: 0.8rem; color: var(--text-muted); max-width: 400px; margin: 0 auto; }
+
+/* Cached badge */
+.ti-cached-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 10px; border-radius: 100px;
+    font-size: 0.65rem; font-weight: 600;
+    background: rgba(168,85,247,0.1); color: var(--ti-purple);
+    border: 1px solid rgba(168,85,247,0.2);
+    margin-left: 8px;
+}
+
+/* Toast notification */
+.ti-toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: var(--bg-secondary); border: 1px solid var(--border-color);
+    border-radius: 10px; padding: 10px 20px; font-size: 0.82rem;
+    color: var(--text-primary); z-index: 9999;
+    opacity: 0; transition: all 0.35s ease; pointer-events: none;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    display: flex; align-items: center; gap: 8px;
+}
+.ti-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.ti-toast i { font-size: 1rem; }
+.ti-toast.ok i { color: var(--ti-green); }
+.ti-toast.err i { color: var(--ti-red); }
+
+/* Print styles */
+@media print {
+    body { background: #fff !important; color: #000 !important; }
+    .ti-hero { min-height: auto !important; padding: 1rem !important; background: #f5f5f5 !important; }
+    .ti-search-card, .ti-action-bar, .ti-loading, .ti-error-wrap, #tiNewScan, .ti-copy-btn { display: none !important; }
+    .ti-card { break-inside: avoid; border: 1px solid #ddd !important; background: #fff !important; box-shadow: none !important; opacity: 1 !important; transform: none !important; }
+    .ti-card-header { background: #f5f5f5 !important; }
+    .ti-card-body { padding: 0.75rem 1rem !important; }
+    .ti-results { padding: 0.5rem 0 !important; }
+    .ti-results.visible { display: block !important; }
+    .ti-ov-metric, .ti-tech-item, .ti-src-item { background: #f9f9f9 !important; border-color: #ddd !important; }
+    .ti-threat-gauge { border-width: 2px !important; }
+    .ti-risk-badge { border-width: 1px !important; }
+    .ti-provenance-badge { border-color: #ccc !important; }
+    .ti-toast { display: none !important; }
+    .container { max-width: 100% !important; padding: 0 !important; }
+    .ti-tech-item .ti-copy-btn { display: none !important; }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+    .ti-hero { padding: 2.5rem 1rem 2rem; min-height: auto; }
+    .ti-hero h1 { font-size: 1.8rem; }
+    .ti-search-card { padding: 0.875rem; }
+    .ti-search-row { flex-wrap: wrap; }
+    .ti-search-row input { min-width: 100%; }
+    .ti-search-row .ti-btn { width: 100%; justify-content: center; }
+    .ti-ov-dash { flex-direction: column; align-items: center; }
+    .ti-ov-left { flex-direction: row; gap: 1rem; min-width: auto; }
+    .ti-threat-gauge { width: 80px; height: 80px; }
+    .ti-threat-gauge .score-val { font-size: 1.25rem; }
+    .ti-ov-right { grid-template-columns: 1fr 1fr; min-width: 0; }
+    .ti-ov-indicator { grid-column: 1 / -1; }
+    .ti-tech-grid { grid-template-columns: 1fr; }
+    .ti-action-bar { justify-content: center; }
+    .ti-action-btn { font-size: 0.72rem; padding: 5px 10px; }
+    .ti-card-body { padding: 1rem; }
+    .ti-card-header { padding: 0.7rem 1rem; }
+    .ti-history-pill .ti-h-value { max-width: 120px; }
+    .ti-src-item { flex-wrap: wrap; }
+    .ti-src-item .src-summary { width: 100%; text-align: left; font-size: 0.65rem; padding-left: 1.6rem; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="ti-hero" id="tiHero">
+    <div class="hero-inner">
+        <div class="hero-badge">
+            <span class="badge-dot"></span>
+            Global Threat Intelligence Platform
+        </div>
+        <h1>Threat <span class="hl-cyan">Intelligence</span></h1>
+        <p class="hero-sub">Search global threat intelligence databases for IP addresses, domains, URLs, file hashes, malware families, and CVEs.</p>
+    </div>
+</section>
+
+<div class="ti-search-card">
+    <div class="ti-search-row">
+        <input type="text" id="tiInput" placeholder="Search IP, Domain, URL, Hash or CVE..." autocomplete="off" spellcheck="false">
+        <span class="ti-type-badge" id="tiTypeBadge"><i class="bi bi-tag"></i> <span id="tiTypeLabel"></span></span>
+        <button class="ti-btn" id="tiSearchBtn"><i class="bi bi-search"></i> Analyze</button>
+    </div>
+
+    <div class="ti-history" id="tiHistory">
+        <div class="ti-history-label">
+            <i class="bi bi-clock-history"></i> Recent Searches
+            <span class="clear-btn" id="tiClearHistory"><i class="bi bi-trash3"></i> Clear</span>
+        </div>
+        <div class="ti-history-pills" id="tiHistoryPills"></div>
+    </div>
+</div>
+
+<div class="ti-error-wrap" id="tiError">
+    <div class="ti-error-box">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <span id="tiErrorMsg"></span>
+        <button class="ti-retry-btn" id="tiRetryBtn"><i class="bi bi-arrow-repeat"></i> Retry</button>
+    </div>
+</div>
+
+<div class="ti-loading" id="tiLoading">
+    <div class="ti-skeleton">
+        <div class="ti-skeleton-hdr"></div>
+        <div class="ti-skeleton-body">
+            <div class="ti-skeleton-row">
+                <div class="ti-skeleton-box ti-skeleton-circle"></div>
+                <div class="ti-skeleton-box ti-skeleton-line" style="height:80px"></div>
+            </div>
+            <div class="ti-skeleton-row">
+                <div class="ti-skeleton-box ti-skeleton-line"></div>
+                <div class="ti-skeleton-box ti-skeleton-line-sm"></div>
+            </div>
+            <div class="ti-skeleton-row">
+                <div class="ti-skeleton-box ti-skeleton-line"></div>
+                <div class="ti-skeleton-box ti-skeleton-line"></div>
+            </div>
+        </div>
+    </div>
+    <div class="ti-skeleton">
+        <div class="ti-skeleton-hdr"></div>
+        <div class="ti-skeleton-body">
+            <div class="ti-skeleton-row"><div class="ti-skeleton-box ti-skeleton-line"></div></div>
+            <div class="ti-skeleton-row"><div class="ti-skeleton-box ti-skeleton-line"></div></div>
+            <div class="ti-skeleton-row"><div class="ti-skeleton-box ti-skeleton-line"></div></div>
+            <div class="ti-skeleton-row"><div class="ti-skeleton-box ti-skeleton-line"></div></div>
+        </div>
+    </div>
+    <div class="ti-skeleton">
+        <div class="ti-skeleton-hdr"></div>
+        <div class="ti-skeleton-body">
+            <div class="ti-skeleton-row" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+                <div class="ti-skeleton-box" style="height:60px"></div>
+                <div class="ti-skeleton-box" style="height:60px"></div>
+                <div class="ti-skeleton-box" style="height:60px"></div>
+            </div>
+            <div class="ti-skeleton-row" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+                <div class="ti-skeleton-box" style="height:50px"></div>
+                <div class="ti-skeleton-box" style="height:50px"></div>
+            </div>
+        </div>
+    </div>
+    <div class="ti-loading-txt"><i class="bi bi-arrow-repeat"></i> Searching intelligence databases...</div>
+</div>
+
+<div class="ti-results" id="tiResults">
+    <div class="container">
+
+        <div class="ti-action-bar" id="tiActionBar">
+            <button class="ti-action-btn" id="tiBtnCopyAll"><i class="bi bi-clipboard"></i> Copy All</button>
+            <button class="ti-action-btn" id="tiBtnJSON"><i class="bi bi-filetype-json"></i> JSON</button>
+            <button class="ti-action-btn" id="tiBtnPDF"><i class="bi bi-file-earmark-pdf"></i> PDF</button>
+            <button class="ti-action-btn" id="tiBtnPrint"><i class="bi bi-printer"></i> Print</button>
+            <button class="ti-action-btn" id="tiBtnShare"><i class="bi bi-share"></i> Share</button>
+        </div>
+
+        <div class="ti-card" id="tiOverviewCard">
+            <div class="ti-card-header">
+                <h5><i class="bi bi-speedometer2" style="color:var(--ti-cyan)"></i> Threat Dashboard</h5>
+            </div>
+            <div class="ti-card-body">
+                <div class="ti-ov-dash" id="tiOverviewDash"></div>
+            </div>
+        </div>
+
+        <div class="ti-card" id="tiSourcesCard">
+            <div class="ti-card-header">
+                <h5><i class="bi bi-diagram-3" style="color:var(--ti-cyan)"></i> Intelligence Sources</h5>
+            </div>
+            <div class="ti-card-body" id="tiSourcesBody">
+                <div class="ti-empty-illustration">
+                    <div class="ei-icon"><i class="bi bi-search"></i></div>
+                    <div class="ei-title">No Sources Queried</div>
+                    <div class="ei-sub">Enter an indicator and run an analysis to check threat intelligence sources.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ti-card" id="tiTimelineCard">
+            <div class="ti-card-header">
+                <h5><i class="bi bi-clock-history" style="color:var(--ti-cyan)"></i> Threat Timeline</h5>
+            </div>
+            <div class="ti-card-body" id="tiTimelineBody">
+                <div class="ti-empty-illustration">
+                    <div class="ei-icon"><i class="bi bi-calendar3"></i></div>
+                    <div class="ei-title">No Timeline Events</div>
+                    <div class="ei-sub">Chronological events will appear here once available for this indicator.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ti-card" id="tiTechCard">
+            <div class="ti-card-header">
+                <h5><i class="bi bi-gear" style="color:var(--ti-cyan)"></i> Technical Details</h5>
+            </div>
+            <div class="ti-card-body">
+                <div class="ti-tech-grid" id="tiTechGrid">
+                    <div class="ti-empty-illustration" style="grid-column:1/-1">
+                        <div class="ei-icon"><i class="bi bi-info-circle"></i></div>
+                        <div class="ei-title">No Technical Data</div>
+                        <div class="ei-sub">Technical details will be populated after an analysis is completed.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ti-card" id="tiRecCard">
+            <div class="ti-card-header">
+                <h5><i class="bi bi-lightbulb" style="color:var(--ti-cyan)"></i> Recommendations</h5>
+            </div>
+            <div class="ti-card-body" id="tiRecBody">
+                <div class="ti-empty-illustration">
+                    <div class="ei-icon"><i class="bi bi-chat-dots"></i></div>
+                    <div class="ei-title">No Recommendations Yet</div>
+                    <div class="ei-sub">Actionable recommendations will be generated after analysis based on the returned intelligence data.</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align:center;padding:0.5rem 0 2rem">
+            <button class="btn btn-outline-light" id="tiNewScan"><i class="bi bi-arrow-repeat"></i> New Search</button>
+        </div>
+
+    </div>
+</div>
+
+<div class="ti-toast" id="tiToast"><i class="bi bi-check-circle"></i> <span id="tiToastMsg"></span></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    var input = document.getElementById('tiInput');
+    var searchBtn = document.getElementById('tiSearchBtn');
+    var typeBadge = document.getElementById('tiTypeBadge');
+    var typeLabel = document.getElementById('tiTypeLabel');
+    var errorWrap = document.getElementById('tiError');
+    var errorMsg = document.getElementById('tiErrorMsg');
+    var retryBtn = document.getElementById('tiRetryBtn');
+    var loadingDiv = document.getElementById('tiLoading');
+    var resultsDiv = document.getElementById('tiResults');
+    var heroSection = document.getElementById('tiHero');
+    var toast = document.getElementById('tiToast');
+    var toastMsg = document.getElementById('tiToastMsg');
+    var actionBar = document.getElementById('tiActionBar');
+
+    var HISTORY_KEY = 'ti_search_history';
+    var CACHE_KEY = 'ti_results_cache';
+    var MAX_HISTORY = 8;
+    var MAX_CACHE = 10;
+    var _lastResponse = null;
+    var _lastQuery = '';
+    var _lastType = '';
+
+    function detectType(val) {
+        v = val.trim();
+        if (!v) return null;
+        if (/^(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)$/.test(v)) return 'ipv4';
+        if (/^\[?([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}\]?$/.test(v) || /^::/.test(v) || /::$/.test(v)) return 'ipv6';
+        if (/^CVE-\d{4}-\d{4,}$/i.test(v)) return 'cve';
+        if (/^[a-fA-F0-9]{32}$/.test(v)) return 'md5';
+        if (/^[a-fA-F0-9]{40}$/.test(v)) return 'sha1';
+        if (/^[a-fA-F0-9]{64}$/.test(v)) return 'sha256';
+        if (/^https?:\/\//i.test(v)) return 'url';
+        if (/^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/.test(v)) return 'domain';
+        return null;
+    }
+
+    function typeLabelText(type) {
+        var labels = { ipv4:'IPv4', ipv6:'IPv6', domain:'Domain', url:'URL', md5:'MD5', sha1:'SHA-1', sha256:'SHA-256', cve:'CVE' };
+        return labels[type] || type;
+    }
+
+    function typeBadgeClass(type) {
+        var map = { ipv4:'ipv4', ipv6:'ipv6', domain:'domain', url:'url', md5:'hash', sha1:'hash', sha256:'hash', cve:'cve' };
+        return map[type] || '';
+    }
+
+    function updateTypeBadge(type) {
+        if (!type) { typeBadge.classList.remove('visible'); return; }
+        typeBadge.className = 'ti-type-badge visible ' + typeBadgeClass(type);
+        typeLabel.textContent = typeLabelText(type);
+    }
+
+    input.addEventListener('input', function() {
+        var type = detectType(this.value);
+        updateTypeBadge(type);
+    });
+
+    function getHistory() {
+        try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; }
+        catch(e) { return []; }
+    }
+
+    function saveHistory(items) {
+        try { localStorage.setItem(HISTORY_KEY, JSON.stringify(items)); }
+        catch(e) {}
+    }
+
+    function addToHistory(val, type) {
+        var items = getHistory();
+        items = items.filter(function(i) { return i.value !== val; });
+        items.unshift({ value: val, type: type || detectType(val) || 'unknown', date: Date.now() });
+        if (items.length > MAX_HISTORY) items = items.slice(0, MAX_HISTORY);
+        saveHistory(items);
+        renderHistory();
+    }
+
+    function clearHistory() {
+        saveHistory([]);
+        renderHistory();
+    }
+
+    function removeFromHistory(val) {
+        var items = getHistory().filter(function(i) { return i.value !== val; });
+        saveHistory(items);
+        renderHistory();
+    }
+
+    function renderHistory() {
+        var items = getHistory();
+        var container = document.getElementById('tiHistoryPills');
+        var section = document.getElementById('tiHistory');
+        if (!items.length) { section.classList.remove('visible'); return; }
+        section.classList.add('visible');
+        var html = '';
+        items.forEach(function(item) {
+            var tc = typeBadgeClass(item.type) || 'hash';
+            html += '<span class="ti-history-pill">';
+            html += '<span class="ti-h-type" style="color:var(--ti-cyan)">' + typeLabelText(item.type) + '</span>';
+            html += '<span class="ti-h-value">' + escapeHtml(item.value) + '</span>';
+            html += '<span class="ti-h-del" data-del="' + escapeHtml(item.value) + '">&times;</span>';
+            html += '</span>';
+        });
+        container.innerHTML = html;
+
+        container.querySelectorAll('.ti-history-pill').forEach(function(pill, idx) {
+            pill.addEventListener('click', function(e) {
+                if (e.target.classList.contains('ti-h-del')) return;
+                var items = getHistory();
+                if (items[idx]) { input.value = items[idx].value; doSearch(); }
+            });
+        });
+        container.querySelectorAll('.ti-h-del').forEach(function(el) {
+            el.addEventListener('click', function(e) {
+                e.stopPropagation();
+                removeFromHistory(this.getAttribute('data-del'));
+            });
+        });
+    }
+
+    document.getElementById('tiClearHistory').addEventListener('click', clearHistory);
+
+    function escapeHtml(t) { return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    function showToast(msg, ok) {
+        toastMsg.textContent = msg;
+        toast.className = 'ti-toast ' + (ok !== false ? 'ok' : 'err');
+        toast.classList.add('show');
+        clearTimeout(toast._hide);
+        toast._hide = setTimeout(function() { toast.classList.remove('show'); }, 2500);
+    }
+
+    function showError(msg) {
+        errorWrap.classList.add('visible');
+        errorMsg.textContent = msg;
+    }
+
+    function hideError() { errorWrap.classList.remove('visible'); }
+
+    function showLoading() {
+        loadingDiv.classList.add('visible');
+        resultsDiv.classList.remove('visible');
+        searchBtn.disabled = true;
+        searchBtn.innerHTML = '<i class="bi bi-arrow-repeat"></i> Analyzing...';
+    }
+
+    function hideLoading() {
+        loadingDiv.classList.remove('visible');
+        searchBtn.disabled = false;
+        searchBtn.innerHTML = '<i class="bi bi-search"></i> Analyze';
+    }
+
+    function fadeInCards() {
+        var cards = document.querySelectorAll('.ti-card');
+        cards.forEach(function(card, i) {
+            card.style.transitionDelay = (i * 80) + 'ms';
+            setTimeout(function() { card.classList.add('fade-in'); }, i * 80 + 50);
+        });
+    }
+
+    function getCacheKey(val, type) {
+        return val.toLowerCase().trim() + ':' + type;
+    }
+
+    function getResultsCache() {
+        try { return JSON.parse(localStorage.getItem(CACHE_KEY)) || {}; }
+        catch(e) { return {}; }
+    }
+
+    function saveToCache(val, type, response) {
+        var cache = getResultsCache();
+        var key = getCacheKey(val, type);
+        cache[key] = { response: response, date: Date.now() };
+        var keys = Object.keys(cache);
+        if (keys.length > MAX_CACHE) {
+            var oldest = keys.sort(function(a,b) { return cache[a].date - cache[b].date; })[0];
+            delete cache[oldest];
+        }
+        try { localStorage.setItem(CACHE_KEY, JSON.stringify(cache)); }
+        catch(e) {}
+    }
+
+    function doSearch(forceRefresh) {
+        var val = input.value.trim();
+        if (!val) { showError('Please enter an IP, domain, URL, hash, or CVE to search.'); return; }
+        var type = detectType(val);
+        if (!type) { showError('Could not detect indicator type. Supported: IPv4, IPv6, Domain, URL, MD5, SHA-1, SHA-256, CVE.'); return; }
+        hideError();
+        showLoading();
+
+        addToHistory(val, type);
+
+        if (!forceRefresh) {
+            var cache = getResultsCache();
+            var key = getCacheKey(val, type);
+            if (cache[key]) {
+                hideLoading();
+                _lastQuery = val;
+                _lastType = type;
+                renderResults(cache[key].response, true);
+                return;
+            }
+        }
+
+        fetch('/api/threat-intel/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
+            body: JSON.stringify({ indicator: val }),
+        })
+        .then(function(r) { return r.json().then(function(d) { return { status: r.status, body: d }; }); })
+        .then(function(resp) {
+            hideLoading();
+            if (!resp.body.success) {
+                showError(resp.body.error || 'Analysis failed');
+                return;
+            }
+            saveToCache(val, type, resp.body);
+            _lastQuery = val;
+            _lastType = type;
+            renderResults(resp.body, false);
+        })
+        .catch(function(err) {
+            hideLoading();
+            showError('Network error: ' + err.message);
+        });
+    }
+
+    retryBtn.addEventListener('click', function() {
+        if (_lastQuery) { input.value = _lastQuery; doSearch(true); }
+    });
+
+    function getCsrfToken() {
+        var name = 'csrftoken';
+        var m = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+        return m ? decodeURIComponent(m[2]) : '';
+    }
+
+    function copyToClipboard(text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(function() {
+                showToast('Copied to clipboard', true);
+            }).catch(function() {
+                fallbackCopy(text);
+            });
+        } else {
+            fallbackCopy(text);
+        }
+    }
+
+    function fallbackCopy(text) {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); showToast('Copied to clipboard', true); }
+        catch(e) { showToast('Failed to copy', false); }
+        document.body.removeChild(ta);
+    }
+
+    // ---- RENDER ----
+    function renderResults(response, fromCache) {
+        _lastResponse = response;
+        var data = response.data;
+        var val = response.indicator;
+        var type = response.type;
+        var typeName = typeLabelText(type);
+
+        var dash = document.getElementById('tiOverviewDash');
+        var rep = data.reputation || {};
+        var tech = data.technical || {};
+        var ov = data.overview || {};
+        var provenance = data.provenance || {};
+        var vtStats = tech.vt_stats || {};
+
+        var v = (rep.verdict || 'unknown').toLowerCase();
+        var gaugeClass = v;
+        var scoreDisplay = rep.score !== null && rep.score !== undefined ? rep.score : '?';
+        var verdictDisplay = rep.verdict ? rep.verdict.charAt(0).toUpperCase() + rep.verdict.slice(1) : 'Unknown';
+
+        var confidencePct = 0;
+        var confidenceLvl = 'low';
+        var confidenceLbl = 'Low';
+        if (vtStats.total && vtStats.total > 0) {
+            confidencePct = Math.round(((vtStats.malicious||0) / vtStats.total) * 100);
+            if (confidencePct >= 50) { confidenceLvl = 'high'; confidenceLbl = 'High'; }
+            else if (confidencePct >= 10) { confidenceLvl = 'medium'; confidenceLbl = 'Medium'; }
+            else { confidenceLvl = 'low'; confidenceLbl = 'Low'; }
+        }
+        if (tech.abuse_confidence_score !== undefined && tech.abuse_confidence_score > confidencePct) {
+            confidencePct = tech.abuse_confidence_score;
+            if (confidencePct >= 50) { confidenceLvl = 'high'; confidenceLbl = 'High'; }
+            else if (confidencePct >= 25) { confidenceLvl = 'medium'; confidenceLbl = 'Medium'; }
+            else { confidenceLvl = 'low'; confidenceLbl = 'Low'; }
+        }
+
+        var lastAnalysis = '—';
+        if (tech.vt_last_analysis) {
+            var d = new Date(tech.vt_last_analysis * 1000);
+            lastAnalysis = d.toUTCString();
+        }
+
+        var cachedBadge = fromCache ? ' <span class="ti-cached-badge"><i class="bi bi-database"></i> Cached</span>' : '';
+        document.querySelector('#tiOverviewCard .ti-card-header h5').innerHTML = '<i class="bi bi-speedometer2" style="color:var(--ti-cyan)"></i> Threat Dashboard' + cachedBadge;
+
+        dash.innerHTML =
+            '<div class="ti-ov-left">' +
+                '<div class="ti-threat-gauge ' + gaugeClass + '">' +
+                    '<span class="score-val">' + escapeHtml(String(scoreDisplay)) + '</span>' +
+                    '<span class="score-lbl">Threat Score</span>' +
+                '</div>' +
+                '<span class="ti-risk-badge ' + gaugeClass + '">' + escapeHtml(verdictDisplay) + '</span>' +
+            '</div>' +
+            '<div class="ti-ov-right">' +
+                '<div class="ti-ov-metric ti-ov-indicator"><div class="m-lbl">Indicator</div><div class="m-val">' + escapeHtml(val) + '</div><button class="ti-copy-btn" data-copy="' + escapeHtml(val) + '" title="Copy indicator"><i class="bi bi-clipboard"></i></button></div>' +
+                '<div class="ti-ov-metric"><div class="m-lbl">Object Type</div><div class="m-val">' + escapeHtml(typeName) + '</div></div>' +
+                '<div class="ti-ov-metric"><div class="m-lbl">Risk Level</div><div class="m-val">' + escapeHtml(verdictDisplay) + '</div></div>' +
+                '<div class="ti-ov-metric"><div class="m-lbl">First Seen</div><div class="m-val">' + (ov.first_seen || '—') + '</div></div>' +
+                '<div class="ti-ov-metric"><div class="m-lbl">Last Analysis</div><div class="m-val">' + lastAnalysis + '</div></div>' +
+                '<div class="ti-ov-metric"><div class="m-lbl">Confidence</div><div class="m-val">' + confidenceLbl + ' (' + confidencePct + '%)<div class="ti-conf-bar-wrap"><div class="ti-conf-bar-bg"><div class="ti-conf-bar-fill ' + confidenceLvl + '" style="width:' + confidencePct + '%"></div></div><div class="ti-conf-bar-label">' + confidenceLbl + ' Confidence</div></div></div></div>' +
+            '</div>';
+
+        // Copy buttons in overview
+        dash.querySelectorAll('.ti-copy-btn').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                copyToClipboard(this.getAttribute('data-copy'));
+                this.classList.add('copied');
+                var icon = this.querySelector('i');
+                icon.className = 'bi bi-check';
+                setTimeout(function() { btn.classList.remove('copied'); icon.className = 'bi bi-clipboard'; }, 1500);
+            });
+        });
+
+        // ---- SOURCES ----
+        var sourcesBody = document.getElementById('tiSourcesBody');
+        var sources = data.sources || [];
+        if (sources.length) {
+            var srcHTML = '<div class="ti-src-checklist">';
+            sources.forEach(function(s) {
+                var cls = 'no-data';
+                var icon = 'bi bi-dash-circle';
+                var summary = 'No intelligence available.';
+                if (s.status === 'found') {
+                    cls = 'found'; icon = 'bi bi-check-circle-fill';
+                    var sd = s.data || {};
+                    var stats = sd.stats || {};
+                    if (stats.malicious !== undefined) {
+                        summary = stats.malicious + ' malicious, ' + stats.suspicious + ' suspicious';
+                    } else if (sd.abuse_confidence_score !== undefined) {
+                        summary = 'Confidence: ' + sd.abuse_confidence_score + '%';
+                    } else if (sd.malware_families && sd.malware_families.length) {
+                        summary = sd.family_count + ' malware families';
+                    } else if (sd.threat) {
+                        summary = escapeHtml(sd.threat);
+                    } else {
+                        summary = 'Data found';
+                    }
+                } else if (s.status === 'error') {
+                    cls = 'error'; icon = 'bi bi-exclamation-triangle-fill';
+                    summary = s.message ? s.message.substring(0, 100) : 'Source Unavailable';
+                }
+                srcHTML += '<div class="ti-src-item ' + cls + '">' +
+                    '<span class="src-icon"><i class="' + icon + '"></i></span>' +
+                    '<span class="src-name">' + escapeHtml(s.name) + '</span>' +
+                    '<span class="src-summary">' + summary + '</span></div>';
+            });
+            srcHTML += '</div>';
+            sourcesBody.innerHTML = srcHTML;
+        } else {
+            sourcesBody.innerHTML = '<div class="ti-empty-illustration"><div class="ei-icon"><i class="bi bi-search"></i></div><div class="ei-title">No Sources Queried</div><div class="ei-sub">No threat intelligence sources were queried for this indicator.</div></div>';
+        }
+
+        // ---- THREAT TIMELINE ----
+        var timelineBody = document.getElementById('tiTimelineBody');
+        var timeline = data.timeline || [];
+        if (timeline.length) {
+            var tlHTML = '<div class="ti-timeline">';
+            timeline.forEach(function(item) {
+                tlHTML += '<div class="ti-tl-item"><div class="tl-date">' + escapeHtml(item.date || '') + '</div><div class="tl-event">' + escapeHtml(item.event || '') + '</div></div>';
+            });
+            tlHTML += '</div>';
+            timelineBody.innerHTML = tlHTML;
+        } else {
+            timelineBody.innerHTML = '<div class="ti-empty-illustration"><div class="ei-icon"><i class="bi bi-calendar3"></i></div><div class="ei-title">No Timeline Events</div><div class="ei-sub">No historical events recorded for this indicator.</div></div>';
+        }
+
+        // ---- TECHNICAL DETAILS ----
+        var techGrid = document.getElementById('tiTechGrid');
+        var techItems = [];
+
+        function addTech(lbl, val, fieldKey) {
+            var src = provenance[fieldKey];
+            var badge = src ? '<span class="ti-provenance-badge">' + escapeHtml(src) + '</span>' : '';
+            var copyAttr = escapeHtml(String(val).substring(0, 500));
+            techItems.push({ html: '<div class="ti-tech-item"><div class="lbl">' + lbl + badge + '</div><div class="val">' + escapeHtml(String(val)) + '</div><button class="ti-copy-btn" data-copy="' + copyAttr + '" title="Copy value"><i class="bi bi-clipboard"></i></button></div>' });
+        }
+
+        if (vtStats) {
+            var vtBlock = '<div class="ti-tech-block"><div class="block-title"><i class="bi bi-shield-check"></i> VirusTotal Detection</div><div class="block-inner">';
+            vtBlock += '<div class="block-stat"><div class="bs-val" style="color:var(--ti-red)">' + (vtStats.malicious !== undefined ? vtStats.malicious : 0) + '</div><div class="bs-lbl">Malicious</div></div>';
+            vtBlock += '<div class="block-stat"><div class="bs-val" style="color:var(--ti-orange)">' + (vtStats.suspicious !== undefined ? vtStats.suspicious : 0) + '</div><div class="bs-lbl">Suspicious</div></div>';
+            vtBlock += '<div class="block-stat"><div class="bs-val" style="color:var(--ti-green)">' + (vtStats.harmless !== undefined ? vtStats.harmless : 0) + '</div><div class="bs-lbl">Harmless</div></div>';
+            vtBlock += '<div class="block-stat"><div class="bs-val" style="color:var(--text-muted)">' + (vtStats.undetected !== undefined ? vtStats.undetected : 0) + '</div><div class="bs-lbl">Undetected</div></div>';
+            if (vtStats.total) vtBlock += '<div class="block-stat"><div class="bs-val">' + vtStats.total + '</div><div class="bs-lbl">Total Engines</div></div>';
+            vtBlock += '</div></div>';
+            techItems.push({ html: vtBlock });
+        }
+
+        if (tech.vt_reputation !== undefined && tech.vt_reputation !== null) addTech('VT Community Reputation', tech.vt_reputation, 'vt_reputation');
+        if (tech.vt_last_analysis) addTech('VT Last Analysis', new Date(tech.vt_last_analysis * 1000).toUTCString(), 'vt_last_analysis');
+        if (tech.vt_categories) {
+            var cats = Object.values(tech.vt_categories).filter(function(v,i,a){return a.indexOf(v)===i;});
+            if (cats.length) addTech('VT Categories', cats.join(', '), 'vt_categories');
+        }
+        if (tech.vt_tags && tech.vt_tags.length) addTech('VT Tags', tech.vt_tags.join(', '), 'vt_tags');
+
+        if (type === 'ipv4' || type === 'ipv6') {
+            if (tech.ip) addTech('IP Address', tech.ip, 'ip');
+            if (tech.asn) addTech('ASN', tech.asn, 'asn');
+            if (tech.network) addTech('Network', tech.network, 'network');
+            if (tech.country) addTech('Country', tech.country, 'country');
+            if (tech.isp) addTech('ISP', tech.isp, 'isp');
+            if (tech.organization) addTech('Organization', tech.organization, 'organization');
+            if (tech.city) addTech('City', tech.city, 'city');
+            if (tech.region) addTech('Region', tech.region, 'region');
+            if (tech.abuse_confidence_score !== undefined && tech.abuse_confidence_score !== null) addTech('AbuseIPDB Confidence', tech.abuse_confidence_score + '%', 'abuse_confidence_score');
+            if (tech.total_reports !== undefined && tech.total_reports !== null) addTech('Abuse Reports', tech.total_reports, 'total_reports');
+            if (tech.usage_type) addTech('Usage Type', tech.usage_type, 'usage_type');
+            if (tech.proxy !== undefined) addTech('Proxy/VPN', tech.proxy ? 'Yes' : 'No', 'proxy');
+            if (tech.hosting !== undefined) addTech('Hosting', tech.hosting ? 'Yes' : 'No', 'hosting');
+        }
+
+        if (type === 'domain') {
+            if (tech.registrar) addTech('Registrar', tech.registrar, 'registrar');
+            if (tech.name_servers && tech.name_servers.length) addTech('Nameservers', tech.name_servers.join(', '), 'name_servers');
+            if (tech.creation_date) addTech('Creation Date', tech.creation_date, 'creation_date');
+            if (tech.expiration_date) addTech('Expiration Date', tech.expiration_date, 'expiration_date');
+            if (tech.organization) addTech('Organization', tech.organization, 'organization');
+            if (tech.country) addTech('Country', tech.country, 'country');
+            if (tech.dns_a && tech.dns_a.length) addTech('DNS A Records', tech.dns_a.join(', '), 'dns_a');
+            if (tech.dns_mx && tech.dns_mx.length) addTech('DNS MX Records', tech.dns_mx.join(', '), 'dns_mx');
+            if (tech.dns_ns && tech.dns_ns.length) addTech('DNS NS Records', tech.dns_ns.join(', '), 'dns_ns');
+        }
+
+        if (type === 'url') {
+            if (tech.urlhaus_threat) addTech('URLHaus Threat Type', tech.urlhaus_threat, 'urlhaus_threat');
+            if (tech.urlhaus_tags && tech.urlhaus_tags.length) addTech('URLHaus Tags', tech.urlhaus_tags.join(', '), 'urlhaus_tags');
+            if (tech.urlhaus_date_added) addTech('URLHaus Date Added', tech.urlhaus_date_added, 'urlhaus_date_added');
+            if (tech.urlhaus_last_online) addTech('URLHaus Last Online', tech.urlhaus_last_online, 'urlhaus_last_online');
+        }
+
+        if (type === 'md5' || type === 'sha1' || type === 'sha256') {
+            if (tech.md5) addTech('MD5', tech.md5, 'md5');
+            if (tech.sha1) addTech('SHA-1', tech.sha1, 'sha1');
+            if (tech.sha256) addTech('SHA-256', tech.sha256, 'sha256');
+            if (tech.file_name) addTech('File Name', tech.file_name, 'file_name');
+            if (tech.file_type) addTech('File Type', tech.file_type, 'file_type');
+            if (tech.file_size) addTech('File Size', tech.file_size + ' bytes', 'file_size');
+            if (tech.signature) addTech('Malware Signature', tech.signature, 'signature');
+            if (tech.magic) addTech('Magic', tech.magic, 'magic');
+        }
+
+        if (type === 'cve') {
+            if (tech.cvss_score !== undefined && tech.cvss_score !== null) {
+                var sev = (tech.cvss_severity || '').toLowerCase();
+                var sevBar = '<div class="ti-sev-bar"><div class="ti-sev-bar-fill ' + sev + '" style="width:' + (tech.cvss_score / 10 * 100) + '%"></div></div>';
+                addTech('CVSS Score', tech.cvss_score + sevBar, 'cvss_score');
+            }
+            if (tech.cvss_severity) addTech('CVSS Severity', tech.cvss_severity, 'cvss_severity');
+            if (tech.cvss_vector) addTech('CVSS Vector', tech.cvss_vector, 'cvss_vector');
+            if (tech.published) addTech('Published', tech.published, 'published');
+            if (tech.last_modified) addTech('Last Modified', tech.last_modified, 'last_modified');
+            if (tech.vuln_status) addTech('Vulnerability Status', tech.vuln_status, 'vuln_status');
+            if (tech.cwes && tech.cwes.length) addTech('CWEs', tech.cwes.join(', '), 'cwes');
+            if (tech.cve_description) addTech('Description', tech.cve_description, 'cve_description');
+        }
+
+        if (tech.threatfox_malware_families && tech.threatfox_malware_families.length) addTech('ThreatFox Families', tech.threatfox_malware_families.join(', '), 'threatfox_malware_families');
+        if (tech.threatfox_first_seen) addTech('ThreatFox First Seen', tech.threatfox_first_seen, 'threatfox_first_seen');
+        if (tech.threatfox_last_seen) addTech('ThreatFox Last Seen', tech.threatfox_last_seen, 'threatfox_last_seen');
+
+        if (!techItems.length) addTech('Details', '—', '');
+
+        var techHTML = '';
+        techItems.forEach(function(item) { techHTML += item.html; });
+        techGrid.innerHTML = techHTML;
+
+        // Copy buttons in tech details
+        techGrid.querySelectorAll('.ti-copy-btn').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                copyToClipboard(this.getAttribute('data-copy'));
+                this.classList.add('copied');
+                var icon = this.querySelector('i');
+                icon.className = 'bi bi-check';
+                setTimeout(function() { btn.classList.remove('copied'); icon.className = 'bi bi-clipboard'; }, 1500);
+            });
+        });
+
+        // ---- RECOMMENDATIONS ----
+        var recBody = document.getElementById('tiRecBody');
+        var recommendations = [];
+
+        function sourceStatus(name) {
+            for (var i = 0; i < sources.length; i++) {
+                if (sources[i].name === name) return sources[i];
+            }
+            return null;
+        }
+
+        var vt = sourceStatus('VirusTotal');
+        var abuse = sourceStatus('AbuseIPDB');
+        var threatfox = sourceStatus('ThreatFox');
+        var urlhaus = sourceStatus('URLHaus');
+        var mb = sourceStatus('MalwareBazaar');
+        var nvd = sourceStatus('NVD');
+
+        var vtMal = vtStats.malicious || 0;
+        var vtSus = vtStats.suspicious || 0;
+
+        if (vt && vt.status === 'found' && vtMal === 0 && vtSus === 0) {
+            recommendations.push({ icon: '\u2705', text: 'No threats detected by VirusTotal. This indicator appears safe based on current intelligence.' });
+        }
+
+        if (vtMal > 0) {
+            recommendations.push({ icon: '\u26d4', text: 'Block this IOC immediately. VirusTotal reports ' + vtMal + ' malicious detection' + (vtMal > 1 ? 's' : '') + ' out of ' + (vtStats.total || '?') + ' engines.' });
+        } else if (vtSus > 0) {
+            recommendations.push({ icon: '\u26a0\ufe0f', text: 'Monitor network traffic. VirusTotal reports ' + vtSus + ' suspicious detection' + (vtSus > 1 ? 's' : '') + '. Further investigation recommended.' });
+        }
+
+        if (abuse && abuse.status === 'found') {
+            var abScore = (abuse.data || {}).abuse_confidence_score || 0;
+            if (abScore >= 50) {
+                recommendations.push({ icon: '\u26d4', text: 'Block this IP at the firewall. AbuseIPDB confidence score is ' + abScore + '% with ' + ((abuse.data || {}).total_reports || 0) + ' total abuse report' + (((abuse.data || {}).total_reports || 0) > 1 ? 's' : '') + '.' });
+            } else if (abScore > 0) {
+                recommendations.push({ icon: '\ud83d\udccb', text: 'Review firewall logs for activity from this IP. AbuseIPDB confidence score is ' + abScore + '%.' });
+            }
+        }
+
+        if (threatfox && threatfox.status === 'found') {
+            var fams = (threatfox.data || {}).malware_families || [];
+            if (fams.length > 0) {
+                recommendations.push({ icon: '\ud83e\udda0', text: 'Associated with ' + fams.length + ' malware famil' + (fams.length > 1 ? 'ies' : 'y') + ' on ThreatFox: ' + escapeHtml(fams.slice(0, 5).join(', ')) + '.' });
+            }
+        }
+
+        if (urlhaus && urlhaus.status === 'found') {
+            var threat = (urlhaus.data || {}).threat || 'malicious';
+            recommendations.push({ icon: '\u26d4', text: 'Block this URL at the proxy/gateway. URLHaus classifies it as: ' + escapeHtml(threat) + '.' });
+        }
+
+        if (mb && mb.status === 'found') {
+            var sig = (mb.data || {}).signature || 'malware';
+            recommendations.push({ icon: '\u26d4', text: 'This file hash is associated with ' + escapeHtml(sig) + ' on MalwareBazaar. Add to blocklist immediately.' });
+        }
+
+        if (nvd && nvd.status === 'found') {
+            var cvss = (nvd.data || {}).cvss || {};
+            var cScore = cvss.score;
+            if (cScore !== undefined && cScore >= 7.0) {
+                recommendations.push({ icon: '\ud83d\udd27', text: 'Critical priority \u2014 patch or update affected software immediately. This CVE has a CVSS score of ' + cScore + ' (' + (cvss.severity || 'N/A') + ').' });
+            } else if (cScore !== undefined && cScore >= 4.0) {
+                recommendations.push({ icon: '\ud83d\udd27', text: 'Apply vendor-recommended mitigations. This CVE has a CVSS score of ' + cScore + ' (' + (cvss.severity || 'N/A') + ').' });
+            } else if (cScore !== undefined) {
+                recommendations.push({ icon: '\ud83d\udccb', text: 'Review if this CVE affects your environment. CVSS score: ' + cScore + ' (' + (cvss.severity || 'N/A') + ').' });
+            }
+        }
+
+        var errCount = 0;
+        for (var i = 0; i < sources.length; i++) {
+            if (sources[i].status === 'error') errCount++;
+        }
+        if (errCount > 0) {
+            recommendations.push({ icon: '\u26a0\ufe0f', text: errCount + ' threat intelligence source' + (errCount > 1 ? 's' : '') + ' could not be reached. Consider retrying the analysis later.' });
+        }
+
+        if (recommendations.length === 0) {
+            recommendations.push({ icon: '\ud83d\udd0d', text: 'No threat intelligence data available for this indicator. Re-run the analysis periodically as databases are updated.' });
+        }
+
+        var recHTML = '';
+        recommendations.forEach(function(r) {
+            recHTML += '<div class="ti-rec-item"><span class="rec-icon">' + r.icon + '</span><span class="rec-text">' + r.text + '</span></div>';
+        });
+        recBody.innerHTML = recHTML;
+
+        resultsDiv.classList.add('visible');
+        fadeInCards();
+        setTimeout(function() {
+            window.scrollTo({ top: heroSection.offsetHeight - 40, behavior: 'smooth' });
+        }, 100);
+    }
+
+    // ---- ACTION BUTTONS ----
+    document.getElementById('tiBtnCopyAll').addEventListener('click', function() {
+        if (!_lastResponse) return;
+        var text = JSON.stringify(_lastResponse, null, 2);
+        copyToClipboard(text);
+    });
+
+    document.getElementById('tiBtnJSON').addEventListener('click', function() {
+        if (!_lastResponse) return;
+        var blob = new Blob([JSON.stringify(_lastResponse, null, 2)], {type: 'application/json'});
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'threat-intel-' + _lastQuery.replace(/[^a-zA-Z0-9]/g, '_') + '.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast('JSON downloaded', true);
+    });
+
+    document.getElementById('tiBtnPDF').addEventListener('click', function() {
+        showToast('Use Print \u2192 Save as PDF', true);
+        window.print();
+    });
+
+    document.getElementById('tiBtnPrint').addEventListener('click', function() {
+        window.print();
+    });
+
+    document.getElementById('tiBtnShare').addEventListener('click', function() {
+        if (!_lastQuery) { showToast('No results to share', false); return; }
+        var url = window.location.origin + window.location.pathname + '?q=' + encodeURIComponent(_lastQuery);
+        copyToClipboard(url);
+        showToast('Share link copied to clipboard', true);
+    });
+
+    // ---- SEARCH ----
+    searchBtn.addEventListener('click', function() { doSearch(); });
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); doSearch(); }
+    });
+
+    // Restore search from URL param
+    (function() {
+        var m = window.location.search.match(/[?&]q=([^&]+)/);
+        if (m) {
+            var q = decodeURIComponent(m[1]);
+            if (detectType(q)) {
+                input.value = q;
+                setTimeout(function() { doSearch(); }, 300);
+            }
+        }
+    })();
+
+    document.getElementById('tiNewScan').addEventListener('click', function() {
+        resultsDiv.classList.remove('visible');
+        var cards = document.querySelectorAll('.ti-card');
+        cards.forEach(function(c) { c.classList.remove('fade-in'); c.style.transitionDelay = ''; });
+        input.value = '';
+        input.focus();
+        updateTypeBadge(null);
+        _lastResponse = null;
+        _lastQuery = '';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    renderHistory();
+})();
+</script>
+{% endblock %}

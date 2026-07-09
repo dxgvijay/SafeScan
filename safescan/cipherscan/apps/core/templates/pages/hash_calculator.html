@@ -1,0 +1,1353 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Hash Calculator — CipherScan{% endblock %}
+
+{% block body_class %}full-width{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {
+    --hc-cyan: #00d4ff;
+    --hc-cyan-light: #66e3ff;
+    --hc-cyan-dim: rgba(0, 212, 255, 0.08);
+    --hc-cyan-glow: rgba(0, 212, 255, 0.25);
+    --hc-purple: #7C5CFF;
+    --hc-purple-dim: rgba(124, 92, 255, 0.08);
+    --hc-green: #00FF9D;
+    --hc-green-dim: rgba(0, 255, 157, 0.08);
+    --hc-bg: linear-gradient(135deg, #0a0e1a 0%, #0a141e 35%, #0f1628 70%, #0a0e1a 100%);
+}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hc-hero {
+    position: relative;
+    padding: 4rem 2rem 3rem;
+    overflow: hidden;
+    background: var(--hc-bg);
+    min-height: 480px;
+    display: flex;
+    align-items: center;
+}
+.hc-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse at 20% 40%, rgba(0, 212, 255, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 60%, rgba(124, 92, 255, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+}
+.hc-hero .hero-inner {
+    position: relative;
+    z-index: 2;
+    max-width: 720px;
+    margin: 0 auto;
+    text-align: center;
+}
+.hc-hero .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--hc-cyan-dim);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--hc-cyan-glow);
+    border-radius: 100px;
+    padding: 6px 18px 6px 10px;
+    font-size: 0.8rem;
+    color: var(--hc-cyan-light);
+    margin-bottom: 1.5rem;
+}
+.hc-hero .badge-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--hc-cyan);
+    animation: hc-pulse 2s ease-in-out infinite;
+}
+@keyframes hc-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+.hc-hero h1 {
+    font-size: clamp(2rem, 4.5vw, 3rem);
+    font-weight: 800;
+    margin-bottom: 0.75rem;
+    line-height: 1.15;
+}
+.hc-hero h1 .hl-cyan { color: var(--hc-cyan); }
+.hc-hero h1 .hl-purple { color: var(--hc-purple); }
+.hc-hero .hero-sub {
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+    margin-bottom: 0;
+    line-height: 1.6;
+}
+
+/* ============================================================
+   TOOLBAR — Mode Tabs & Actions
+   ============================================================ */
+.hc-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+.hc-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: 4px;
+}
+.hc-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0.5rem 1rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: transparent;
+    color: var(--text-secondary);
+    transition: all var(--transition-fast);
+    font-family: var(--font-ui);
+}
+.hc-tab:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.04);
+}
+.hc-tab.active {
+    background: var(--hc-cyan);
+    color: #0a0e1a;
+}
+.hc-tab i { font-size: 0.875rem; }
+.hc-tab input[type="file"] { display: none; }
+
+.hc-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+/* ============================================================
+   INPUT AREAS
+   ============================================================ */
+.hc-input-panel { display: none; }
+.hc-input-panel.active { display: block; }
+
+.hc-textarea-wrap {
+    position: relative;
+}
+.hc-textarea-wrap textarea {
+    width: 100%;
+    min-height: 180px;
+    padding: 1rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.6;
+    resize: vertical;
+    transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
+    outline: none;
+}
+.hc-textarea-wrap textarea:focus {
+    border-color: var(--hc-cyan-glow);
+    box-shadow: 0 0 20px var(--hc-cyan-dim);
+}
+.hc-textarea-wrap textarea::placeholder {
+    color: var(--text-muted);
+    font-family: var(--font-ui);
+}
+.hc-textarea-wrap .textarea-clear {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: none;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+    font-size: 0.75rem;
+}
+.hc-textarea-wrap .textarea-clear:hover {
+    background: var(--accent-danger-dim);
+    color: var(--accent-danger);
+}
+
+/* Drop Zone */
+.hc-dropzone {
+    position: relative;
+    border: 2px dashed rgba(0, 212, 255, 0.25);
+    border-radius: var(--radius-lg);
+    padding: 3rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    background: var(--bg-secondary);
+}
+.hc-dropzone:hover {
+    border-color: var(--hc-cyan);
+    background: var(--hc-cyan-dim);
+}
+.hc-dropzone.dragover {
+    border-color: var(--hc-cyan);
+    background: var(--hc-cyan-dim);
+    box-shadow: 0 0 30px var(--hc-cyan-glow);
+}
+.hc-dropzone .dz-icon {
+    font-size: 2.5rem;
+    color: var(--hc-cyan);
+    margin-bottom: 0.75rem;
+}
+.hc-dropzone .dz-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+.hc-dropzone .dz-sub {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+}
+.hc-dropzone .dz-sub span {
+    color: var(--hc-cyan);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+.hc-dropzone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* File Info Card */
+.hc-file-info {
+    display: none;
+    align-items: center;
+    gap: 1rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: 0.875rem 1.25rem;
+    margin-top: 1rem;
+}
+.hc-file-info.visible { display: flex; }
+.hc-file-info .fi-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-sm);
+    background: var(--hc-purple-dim);
+    color: var(--hc-purple);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.125rem;
+    flex-shrink: 0;
+}
+.hc-file-info .fi-details {
+    flex: 1;
+    min-width: 0;
+}
+.hc-file-info .fi-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    word-break: break-all;
+}
+.hc-file-info .fi-meta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 2px;
+}
+.hc-file-info .fi-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.hc-file-info .fi-remove {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+}
+.hc-file-info .fi-remove:hover {
+    background: var(--accent-danger-dim);
+    color: var(--accent-danger);
+}
+
+/* ============================================================
+   INPUT STATS BAR
+   ============================================================ */
+.hc-input-stats {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 0.75rem;
+    padding: 0.5rem 0;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+.hc-input-stats span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.hc-input-stats .stat-val {
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    font-size: 0.71875rem;
+}
+
+/* ============================================================
+   LOADING
+   ============================================================ */
+.hc-loading {
+    display: none;
+    text-align: center;
+    padding: 3rem 0;
+}
+.hc-loading.visible { display: block; }
+.hc-loading .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--glass-border);
+    border-top-color: var(--hc-cyan);
+    border-radius: 50%;
+    animation: hc-spin 0.8s linear infinite;
+    margin: 0 auto 1rem;
+}
+@keyframes hc-spin {
+    to { transform: rotate(360deg); }
+}
+.hc-loading .txt {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+.hc-loading .progress-track {
+    max-width: 320px;
+    margin: 1rem auto 0;
+    height: 4px;
+    background: var(--bg-tertiary);
+    border-radius: 4px;
+    overflow: hidden;
+}
+.hc-loading .progress-track .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--hc-cyan), var(--hc-purple));
+    border-radius: 4px;
+    animation: hc-progress 1.5s ease-in-out infinite;
+}
+@keyframes hc-progress {
+    0% { width: 0%; margin-left: 0; }
+    50% { width: 60%; margin-left: 20%; }
+    100% { width: 0%; margin-left: 100%; }
+}
+
+/* ============================================================
+   ERROR
+   ============================================================ */
+.hc-error {
+    display: none;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1.25rem;
+    background: var(--accent-danger-dim);
+    border: 1px solid rgba(255, 77, 109, 0.2);
+    border-radius: var(--radius-md);
+    color: var(--accent-danger);
+    font-size: 0.875rem;
+    margin-bottom: 1.5rem;
+}
+.hc-error.visible { display: flex; }
+.hc-error i { font-size: 1.125rem; flex-shrink: 0; }
+
+/* ============================================================
+   RESULTS HEADER
+   ============================================================ */
+.hc-results-header {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--glass-border);
+}
+.hc-results-header.visible { display: flex; }
+.hc-results-header .rh-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+.hc-results-header .rh-left h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0;
+}
+.hc-results-header .rh-total {
+    font-size: 0.71875rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+}
+
+/* ============================================================
+   ALGORITHM RESULT CARDS
+   ============================================================ */
+.hc-algo-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.hc-algo-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--glass-shadow);
+    overflow: hidden;
+    transition: all var(--transition-normal);
+    display: none;
+}
+.hc-algo-card.visible {
+    display: block;
+    animation: hc-card-in 0.4s ease forwards;
+}
+@keyframes hc-card-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.hc-algo-card:hover {
+    border-color: var(--glass-border-hover);
+    box-shadow: var(--glass-shadow), var(--accent-cyan-glow);
+    transform: translateY(-2px);
+}
+.hc-algo-card .ac-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.875rem 1.25rem;
+    border-bottom: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.015);
+}
+.hc-algo-card .ac-header .ac-left {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+}
+.hc-algo-card .ac-header .ac-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 50px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    letter-spacing: 0.03em;
+}
+.hc-algo-card .ac-header .ac-badge.md5 { background: rgba(0, 212, 255, 0.12); color: var(--accent-cyan); }
+.hc-algo-card .ac-header .ac-badge.sha1 { background: rgba(124, 92, 255, 0.12); color: var(--accent-purple); }
+.hc-algo-card .ac-header .ac-badge.sha224 { background: rgba(0, 255, 157, 0.12); color: var(--accent-success); }
+.hc-algo-card .ac-header .ac-badge.sha256 { background: rgba(255, 107, 53, 0.12); color: var(--accent-orange); }
+.hc-algo-card .ac-header .ac-badge.sha384 { background: rgba(255, 77, 109, 0.12); color: var(--accent-danger); }
+.hc-algo-card .ac-header .ac-badge.sha512 { background: rgba(255, 217, 61, 0.12); color: var(--accent-warning); }
+
+.hc-algo-card .ac-header .ac-bits {
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+}
+.hc-algo-card .ac-header .ac-copy {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--glass-border);
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+    font-size: 0.875rem;
+}
+.hc-algo-card .ac-header .ac-copy:hover {
+    background: var(--hc-cyan-dim);
+    color: var(--hc-cyan);
+    border-color: var(--hc-cyan-glow);
+}
+.hc-algo-card .ac-header .ac-copy.copied {
+    background: var(--hc-green-dim);
+    color: var(--hc-green);
+    border-color: rgba(0, 255, 157, 0.2);
+}
+
+.hc-algo-card .ac-hash {
+    padding: 0.875rem 1.25rem;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--text-primary);
+    word-break: break-all;
+    background: rgba(0, 0, 0, 0.15);
+    border-bottom: 1px solid var(--glass-border);
+    letter-spacing: 0.02em;
+    position: relative;
+}
+.hc-algo-card .ac-hash .hash-truncated {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.hc-algo-card .ac-hash .hash-full {
+    display: none;
+}
+.hc-algo-card .ac-hash.expanded .hash-truncated { display: none; }
+.hc-algo-card .ac-hash.expanded .hash-full { display: inline; }
+.hc-algo-card .ac-hash .hash-toggle {
+    display: inline-block;
+    margin-top: 0.375rem;
+    font-size: 0.6875rem;
+    font-family: var(--font-ui);
+    color: var(--hc-cyan);
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    font-weight: 600;
+}
+.hc-algo-card .ac-hash .hash-toggle:hover {
+    text-decoration: underline;
+}
+
+.hc-algo-card .ac-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.01);
+}
+.hc-algo-card .ac-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.hc-algo-card .ac-meta .meta-val {
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+}
+
+.hc-algo-card .ac-desc {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    border-top: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.01);
+}
+.hc-algo-card .ac-desc .desc-label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-right: 0.25rem;
+}
+
+/* ============================================================
+   STAGGERED CARD ANIMATION
+   ============================================================ */
+.hc-algo-card.visible:nth-child(1) { animation-delay: 0.02s; }
+.hc-algo-card.visible:nth-child(2) { animation-delay: 0.06s; }
+.hc-algo-card.visible:nth-child(3) { animation-delay: 0.10s; }
+.hc-algo-card.visible:nth-child(4) { animation-delay: 0.14s; }
+.hc-algo-card.visible:nth-child(5) { animation-delay: 0.18s; }
+.hc-algo-card.visible:nth-child(6) { animation-delay: 0.22s; }
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+.hc-empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-muted);
+}
+.hc-empty i {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 0.75rem;
+    color: var(--glass-border);
+}
+.hc-empty p {
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 768px) {
+    .hc-hero { padding: 3rem 1.25rem 2rem; min-height: auto; }
+    .hc-toolbar { flex-direction: column; align-items: stretch; }
+    .hc-tabs { width: 100%; justify-content: stretch; }
+    .hc-tab { flex: 1; justify-content: center; }
+    .hc-actions { width: 100%; justify-content: flex-start; }
+    .hc-file-info.visible { flex-wrap: wrap; }
+    .hc-algo-card .ac-header { flex-wrap: wrap; gap: 0.5rem; }
+    .hc-results-header { flex-direction: column; align-items: flex-start; }
+}
+
+@media (max-width: 480px) {
+    .hc-tab { font-size: 0.75rem; padding: 0.375rem 0.625rem; }
+    .hc-textarea-wrap textarea { min-height: 120px; font-size: 0.8125rem; }
+    .hc-algo-card .ac-hash { font-size: 0.75rem; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- ============================================================
+     HERO
+     ============================================================ -->
+<section class="hc-hero">
+    <div class="hero-inner">
+        <div class="hero-badge">
+            <span class="badge-dot"></span>
+            Cryptography Tool
+        </div>
+        <h1>Hash <span class="hl-cyan">Calculator</span></h1>
+        <p class="hero-sub">
+            Compute cryptographic hashes instantly. Supports MD5, SHA-1, SHA-224, SHA-256, SHA-384, and SHA-512.
+            Paste text or upload any file to generate all hashes server-side.
+        </p>
+    </div>
+</section>
+
+<!-- ============================================================
+     MAIN SECTION
+     ============================================================ -->
+<section style="padding: 0 2rem 4rem; max-width: 960px; margin: 0 auto;">
+
+    <!-- Toolbar -->
+    <div class="hc-toolbar">
+        <div class="hc-tabs" role="tablist">
+            <button class="hc-tab active" data-mode="text" role="tab" aria-selected="true" id="hcTabText">
+                <i class="bi bi-pencil"></i> Text Input
+            </button>
+            <button class="hc-tab" data-mode="file" role="tab" aria-selected="false" id="hcTabFile">
+                <i class="bi bi-file-earmark-arrow-up"></i> Upload File
+            </button>
+        </div>
+
+        <div class="hc-actions">
+            <button class="btn-cs btn-cs-outline btn-cs-sm" id="hcCopyAll" disabled title="Copy all hashes">
+                <i class="bi bi-files"></i> Copy All
+            </button>
+            <button class="btn-cs btn-cs-outline btn-cs-sm" id="hcDownload" disabled title="Download results as text file">
+                <i class="bi bi-download"></i> Download
+            </button>
+            <button class="btn-cs btn-cs-ghost btn-cs-sm" id="hcClear" title="Clear input">
+                <i class="bi bi-trash3"></i> Clear
+            </button>
+        </div>
+    </div>
+
+    <!-- Error -->
+    <div class="hc-error" id="hcError" role="alert">
+        <i class="bi bi-exclamation-circle"></i>
+        <span id="hcErrorText"></span>
+    </div>
+
+    <!-- Text Input Panel -->
+    <div class="hc-input-panel active" id="hcTextPanel" role="tabpanel" aria-labelledby="hcTabText">
+        <div class="hc-textarea-wrap">
+            <textarea id="hcTextInput" placeholder="Enter text to hash... (auto-computes as you type)" spellcheck="false" aria-label="Text input for hashing"></textarea>
+            <button class="textarea-clear" id="hcTextClear" title="Clear text" aria-label="Clear text input">
+                <i class="bi bi-x"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- File Upload Panel -->
+    <div class="hc-input-panel" id="hcFilePanel" role="tabpanel" aria-labelledby="hcTabFile">
+        <div class="hc-dropzone" id="hcDropzone">
+            <div class="dz-icon"><i class="bi bi-file-earmark-binary"></i></div>
+            <div class="dz-title">Drop a file here or click to browse</div>
+            <div class="dz-sub">Supports any file type up to <span>100 MB</span></div>
+            <input type="file" id="hcFileInput" aria-label="Choose file to hash">
+        </div>
+        <div class="hc-file-info" id="hcFileInfo">
+            <div class="fi-icon"><i class="bi bi-file-earmark"></i></div>
+            <div class="fi-details">
+                <div class="fi-name" id="hcFileName"></div>
+                <div class="fi-meta">
+                    <span><i class="bi bi-hdd"></i> <span id="hcFileSize"></span></span>
+                    <span><i class="bi bi-file-type"></i> <span id="hcFileMime"></span></span>
+                </div>
+            </div>
+            <button class="fi-remove" id="hcFileRemove" title="Remove file" aria-label="Remove file">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Input Stats -->
+    <div class="hc-input-stats" id="hcInputStats" style="display:none;">
+        <span><i class="bi bi-text-paragraph"></i> Characters: <span class="stat-val" id="hcStatChars">0</span></span>
+        <span><i class="bi bi-hdd"></i> Size: <span class="stat-val" id="hcStatSize">0 B</span></span>
+    </div>
+
+    <!-- Loading -->
+    <div class="hc-loading" id="hcLoading">
+        <div class="spinner"></div>
+        <div class="txt">Computing hashes...</div>
+        <div class="progress-track"><div class="progress-fill"></div></div>
+    </div>
+
+    <!-- Results Header -->
+    <div class="hc-results-header" id="hcResultsHeader">
+        <div class="rh-left">
+            <h3><i class="bi bi-hash" style="color:var(--hc-cyan);margin-right:6px;"></i> Results</h3>
+            <span class="rh-total" id="hcTotalTime"></span>
+        </div>
+        <div style="display:flex;gap:0.5rem;">
+            <button class="btn-cs btn-cs-outline btn-cs-sm" id="hcCopyAll2" disabled title="Copy all hashes">
+                <i class="bi bi-files"></i> Copy All
+            </button>
+            <button class="btn-cs btn-cs-outline btn-cs-sm" id="hcDownload2" disabled title="Download results">
+                <i class="bi bi-download"></i> Download
+            </button>
+        </div>
+    </div>
+
+    <!-- Algorithm Results Grid -->
+    <div class="hc-algo-grid" id="hcAlgoGrid">
+        <!-- Each card is generated by JavaScript -->
+    </div>
+
+    <!-- Empty State -->
+    <div class="hc-empty" id="hcEmpty">
+        <i class="bi bi-hash"></i>
+        <p>Enter text or upload a file to compute hashes</p>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    'use strict';
+
+    // -------------------------------------------------------
+    // DOM refs
+    // -------------------------------------------------------
+    var textInput = document.getElementById('hcTextInput');
+    var fileInput = document.getElementById('hcFileInput');
+    var dropzone = document.getElementById('hcDropzone');
+    var fileInfo = document.getElementById('hcFileInfo');
+    var fileName = document.getElementById('hcFileName');
+    var fileSize = document.getElementById('hcFileSize');
+    var fileMime = document.getElementById('hcFileMime');
+    var fileRemove = document.getElementById('hcFileRemove');
+    var textClear = document.getElementById('hcTextClear');
+    var tabs = document.querySelectorAll('.hc-tab');
+    var textPanel = document.getElementById('hcTextPanel');
+    var filePanel = document.getElementById('hcFilePanel');
+    var errorEl = document.getElementById('hcError');
+    var errorText = document.getElementById('hcErrorText');
+    var loadingEl = document.getElementById('hcLoading');
+    var resultsHeader = document.getElementById('hcResultsHeader');
+    var algoGrid = document.getElementById('hcAlgoGrid');
+    var emptyEl = document.getElementById('hcEmpty');
+    var inputStats = document.getElementById('hcInputStats');
+    var statChars = document.getElementById('hcStatChars');
+    var statSize = document.getElementById('hcStatSize');
+    var totalTime = document.getElementById('hcTotalTime');
+    var copyAllBtns = [document.getElementById('hcCopyAll'), document.getElementById('hcCopyAll2')];
+    var downloadBtns = [document.getElementById('hcDownload'), document.getElementById('hcDownload2')];
+    var clearBtn = document.getElementById('hcClear');
+
+    // -------------------------------------------------------
+    // State
+    // -------------------------------------------------------
+    var currentMode = 'text';
+    var selectedFile = null;
+    var currentResults = null;
+    var debounceTimer = null;
+
+    var algorithmMeta = {
+        md5:    { bits: 128, color: 'md5', label: 'MD5' },
+        sha1:   { bits: 160, color: 'sha1', label: 'SHA-1' },
+        sha224: { bits: 224, color: 'sha224', label: 'SHA-224' },
+        sha256: { bits: 256, color: 'sha256', label: 'SHA-256' },
+        sha384: { bits: 384, color: 'sha384', label: 'SHA-384' },
+        sha512: { bits: 512, color: 'sha512', label: 'SHA-512' }
+    };
+
+    var algoOrder = ['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512'];
+
+    // -------------------------------------------------------
+    // Utility
+    // -------------------------------------------------------
+    function getCSRF() {
+        var meta = document.querySelector('meta[name="csrf-token"]');
+        return meta ? meta.getAttribute('content') : '';
+    }
+
+    function formatBytes(bytes) {
+        if (bytes === 0) return '0 B';
+        var units = ['B', 'KB', 'MB', 'GB'];
+        var i = 0;
+        var size = bytes;
+        while (size >= 1024 && i < units.length - 1) {
+            size /= 1024;
+            i++;
+        }
+        return size.toFixed(i > 0 ? 2 : 0) + ' ' + units[i];
+    }
+
+    function escapeHtml(str) {
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+    }
+
+    function showError(msg) {
+        errorText.textContent = msg;
+        errorEl.classList.add('visible');
+    }
+
+    function hideError() {
+        errorEl.classList.remove('visible');
+        errorText.textContent = '';
+    }
+
+    function showLoading() {
+        loadingEl.classList.add('visible');
+        resultsHeader.classList.remove('visible');
+        algoGrid.innerHTML = '';
+        emptyEl.style.display = 'none';
+    }
+
+    function hideLoading() {
+        loadingEl.classList.remove('visible');
+    }
+
+    function enableActions(enabled) {
+        copyAllBtns.forEach(function (b) { if (b) b.disabled = !enabled; });
+        downloadBtns.forEach(function (b) { if (b) b.disabled = !enabled; });
+    }
+
+    // -------------------------------------------------------
+    // Toast helper
+    // -------------------------------------------------------
+    function toastSuccess(msg) {
+        if (window.CipherScan && window.CipherScan.toast) {
+            window.CipherScan.toast.success('Copied', msg);
+        }
+    }
+
+    function toastError(msg) {
+        if (window.CipherScan && window.CipherScan.toast) {
+            window.CipherScan.toast.error('Error', msg);
+        }
+    }
+
+    // -------------------------------------------------------
+    // Copy text to clipboard
+    // -------------------------------------------------------
+    function copyToClipboard(text, btnEl) {
+        if (!text) return;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(function () {
+                if (btnEl) {
+                    btnEl.classList.add('copied');
+                    btnEl.innerHTML = '<i class="bi bi-check-lg"></i>';
+                    setTimeout(function () {
+                        btnEl.classList.remove('copied');
+                        btnEl.innerHTML = '<i class="bi bi-clipboard"></i>';
+                    }, 1500);
+                }
+                toastSuccess('Hash copied to clipboard');
+            }).catch(function () {
+                fallbackCopy(text, btnEl);
+            });
+        } else {
+            fallbackCopy(text, btnEl);
+        }
+    }
+
+    function fallbackCopy(text, btnEl) {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+            document.execCommand('copy');
+            if (btnEl) {
+                btnEl.classList.add('copied');
+                btnEl.innerHTML = '<i class="bi bi-check-lg"></i>';
+                setTimeout(function () {
+                    btnEl.classList.remove('copied');
+                    btnEl.innerHTML = '<i class="bi bi-clipboard"></i>';
+                }, 1500);
+            }
+            toastSuccess('Hash copied to clipboard');
+        } catch (e) {
+            toastError('Could not copy');
+        }
+        document.body.removeChild(ta);
+    }
+
+    // -------------------------------------------------------
+    // Build result cards
+    // -------------------------------------------------------
+    function buildResults(data) {
+        currentResults = data;
+        algoGrid.innerHTML = '';
+        hideLoading();
+        hideError();
+        enableActions(true);
+
+        // Update input stats
+        inputStats.style.display = 'flex';
+        statChars.textContent = data.input.char_count.toLocaleString();
+        statSize.textContent = data.input.size_display;
+
+        // Results header
+        totalTime.textContent = 'Total: ' + data.total_duration_ms + ' ms';
+        resultsHeader.classList.add('visible');
+        emptyEl.style.display = 'none';
+
+        // Build cards
+        var html = '';
+        data.algorithms.forEach(function (algo, idx) {
+            var meta = algorithmMeta[algo.algorithm] || { bits: 0, color: 'md5', label: algo.algorithm_upper };
+            html += '<div class="hc-algo-card visible" id="card-' + algo.algorithm + '">';
+            html += '<div class="ac-header">';
+            html += '<div class="ac-left">';
+            html += '<span class="ac-badge ' + meta.color + '">' + escapeHtml(meta.label) + '</span>';
+            html += '<span class="ac-bits">' + meta.bits + '-bit</span>';
+            html += '</div>';
+            html += '<button class="ac-copy" data-algo="' + algo.algorithm + '" title="Copy ' + meta.label + ' hash" aria-label="Copy ' + meta.label + ' hash"><i class="bi bi-clipboard"></i></button>';
+            html += '</div>';
+            html += '<div class="ac-hash" id="hash-block-' + algo.algorithm + '">';
+            html += '<div class="hash-truncated">' + escapeHtml(algo.hash) + '</div>';
+            html += '<div class="hash-full">' + escapeHtml(algo.hash) + '</div>';
+            if (algo.hash.length > 64) {
+                html += '<button class="hash-toggle" onclick="toggleHash(\'' + algo.algorithm + '\')" id="toggle-' + algo.algorithm + '">Show full hash</button>';
+            }
+            html += '</div>';
+            html += '<div class="ac-meta">';
+            html += '<span><i class="bi bi-text-paragraph"></i> Length: <span class="meta-val">' + algo.char_length + ' chars</span></span>';
+            html += '<span><i class="bi bi-clock"></i> Time: <span class="meta-val">' + algo.duration_ms + ' ms</span></span>';
+            html += '<span><i class="bi bi-shield"></i> ' + escapeHtml(algo.description) + '</span>';
+            html += '</div>';
+            html += '</div>';
+        });
+        algoGrid.innerHTML = html;
+
+        // Attach copy handlers
+        algoGrid.querySelectorAll('.ac-copy').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var algo = this.dataset.algo;
+                var found = null;
+                data.algorithms.forEach(function (a) { if (a.algorithm === algo) found = a.hash; });
+                if (found) copyToClipboard(found, this);
+            });
+        });
+    }
+
+    // Toggle hash full/truncated
+    window.toggleHash = function (algo) {
+        var block = document.getElementById('hash-block-' + algo);
+        if (!block) return;
+        block.classList.toggle('expanded');
+        var toggle = document.getElementById('toggle-' + algo);
+        if (toggle) {
+            toggle.textContent = block.classList.contains('expanded') ? 'Show less' : 'Show full hash';
+        }
+    };
+
+    // -------------------------------------------------------
+    // API call
+    // -------------------------------------------------------
+    function calculateHash(data) {
+        hideError();
+        if (!data) return;
+
+        // Minimal validation
+        if (data.get) {
+            // FormData (file upload)
+            var file = data.get('file');
+            if (!file || file.size === 0) {
+                showError('Please select a file to hash.');
+                return;
+            }
+            if (file.size > 100 * 1024 * 1024) {
+                showError('File exceeds the maximum size of 100 MB.');
+                return;
+            }
+        } else if (typeof data === 'object' && data.text !== undefined) {
+            if (!data.text.trim()) {
+                return;
+            }
+        }
+
+        showLoading();
+        emptyEl.style.display = 'none';
+        resultsHeader.classList.remove('visible');
+        enableActions(false);
+
+        var url = '{% url "hash_calculate_api" %}';
+        var options = {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCSRF() }
+        };
+
+        if (data.get) {
+            // FormData
+            options.body = data;
+        } else {
+            options.headers['Content-Type'] = 'application/json';
+            options.body = JSON.stringify(data);
+        }
+
+        fetch(url, options)
+            .then(function (res) {
+                return res.json().then(function (json) {
+                    if (!res.ok) {
+                        throw new Error(json.error || 'Request failed');
+                    }
+                    return json;
+                });
+            })
+            .then(function (json) {
+                if (json.error) {
+                    hideLoading();
+                    showError(json.error);
+                    return;
+                }
+                buildResults(json);
+            })
+            .catch(function (err) {
+                hideLoading();
+                showError(err.message || 'An unexpected error occurred.');
+                enableActions(false);
+            });
+    }
+
+    // -------------------------------------------------------
+    // Compute from text (debounced)
+    // -------------------------------------------------------
+    function computeFromText() {
+        hideError();
+        var text = textInput.value;
+
+        if (!text.trim()) {
+            // Reset
+            currentResults = null;
+            algoGrid.innerHTML = '';
+            resultsHeader.classList.remove('visible');
+            emptyEl.style.display = 'block';
+            inputStats.style.display = 'none';
+            enableActions(false);
+            return;
+        }
+
+        calculateHash({ text: text });
+    }
+
+    function debouncedCompute() {
+        hideError();
+        var text = textInput.value;
+        if (!text.trim()) {
+            currentResults = null;
+            algoGrid.innerHTML = '';
+            resultsHeader.classList.remove('visible');
+            emptyEl.style.display = 'block';
+            inputStats.style.display = 'none';
+            enableActions(false);
+            return;
+        }
+        // Update char count
+        statChars.textContent = text.length.toLocaleString();
+        statSize.textContent = new Blob([text]).size.toLocaleString() + ' B';
+        inputStats.style.display = 'flex';
+
+        if (debounceTimer) clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(function () {
+            computeFromText();
+        }, 350);
+    }
+
+    // -------------------------------------------------------
+    // Compute from file
+    // -------------------------------------------------------
+    function computeFromFile(file) {
+        if (!file) return;
+        var fd = new FormData();
+        fd.append('file', file);
+        calculateHash(fd);
+    }
+
+    // -------------------------------------------------------
+    // Upload file handling
+    // -------------------------------------------------------
+    function handleFile(file) {
+        if (!file) return;
+        if (file.size > 100 * 1024 * 1024) {
+            showError('File exceeds the maximum size of 100 MB. Selected file is ' + formatBytes(file.size) + '.');
+            return;
+        }
+
+        selectedFile = file;
+        fileName.textContent = file.name;
+        fileSize.textContent = formatBytes(file.size);
+        fileMime.textContent = file.type || 'application/octet-stream';
+        fileInfo.classList.add('visible');
+
+        computeFromFile(file);
+    }
+
+    function removeFile() {
+        selectedFile = null;
+        fileInput.value = '';
+        fileInfo.classList.remove('visible');
+        currentResults = null;
+        algoGrid.innerHTML = '';
+        resultsHeader.classList.remove('visible');
+        emptyEl.style.display = 'block';
+        inputStats.style.display = 'none';
+        enableActions(false);
+        hideError();
+        hideLoading();
+    }
+
+    // -------------------------------------------------------
+    // Copy All
+    // -------------------------------------------------------
+    function copyAll() {
+        if (!currentResults || !currentResults.algorithms) return;
+        var lines = currentResults.algorithms.map(function (a) {
+            return a.algorithm_upper + ': ' + a.hash;
+        });
+        var text = lines.join('\n');
+        copyToClipboard(text, null);
+        toastSuccess('All hashes copied to clipboard');
+    }
+
+    // -------------------------------------------------------
+    // Download Results
+    // -------------------------------------------------------
+    function downloadResults() {
+        if (!currentResults || !currentResults.algorithms) return;
+
+        var lines = [];
+        lines.push('=== CipherScan Hash Calculator Results ===');
+        lines.push('');
+        lines.push('Input Type: ' + currentResults.input.type);
+        lines.push('Input Size: ' + currentResults.input.size_display + ' (' + currentResults.input.byte_count + ' bytes)');
+        lines.push('Characters: ' + currentResults.input.char_count);
+        if (currentResults.input.filename) {
+            lines.push('Filename: ' + currentResults.input.filename);
+        }
+        lines.push('Generated: ' + new Date().toISOString());
+        lines.push('Total Time: ' + currentResults.total_duration_ms + ' ms');
+        lines.push('');
+        lines.push('--- Algorithms ---');
+        lines.push('');
+
+        currentResults.algorithms.forEach(function (a) {
+            lines.push(a.algorithm_upper + ' (' + a.bits + '-bit)');
+            lines.push('Hash: ' + a.hash);
+            lines.push('Length: ' + a.char_length + ' chars');
+            lines.push('Time: ' + a.duration_ms + ' ms');
+            lines.push('Description: ' + a.description);
+            lines.push('');
+        });
+
+        lines.push('=== Generated by CipherScan (https://cipherscan.app) ===');
+
+        var blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        var fname = currentResults.input.filename
+            ? currentResults.input.filename + '-hashes.txt'
+            : 'hash-results.txt';
+        a.download = fname;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        toastSuccess('Results downloaded as ' + fname);
+    }
+
+    // -------------------------------------------------------
+    // Clear
+    // -------------------------------------------------------
+    function clearAll() {
+        textInput.value = '';
+        removeFile();
+        currentResults = null;
+        algoGrid.innerHTML = '';
+        resultsHeader.classList.remove('visible');
+        emptyEl.style.display = 'block';
+        inputStats.style.display = 'none';
+        hideError();
+        hideLoading();
+        enableActions(false);
+        // Switch to text mode
+        setMode('text');
+        textInput.focus();
+    }
+
+    // -------------------------------------------------------
+    // Mode switching
+    // -------------------------------------------------------
+    function setMode(mode) {
+        currentMode = mode;
+        tabs.forEach(function (t) {
+            var isActive = t.dataset.mode === mode;
+            t.classList.toggle('active', isActive);
+            t.setAttribute('aria-selected', isActive);
+        });
+        textPanel.classList.toggle('active', mode === 'text');
+        filePanel.classList.toggle('active', mode === 'file');
+        hideError();
+    }
+
+    // -------------------------------------------------------
+    // Drag and drop
+    // -------------------------------------------------------
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(function (evt) {
+        dropzone.addEventListener(evt, function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+    });
+
+    dropzone.addEventListener('dragenter', function () {
+        dropzone.classList.add('dragover');
+    });
+
+    dropzone.addEventListener('dragleave', function (e) {
+        if (!dropzone.contains(e.relatedTarget)) {
+            dropzone.classList.remove('dragover');
+        }
+    });
+
+    dropzone.addEventListener('drop', function (e) {
+        dropzone.classList.remove('dragover');
+        var files = e.dataTransfer.files;
+        if (files.length > 0) {
+            handleFile(files[0]);
+        }
+    });
+
+    // -------------------------------------------------------
+    // Event listeners
+    // -------------------------------------------------------
+
+    // Text input — live mode
+    textInput.addEventListener('input', debouncedCompute);
+
+    // Text clear
+    textClear.addEventListener('click', function () {
+        textInput.value = '';
+        textInput.focus();
+        debouncedCompute();
+    });
+
+    // File input
+    fileInput.addEventListener('change', function () {
+        if (this.files.length > 0) {
+            handleFile(this.files[0]);
+        }
+    });
+
+    // File remove
+    fileRemove.addEventListener('click', removeFile);
+
+    // Tabs
+    tabs.forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            var mode = this.dataset.mode;
+            if (mode === currentMode) return;
+            setMode(mode);
+            if (mode === 'text') {
+                debouncedCompute();
+            }
+        });
+    });
+
+    // Copy All
+    copyAllBtns.forEach(function (btn) {
+        if (btn) btn.addEventListener('click', copyAll);
+    });
+
+    // Download
+    downloadBtns.forEach(function (btn) {
+        if (btn) btn.addEventListener('click', downloadResults);
+    });
+
+    // Clear
+    clearBtn.addEventListener('click', clearAll);
+
+    // Keyboard shortcut: Ctrl+Enter to compute from text
+    textInput.addEventListener('keydown', function (e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            e.preventDefault();
+            if (debounceTimer) clearTimeout(debounceTimer);
+            computeFromText();
+        }
+    });
+
+    // -------------------------------------------------------
+    // Init
+    // -------------------------------------------------------
+    emptyEl.style.display = 'block';
+    setMode('text');
+    enableActions(false);
+
+})();
+</script>
+{% endblock %}

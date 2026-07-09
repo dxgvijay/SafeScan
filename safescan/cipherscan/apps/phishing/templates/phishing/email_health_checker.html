@@ -1,0 +1,539 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Email Health Checker - CipherScan{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hc-hero {
+        text-align: center;
+        padding: 40px 0 32px;
+    }
+    .hc-hero h1 {
+        font-size: 32px;
+        font-weight: 800;
+        background: linear-gradient(135deg, #10b981, #059669);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 8px;
+    }
+    .hc-hero p {
+        color: var(--text-secondary);
+        font-size: 15px;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    .hc-input-section {
+        max-width: 600px;
+        margin: 0 auto 32px;
+        text-align: center;
+    }
+    .hc-input-row {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+    .hc-input-row input {
+        flex: 1;
+        padding: 14px 18px;
+        background: var(--bg-input);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        color: var(--text-primary);
+        font-size: 16px;
+        font-family: 'JetBrains Mono', monospace;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+    .hc-input-row input:focus {
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+    .hc-input-row input::placeholder {
+        color: var(--text-muted);
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+    }
+    #check-btn {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: #fff;
+        padding: 14px 28px;
+        font-size: 15px;
+        font-weight: 600;
+        border: none;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+        font-family: inherit;
+        line-height: 1.4;
+    }
+    #check-btn:hover:not(:disabled) {
+        opacity: 0.9;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 20px rgba(16, 185, 129, 0.35);
+    }
+    #check-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    .hc-results {
+        max-width: 800px;
+        margin: 0 auto;
+        display: none;
+    }
+    .hc-results.visible { display: block; }
+    .hc-error {
+        max-width: 600px;
+        margin: 0 auto 16px;
+        padding: 14px 18px;
+        background: rgba(239,68,68,0.1);
+        border: 1px solid rgba(239,68,68,0.25);
+        border-radius: var(--radius-md);
+        color: var(--accent-red);
+        font-size: 14px;
+        display: none;
+        align-items: center;
+        gap: 10px;
+    }
+    .hc-error.visible { display: flex; }
+    .grade-circle {
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border: 4px solid;
+        margin: 0 auto 24px;
+    }
+    .grade-circle .letter {
+        font-size: 52px;
+        font-weight: 800;
+        line-height: 1;
+    }
+    .grade-circle .sub {
+        font-size: 13px;
+        font-weight: 500;
+        opacity: 0.8;
+    }
+    .grade-circle.grade-a { border-color: #10b981; color: #10b981; }
+    .grade-circle.grade-b { border-color: #14b8a6; color: #14b8a6; }
+    .grade-circle.grade-c { border-color: #eab308; color: #eab308; }
+    .grade-circle.grade-d { border-color: #f97316; color: #f97316; }
+    .grade-circle.grade-f { border-color: #ef4444; color: #ef4444; }
+    .hc-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        margin-bottom: 20px;
+    }
+    .hc-card h3 {
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .hc-card h3 .h-icon { width: 28px; height: 28px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; }
+    .hc-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    .hc-stat {
+        text-align: center;
+        padding: 20px;
+        background: var(--bg-input);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+    }
+    .hc-stat .val { font-size: 32px; font-weight: 800; }
+    .hc-stat .lbl { font-size: 12px; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .dns-card {
+        background: var(--bg-input);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 16px;
+        margin-bottom: 12px;
+    }
+    .dns-card .dns-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .dns-card .dns-value {
+        font-size: 13px;
+        color: var(--text-primary);
+        font-family: 'JetBrains Mono', monospace;
+        word-break: break-all;
+        line-height: 1.6;
+    }
+    .dns-card .dns-value .not-found {
+        color: var(--accent-red);
+        font-family: 'Inter', sans-serif;
+        font-weight: 500;
+    }
+    .issue-item {
+        display: flex;
+        gap: 12px;
+        padding: 14px 16px;
+        background: rgba(239,68,68,0.08);
+        border: 1px solid rgba(239,68,68,0.2);
+        border-radius: var(--radius-md);
+        margin-bottom: 8px;
+        align-items: flex-start;
+    }
+    .issue-item .ii-icon { color: var(--accent-red); font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+    .issue-item .ii-text { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+    .issue-item .ii-text strong { color: var(--text-primary); }
+    .all-passed {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px;
+        background: rgba(0,255,136,0.08);
+        border: 1px solid rgba(0,255,136,0.2);
+        border-radius: var(--radius-md);
+        color: var(--accent-green);
+        font-weight: 600;
+        font-size: 14px;
+    }
+    .explain-card {
+        display: flex;
+        gap: 14px;
+        padding: 16px;
+        background: var(--bg-input);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        margin-bottom: 10px;
+    }
+    .explain-card .e-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        flex-shrink: 0;
+    }
+    .explain-card .e-text h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .explain-card .e-text p { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+    .btn-reset {
+        background: var(--bg-card);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        padding: 10px 24px;
+        border-radius: var(--radius-sm);
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .btn-reset:hover {
+        background: var(--bg-card-hover);
+        border-color: var(--text-muted);
+    }
+    .section-divider {
+        text-align: center;
+        margin: 32px 0 16px;
+    }
+    @media (max-width: 640px) {
+        .hc-input-row { flex-direction: column; }
+        .hc-stats { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hc-hero">
+    <h1>Email Health Checker</h1>
+    <p>Check any domain's email security configuration including MX records, SPF, DMARC, and overall server health.</p>
+</div>
+
+<div class="hc-input-section" id="input-section">
+    <div class="hc-input-row">
+        <input type="text" id="hc-domain-input" placeholder="example.com" autocomplete="off" spellcheck="false">
+        <button id="check-btn" onclick="checkDomain()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            Check Domain Health
+        </button>
+    </div>
+</div>
+
+<div class="hc-error" id="hc-error">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+    <span id="hc-error-text"></span>
+</div>
+
+<div class="hc-results" id="results-section">
+
+    <div style="text-align:center;margin-bottom:24px;">
+        <div class="grade-circle" id="health-grade-circle">
+            <span class="letter" id="health-grade">—</span>
+            <span class="sub">HEALTH GRADE</span>
+        </div>
+    </div>
+
+    <div class="hc-stats">
+        <div class="hc-stat">
+            <div class="val" id="health-score" style="color:var(--accent-green);">0</div>
+            <div class="lbl">Health Score / 100</div>
+        </div>
+        <div class="hc-stat">
+            <div class="val" id="health-domain" style="color:var(--accent-cyan);font-size:22px;">—</div>
+            <div class="lbl">Domain Checked</div>
+        </div>
+    </div>
+
+    <div class="hc-card">
+        <h3><span class="h-icon" style="background:rgba(0,240,255,0.15);color:var(--accent-cyan);">📡</span> DNS Records</h3>
+        <div class="dns-card">
+            <div class="dns-label"><span style="color:var(--accent-cyan);">📧</span> MX Records</div>
+            <div class="dns-value" id="mx-records"></div>
+        </div>
+        <div class="dns-card">
+            <div class="dns-label"><span style="color:var(--accent-amber);">🛡️</span> SPF Record</div>
+            <div class="dns-value" id="spf-record"></div>
+        </div>
+        <div class="dns-card">
+            <div class="dns-label"><span style="color:var(--accent-purple);">🔐</span> DMARC Record</div>
+            <div class="dns-value" id="dmarc-record"></div>
+        </div>
+    </div>
+
+    <div class="hc-card">
+        <h3><span class="h-icon" style="background:rgba(239,68,68,0.15);color:var(--accent-red);">⚠</span> Issues Found</h3>
+        <div id="issues-list"></div>
+    </div>
+
+    <div class="hc-card">
+        <h3><span class="h-icon" style="background:rgba(16,185,129,0.15);color:#10b981;">ℹ</span> What This Means</h3>
+        <div class="explain-card">
+            <div class="e-icon" style="background:rgba(0,240,255,0.15);color:var(--accent-cyan);">📧</div>
+            <div class="e-text">
+                <h4>MX Records (Mail Exchange)</h4>
+                <p>Mail exchange records tell other servers where to deliver email for this domain. Without MX records, the domain cannot receive any email.</p>
+            </div>
+        </div>
+        <div class="explain-card">
+            <div class="e-icon" style="background:rgba(245,158,11,0.15);color:var(--accent-amber);">🛡️</div>
+            <div class="e-text">
+                <h4>SPF Record (Sender Policy Framework)</h4>
+                <p>Sender Policy Framework prevents domain spoofing by specifying which servers are authorized to send email for this domain. Missing or misconfigured SPF makes the domain vulnerable to spoofing.</p>
+            </div>
+        </div>
+        <div class="explain-card">
+            <div class="e-icon" style="background:rgba(124,58,237,0.15);color:#7c3aed;">🔐</div>
+            <div class="e-text">
+                <h4>DMARC Policy (Domain-Based Message Authentication)</h4>
+                <p>Domain-based Message Authentication prevents phishing by telling receiving servers what to do with emails that fail SPF or DKIM checks. A DMARC policy is essential for domain protection.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-divider">
+        <button class="btn-reset" onclick="window.location.reload()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            Check Another Domain
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+async function checkDomain() {
+    const input = document.querySelector(
+        'input[type="text"], input[placeholder*="domain"], input[placeholder*="example"]');
+    const domain = input ? input.value.trim() : '';
+
+    if (!domain) {
+        alert('Please enter a domain name');
+        return;
+    }
+
+    const btn = document.getElementById('check-btn');
+    btn.textContent = 'Checking...';
+    btn.disabled = true;
+
+    try {
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        const response = await fetch('/api/phishing/domain-health/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ domain: domain })
+        });
+
+        const data = await response.json();
+        console.log('Health check result:', data);
+
+        if (data.error) {
+            alert('Error: ' + data.error);
+            return;
+        }
+
+        showHealthResults(data);
+    } catch (err) {
+        console.error('Request failed:', err);
+        alert('Network error: ' + err.message);
+    } finally {
+        btn.textContent = 'Check Domain Health';
+        btn.disabled = false;
+    }
+}
+
+function showHealthResults(data) {
+    // Hide input section
+    document.getElementById('input-section')?.style.setProperty('display', 'none');
+
+    // Show results section
+    const results = document.getElementById('results-section');
+    if (results) {
+        results.style.display = 'block';
+
+        // Health grade
+        const grade = document.getElementById('health-grade');
+        if (grade) grade.textContent = data.health_grade;
+
+        // Grade circle color
+        const circle = document.getElementById('health-grade-circle');
+        if (circle) {
+            const g = (data.health_grade || '').toLowerCase();
+            circle.className = 'grade-circle';
+            if (g === 'a') circle.classList.add('grade-a');
+            else if (g === 'b') circle.classList.add('grade-b');
+            else if (g === 'c') circle.classList.add('grade-c');
+            else if (g === 'd') circle.classList.add('grade-d');
+            else circle.classList.add('grade-f');
+        }
+
+        // Health score
+        const score = document.getElementById('health-score');
+        if (score) {
+            score.textContent = data.health_score;
+            const sv = data.health_score || 0;
+            score.style.color = sv >= 90 ? '#10b981' : sv >= 75 ? '#14b8a6' : sv >= 60 ? '#eab308' : sv >= 40 ? '#f97316' : '#ef4444';
+        }
+
+        // Domain
+        const domainEl = document.getElementById('health-domain');
+        if (domainEl) domainEl.textContent = data.domain;
+
+        // MX records
+        const mx = document.getElementById('mx-records');
+        if (mx) {
+            const records = data.mx_records || [];
+            if (records.length === 0) {
+                mx.innerHTML = '<span class="not-found">No MX records found</span>';
+            } else {
+                mx.innerHTML = records.map(function(m) {
+                    return '<div style="padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04);">📨 ' + m + '</div>';
+                }).join('');
+            }
+        }
+
+        // SPF record
+        const spf = document.getElementById('spf-record');
+        if (spf) {
+            spf.innerHTML = data.spf_record
+                ? '<span style="color:var(--accent-green);">' + escapeHtml(data.spf_record) + '</span>'
+                : '<span class="not-found">SPF record not found</span>';
+        }
+
+        // DMARC record
+        const dmarc = document.getElementById('dmarc-record');
+        if (dmarc) {
+            dmarc.innerHTML = data.dmarc_record
+                ? '<span style="color:var(--accent-green);">' + escapeHtml(data.dmarc_record) + '</span>'
+                : '<span class="not-found">DMARC record not found</span>';
+        }
+
+        // Issues list
+        const issuesList = document.getElementById('issues-list');
+        if (issuesList) {
+            issuesList.innerHTML = '';
+            if (!data.issues || data.issues.length === 0) {
+                issuesList.innerHTML = '<div class="all-passed"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> All checks passed! Your domain has a healthy email configuration.</div>';
+            } else {
+                data.issues.forEach(function(issue) {
+                    const div = document.createElement('div');
+                    div.style.cssText = 'color:#ef4444;padding:8px;margin:4px 0;background:rgba(239,68,68,0.1);border-radius:6px;';
+                    div.textContent = '⚠️ ' + issue;
+                    issuesList.appendChild(div);
+                });
+            }
+        }
+    } else {
+        // Fallback display if results section is missing
+        const container = document.querySelector('main, .container, body');
+        if (!container) return;
+        const div = document.createElement('div');
+        div.style.cssText = 'padding:20px;margin:20px auto;max-width:800px;background:#1a1a2e;border-radius:12px;color:white;';
+        div.innerHTML =
+            '<h2 style="color:#22c55e;font-size:3rem;text-align:center;">Grade: ' + (data.health_grade || '—') + '</h2>' +
+            '<p style="text-align:center;font-size:1.5rem;">Health Score: ' + (data.health_score || 0) + '/100</p>' +
+            '<h3>MX Records:</h3><p>' + ((data.mx_records || []).join('<br>') || 'None found') + '</p>' +
+            '<h3>SPF Record:</h3><p>' + (data.spf_record || 'Not found') + '</p>' +
+            '<h3>DMARC Record:</h3><p>' + (data.dmarc_record || 'Not found') + '</p>' +
+            '<h3>Issues:</h3><p>' + ((data.issues || []).join('<br>') || 'None — all checks passed!') + '</p>' +
+            '<button onclick="location.reload()" style="margin-top:20px;padding:12px 24px;background:#0891b2;color:white;border:none;border-radius:8px;cursor:pointer;">Check Another Domain</button>';
+        container.appendChild(div);
+    }
+
+    // Scroll to results
+    (results || document.querySelector('main > div:last-child, .container > div:last-child'))?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function escapeHtml(str) {
+    var d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+}
+
+// Enter key support
+document.addEventListener('DOMContentLoaded', function() {
+    var input = document.querySelector('input[type="text"], input[placeholder*="domain"]');
+    if (input) {
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') checkDomain();
+        });
+    }
+});
+</script>
+{% endblock %}

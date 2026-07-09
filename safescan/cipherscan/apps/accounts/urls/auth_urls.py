@@ -1,4 +1,5 @@
-from django.urls import path
+from django.urls import path, include
+from django.views.generic.base import RedirectView
 from django.contrib.auth import views as auth_views
 from apps.accounts.views import login, logout, registration
 
@@ -50,4 +51,9 @@ urlpatterns = [
         ),
         name="password_change_done",
     ),
+    # Social login shortcuts
+    path("google/login/", RedirectView.as_view(url="/accounts/allauth/google/login/?process=login"), name="google_login"),
+    path("github/login/", RedirectView.as_view(url="/accounts/allauth/github/login/?process=login"), name="github_login"),
+    # django-allauth URLs
+    path("allauth/", include("allauth.urls")),
 ]

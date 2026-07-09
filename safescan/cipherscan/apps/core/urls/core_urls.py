@@ -1,5 +1,11 @@
 from django.urls import path
+from django.views.generic import RedirectView
 from apps.core.views import home, pages
+from apps.core.views.pages import browser_isolation_page
+from apps.core.views.hash_api import hash_calculate_view
+from apps.core.views.base64_api import base64_process_view, base64_download_view
+from apps.core.views.regex_api import regex_test_view, regex_templates_view
+from apps.core.views.port_scan_api import port_scan_start_view, port_scan_status_view, port_scan_result_view, port_scan_export_view
 
 urlpatterns = [
     path("", home.HomeView.as_view(), name="home"),
@@ -10,23 +16,26 @@ urlpatterns = [
     path("faq/", pages.FAQView.as_view(), name="faq"),
     path("privacy/", pages.PrivacyView.as_view(), name="privacy"),
     path("terms/", pages.TermsView.as_view(), name="terms"),
-    path("url-scanner/", pages.UrlScanView.as_view(), name="url_scan"),
-    path("url-scanner/<uuid:scan_id>/", pages.ScanDetailView.as_view(), name="scan_detail"),
+    path("url-scanner/", RedirectView.as_view(url="/browser-isolation/", permanent=True), name="url_scan"),
+    path("url-scanner/<str:scan_id>/", RedirectView.as_view(url="/browser-isolation/", permanent=True), name="scan_detail"),
     path("file/", pages.FileScanView.as_view(), name="file_scan"),
-    path("email-scanner/", pages.EmailScanView.as_view(), name="email_scan"),
+    path("email-scanner/", pages.email_scan_redirect, name="email_scan"),
     path("ip-scanner/", pages.IPScanView.as_view(), name="ip_scan"),
     path("domain-scanner/", pages.DomainScanView.as_view(), name="domain_scan"),
+    path("browser-isolation/", browser_isolation_page, name="browser_isolation"),
     path("phishing/", pages.PhishingAnalysisView.as_view(), name="phishing_analysis"),
     path("phishing/header-analyzer/", pages.EmailHeaderAnalyzerView.as_view(), name="email_header_analyzer"),
     path("phishing/health-checker/", pages.EmailHealthCheckerView.as_view(), name="email_health_checker"),
     path("phishing/suspicious-blocker/", pages.SuspiciousEmailBlockerView.as_view(), name="suspicious_email_blocker"),
     path("sandbox/", pages.SandboxView.as_view(), name="sandbox"),
+    path("sandbox/editor/", pages.SandboxEditorView.as_view(), name="sandbox_editor"),
+    path("sandbox/editor/<str:language>/", pages.SandboxEditorView.as_view(), name="sandbox_editor_with_lang"),
     path("threat-intel/", pages.ThreatIntelView.as_view(), name="threat_intel"),
     path("vulnerability-scanner/", pages.VulnScanView.as_view(), name="vuln_scan"),
     path("ssl-checker/", pages.SSLCheckerView.as_view(), name="ssl_checker"),
     path("dns-lookup/", pages.DNSLookupView.as_view(), name="dns_lookup"),
     path("whois-lookup/", pages.WHOISLookupView.as_view(), name="whois_lookup"),
-    path("dark-web/", pages.DarkWebView.as_view(), name="dark_web"),
+    path("dark-web/", RedirectView.as_view(pattern_name="darkweb:index", permanent=True), name="dark_web"),
     path("breach-check/", pages.BreachCheckView.as_view(), name="breach_check"),
     path("scan-history/", pages.ScanHistoryView.as_view(), name="scan_history"),
     path("saved-reports/", pages.SavedReportsView.as_view(), name="saved_reports"),
@@ -37,6 +46,19 @@ urlpatterns = [
     path("docs/", pages.DocsView.as_view(), name="docs"),
     path("blog/", pages.BlogView.as_view(), name="blog"),
     path("tools/", pages.FeaturesView.as_view(), name="tools"),
+    path("hash-calculator/", pages.HashCalculatorView.as_view(), name="hash_calculator"),
+    path("base64/", pages.Base64View.as_view(), name="base64"),
+    path("regex-tester/", pages.RegexTesterView.as_view(), name="regex_tester"),
+    path("api/regex/test/", regex_test_view, name="regex_test_api"),
+    path("api/regex/templates/", regex_templates_view, name="regex_templates_api"),
+    path("port-scanner/", pages.PortScannerView.as_view(), name="port_scanner"),
+    path("api/port/scan/", port_scan_start_view, name="port_scan_start_api"),
+    path("api/port/scan/<str:scan_id>/status/", port_scan_status_view, name="port_scan_status_api"),
+    path("api/port/scan/<str:scan_id>/result/", port_scan_result_view, name="port_scan_result_api"),
+    path("api/port/scan/<str:scan_id>/export/", port_scan_export_view, name="port_scan_export_api"),
+    path("api/base64/process/", base64_process_view, name="base64_process_api"),
+    path("api/base64/download/", base64_download_view, name="base64_download_api"),
+    path("api/hash-calculate/", hash_calculate_view, name="hash_calculate_api"),
     path("api/stats", home.StatsView.as_view(), name="stats_api"),
     path("api/threats/history", home.ThreatHistoryView.as_view(), name="threat_history_api"),
 ]

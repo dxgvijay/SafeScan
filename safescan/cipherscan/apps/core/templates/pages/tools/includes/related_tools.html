@@ -1,0 +1,29 @@
+{% load static %}{% url 'sandbox_port_scanner' as ps_url %}{% url 'sandbox_hash_calculator' as hc_url %}{% url 'sandbox_base64' as b64_url %}{% url 'sandbox_regex' as rx_url %}{% url 'sandbox_code_editor' as ed_url %}
+{% if current != 'port-scanner' %}
+<a href="{{ ps_url }}" class="related-tool-card">
+  <div class="related-tool-icon" style="background:rgba(0,212,255,0.1);color:var(--accent-cyan)"><i class="bi bi-plug"></i></div>
+  <div class="related-tool-info"><div class="related-tool-name">Port Scanner</div><div class="related-tool-desc">TCP port scanning</div></div>
+</a>
+{% endif %}
+{% if current != 'hash-calculator' %}
+<a href="{{ hc_url }}" class="related-tool-card">
+  <div class="related-tool-icon" style="background:rgba(179,136,255,0.1);color:#b388ff"><i class="bi bi-hash"></i></div>
+  <div class="related-tool-info"><div class="related-tool-name">Hash Calculator</div><div class="related-tool-desc">Cryptographic hashing</div></div>
+</a>
+{% endif %}
+{% if current != 'base64' %}
+<a href="{{ b64_url }}" class="related-tool-card">
+  <div class="related-tool-icon" style="background:rgba(255,217,61,0.1);color:#ffd93d"><i class="bi bi-arrow-left-right"></i></div>
+  <div class="related-tool-info"><div class="related-tool-name">Base64</div><div class="related-tool-desc">Encode / Decode</div></div>
+</a>
+{% endif %}
+{% if current != 'regex' %}
+<a href="{{ rx_url }}" class="related-tool-card">
+  <div class="related-tool-icon" style="background:rgba(0,255,136,0.1);color:var(--accent-success)"><i class="bi bi-code-slash"></i></div>
+  <div class="related-tool-info"><div class="related-tool-name">Regex Tester</div><div class="related-tool-desc">Pattern matching</div></div>
+</a>
+{% endif %}
+<a href="{{ ed_url }}" class="related-tool-card">
+  <div class="related-tool-icon" style="background:rgba(0,122,204,0.1);color:#007acc"><i class="bi bi-code"></i></div>
+  <div class="related-tool-info"><div class="related-tool-name">Code Editor</div><div class="related-tool-desc">Multi-language IDE</div></div>
+</a>

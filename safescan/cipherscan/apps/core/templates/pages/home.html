@@ -1,33 +1,28 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}CipherScan — Analyze. Detect. Protect.{% endblock %}
+{% block title %}CipherScan — Premium Cybersecurity Analysis Platform{% endblock %}
 
-{% block body_class %}full-width{% endblock %}
+{% block body_class %}{% endblock %}
 
 {% block extra_css %}
 <style>
 /* ============================================================
-   LANDING PAGE — Hero
+   HERO — Premium Cyber Grid
    ============================================================ */
 #hero {
     position: relative;
-    min-height: calc(100vh - var(--navbar-height));
+    min-height: 90vh;
     display: flex;
     align-items: center;
     overflow: hidden;
-}
-#hero #particles-js {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
+    background: var(--bg-primary);
 }
 #hero .hero-content {
     position: relative;
-    z-index: 1;
+    z-index: 2;
     width: 100%;
-    padding: 4rem 2rem;
+    padding: 6rem 2rem 4rem;
 }
 #hero .hero-badge {
     display: inline-flex;
@@ -41,18 +36,13 @@
     font-weight: 500;
     color: var(--accent-cyan);
     margin-bottom: 1.5rem;
-    animation: fade-in-up 0.8s ease both;
 }
 #hero .hero-badge .badge-dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
     background: var(--accent-success);
-    animation: dot-pulse 2s infinite;
-}
-@keyframes dot-pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(0.8); }
+    animation: status-pulse 2s infinite;
 }
 #hero .hero-title {
     font-size: clamp(2.5rem, 6vw, 4.5rem);
@@ -60,10 +50,9 @@
     line-height: 1.05;
     letter-spacing: -0.03em;
     margin-bottom: 1rem;
-    animation: fade-in-up 0.8s 0.15s ease both;
 }
 #hero .hero-title .gradient-text {
-    background: linear-gradient(135deg, var(--accent-cyan), #7c5bfe, var(--accent-cyan));
+    background: var(--gradient-cyan-purple);
     background-size: 200% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -77,55 +66,56 @@
 #hero .hero-subtitle {
     font-size: clamp(1rem, 2vw, 1.25rem);
     color: var(--text-secondary);
-    max-width: 580px;
+    max-width: 600px;
     line-height: 1.7;
     margin-bottom: 2rem;
-    animation: fade-in-up 0.8s 0.3s ease both;
 }
 #hero .hero-ctas {
     display: flex;
     flex-wrap: wrap;
     gap: 0.75rem;
-    margin-bottom: 2.5rem;
-    animation: fade-in-up 0.8s 0.45s ease both;
-}
-#hero .hero-ctas .btn-cs {
-    padding: 0.75rem 1.75rem;
-    font-size: 0.9375rem;
-    border-radius: var(--radius-md);
+    margin-bottom: 3rem;
 }
 #hero .hero-ctas .btn-hero-primary {
-    background: var(--accent-cyan);
-    color: #0a0e1a;
-    border: 1px solid var(--accent-cyan);
+    padding: 0.875rem 2rem;
+    font-size: 0.9375rem;
     font-weight: 700;
+    border-radius: var(--radius-md);
+    background: var(--gradient-cyan-purple);
+    color: #fff;
+    border: none;
+    transition: all var(--transition-normal);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 #hero .hero-ctas .btn-hero-primary:hover {
-    background: #33ddff;
-    border-color: #33ddff;
-    box-shadow: var(--accent-cyan-glow), 0 0 60px rgba(0, 212, 255, 0.15);
+    box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
     transform: translateY(-2px);
 }
 #hero .hero-ctas .btn-hero-secondary {
+    padding: 0.875rem 2rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    border-radius: var(--radius-md);
     background: rgba(255, 255, 255, 0.04);
     color: var(--text-primary);
     border: 1px solid var(--glass-border);
-    font-weight: 600;
     backdrop-filter: blur(10px);
+    transition: all var(--transition-normal);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 #hero .hero-ctas .btn-hero-secondary:hover {
     background: rgba(255, 255, 255, 0.08);
     border-color: var(--text-muted);
     transform: translateY(-2px);
 }
-
-/* Hero Stats */
-.hero-stats {
+#hero .hero-stats {
     display: flex;
     flex-wrap: wrap;
-    gap: 2rem;
-    margin-bottom: 2.5rem;
-    animation: fade-in-up 0.8s 0.6s ease both;
+    gap: 2.5rem;
 }
 .hero-stat {
     display: flex;
@@ -156,78 +146,42 @@
     background: var(--glass-border);
 }
 
-/* Hero Quick Scan */
-.hero-scan {
-    animation: fade-in-up 0.8s 0.75s ease both;
+/* Quick scan input */
+.hero-scan-wrapper {
+    max-width: 560px;
+    margin-top: 1.5rem;
 }
-.hero-scan .scan-tabs {
-    display: flex;
-    max-width: 640px;
-    background: rgba(15, 22, 40, 0.6);
+.hero-scan-wrapper .input-group {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
     border: 1px solid var(--glass-border);
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    border-radius: var(--radius-lg);
     overflow: hidden;
-    backdrop-filter: blur(20px);
-}
-.hero-scan .scan-tabs .scan-type-btn {
-    background: transparent;
-    border: none;
-    color: var(--text-secondary);
-    padding: 0.75rem 1rem;
-    font-size: 0.8125rem;
-    font-weight: 500;
-    cursor: pointer;
     transition: all var(--transition-fast);
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-    border-right: 1px solid var(--glass-border);
-    white-space: nowrap;
 }
-.hero-scan .scan-tabs .scan-type-btn:hover {
-    color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.03);
+.hero-scan-wrapper .input-group:focus-within {
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.1);
 }
-.hero-scan .scan-tabs .scan-type-btn.active {
-    color: var(--accent-cyan);
-    background: var(--accent-cyan-dim);
-}
-.hero-scan .scan-tabs .scan-type-btn:last-child {
-    border-right: none;
-}
-
-.hero-scan .scan-action-wrapper {
-    max-width: 640px;
-    background: rgba(15, 22, 40, 0.6);
-    border: 1px solid var(--glass-border);
-    border-top: none;
-    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-    overflow: hidden;
-    backdrop-filter: blur(20px);
-}
-
-#urlModeContent {
-    display: flex;
-}
-#urlModeContent input {
+.hero-scan-wrapper .input-group input {
     flex: 1;
     background: transparent;
     border: none;
-    padding: 0.75rem 1rem;
+    padding: 0.875rem 1.25rem;
     color: var(--text-primary);
     font-family: var(--font-ui);
     font-size: 0.875rem;
     outline: none;
     min-width: 0;
 }
-#urlModeContent input::placeholder {
+.hero-scan-wrapper .input-group input::placeholder {
     color: var(--text-muted);
 }
-#urlModeContent .btn-scan-submit {
+.hero-scan-wrapper .input-group button {
     background: var(--accent-cyan);
     border: none;
-    color: #0a0e1a;
-    padding: 0.75rem 1.5rem;
+    color: #fff;
+    padding: 0.875rem 1.5rem;
     font-weight: 700;
     font-size: 0.875rem;
     cursor: pointer;
@@ -237,92 +191,84 @@
     gap: 0.5rem;
     white-space: nowrap;
 }
-#urlModeContent .btn-scan-submit:hover {
-    background: #33ddff;
-}
-#urlModeContent .btn-scan-submit i {
-    font-size: 0.875rem;
-}
-
-#fileModeContent .file-drop-zone {
-    border: none;
-    border-radius: 0;
-    padding: 1.5rem;
-    margin: 0;
-    max-width: none;
-    display: block;
-    text-align: center;
-    cursor: pointer;
-    transition: all var(--transition-normal);
-}
-#fileModeContent .file-drop-zone:hover,
-#fileModeContent .file-drop-zone.dragover {
-    background: var(--accent-cyan-dim);
-}
-#fileModeContent .file-drop-zone i {
-    font-size: 2rem;
-    color: var(--text-muted);
-    margin-bottom: 0.5rem;
-    display: block;
-}
-#fileModeContent .file-drop-zone p {
-    font-size: 0.8125rem;
-    color: var(--text-secondary);
-    margin: 0 0 1rem;
-}
-#fileModeContent .file-drop-zone p strong {
-    color: var(--accent-cyan);
-}
-#fileModeContent .file-drop-zone .btn-scan-submit {
-    background: var(--accent-cyan);
-    border: none;
-    color: #0a0e1a;
-    padding: 0.75rem 1.5rem;
-    font-weight: 700;
-    font-size: 0.875rem;
-    cursor: pointer;
-    transition: all var(--transition-fast);
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    width: 100%;
-    justify-content: center;
-    border-radius: var(--radius-md);
-}
-#fileModeContent .file-drop-zone .btn-scan-submit:hover {
+.hero-scan-wrapper .input-group button:hover {
     background: #33ddff;
 }
 
 /* ============================================================
-   SECTION COMMON
+   TOOLS GRID — Premium Glow Cards
    ============================================================ */
-.section-cs {
+#tools {
+    position: relative;
     padding: 5rem 0;
 }
-.section-cs .section-header {
-    text-align: center;
-    margin-bottom: 3.5rem;
+.tool-card {
+    position: relative;
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem 1.5rem;
+    height: 100%;
+    transition: all var(--transition-normal);
+    cursor: pointer;
+    overflow: hidden;
 }
-.section-cs .section-header h2 {
-    font-size: clamp(1.75rem, 3.5vw, 2.5rem);
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    margin-bottom: 0.75rem;
+.tool-card::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: var(--radius-lg);
+    background: linear-gradient(135deg, var(--accent-cyan), transparent 40%, var(--accent-purple) 100%);
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+    z-index: -1;
 }
-.section-cs .section-header .section-subtitle {
+.tool-card:hover::before {
+    opacity: 1;
+}
+.tool-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--glass-shadow), 0 0 30px rgba(0, 212, 255, 0.08);
+}
+.tool-card .tool-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    transition: all var(--transition-normal);
+}
+.tool-card:hover .tool-icon {
+    transform: scale(1.1);
+}
+.tool-card .tool-icon.cyan { background: var(--accent-cyan-dim); color: var(--accent-cyan); }
+.tool-card .tool-icon.purple { background: var(--accent-purple-dim); color: var(--accent-purple); }
+.tool-card .tool-icon.green { background: var(--accent-success-dim); color: var(--accent-success); }
+.tool-card .tool-icon.orange { background: var(--accent-orange-dim); color: var(--accent-orange); }
+.tool-card .tool-icon.danger { background: var(--accent-danger-dim); color: var(--accent-danger); }
+.tool-card .tool-icon.warning { background: var(--accent-warning-dim); color: var(--accent-warning); }
+.tool-card h5 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.375rem;
+}
+.tool-card p {
+    font-size: 0.8125rem;
     color: var(--text-secondary);
-    font-size: 1.0625rem;
-    max-width: 540px;
-    margin: 0 auto;
-    line-height: 1.7;
+    line-height: 1.6;
+    margin: 0;
 }
-.section-cs .section-header .section-accent {
-    display: inline-block;
-    width: 40px;
-    height: 3px;
-    background: var(--accent-cyan);
-    border-radius: 3px;
+.tool-card .tool-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
     margin-top: 0.75rem;
+    font-size: 0.71875rem;
+    font-weight: 500;
 }
 
 /* ============================================================
@@ -330,591 +276,560 @@
    ============================================================ */
 #features {
     position: relative;
+    padding: 5rem 0;
 }
-.feature-card {
-    background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur));
-    -webkit-backdrop-filter: blur(var(--glass-blur));
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-lg);
-    padding: 2rem 1.5rem;
-    height: 100%;
-    transition: all var(--transition-normal);
-    position: relative;
-    overflow: hidden;
-}
-.feature-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
-    opacity: 0;
-    transition: opacity var(--transition-normal);
-}
-.feature-card:hover {
-    border-color: var(--glass-border-hover);
-    box-shadow: var(--glass-shadow), var(--accent-cyan-glow);
-    transform: translateY(-6px);
-}
-.feature-card:hover::before {
-    opacity: 1;
-}
-.feature-card .feature-icon {
-    width: 52px;
-    height: 52px;
-    border-radius: var(--radius-md);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.25rem;
-    margin-bottom: 1.25rem;
-    transition: all var(--transition-normal);
-}
-.feature-card:hover .feature-icon {
-    transform: scale(1.1);
-}
-.feature-card .feature-icon.cyan { background: var(--accent-cyan-dim); color: var(--accent-cyan); }
-.feature-card .feature-icon.orange { background: var(--accent-orange-dim); color: var(--accent-orange); }
-.feature-card .feature-icon.success { background: var(--accent-success-dim); color: var(--accent-success); }
-.feature-card .feature-icon.purple { background: var(--accent-purple-dim); color: var(--accent-purple); }
-.feature-card .feature-icon.danger { background: var(--accent-danger-dim); color: var(--accent-danger); }
-.feature-card .feature-icon.warning { background: var(--accent-warning-dim); color: var(--accent-warning); }
-
-.feature-card h4 {
-    font-size: 1.0625rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-}
-.feature-card p {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    line-height: 1.6;
-    margin: 0;
-}
-.feature-card .feature-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-    margin-top: 1rem;
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: var(--accent-cyan);
-    transition: gap var(--transition-fast);
-}
-.feature-card .feature-link:hover {
-    gap: 0.625rem;
-}
-
-/* ============================================================
-   HOW IT WORKS
-   ============================================================ */
-#how-it-works {
-    position: relative;
-}
-#how-it-works::before {
+#features::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: radial-gradient(ellipse at 50% 0%, rgba(0, 212, 255, 0.03) 0%, transparent 60%);
+    background: radial-gradient(ellipse at 30% 0%, rgba(0, 212, 255, 0.03) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 100%, rgba(124, 92, 255, 0.03) 0%, transparent 60%);
     pointer-events: none;
 }
-.step-card {
-    text-align: center;
+.feature-card-lg {
     position: relative;
-    padding: 2rem 1.5rem;
-}
-.step-card .step-number {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.25rem;
-    font-weight: 700;
-    font-family: var(--font-mono);
-    margin: 0 auto 1.25rem;
-    position: relative;
-    background: var(--accent-cyan-dim);
-    color: var(--accent-cyan);
-    border: 2px solid rgba(0, 212, 255, 0.2);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem 2rem;
+    height: 100%;
     transition: all var(--transition-normal);
+    overflow: hidden;
 }
-.step-card:hover .step-number {
-    box-shadow: var(--accent-cyan-glow);
-    transform: scale(1.05);
-}
-.step-card .step-icon {
-    font-size: 1.25rem;
-}
-.step-card h4 {
-    font-size: 1.0625rem;
-    font-weight: 600;
-    margin-bottom: 0.375rem;
-}
-.step-card p {
-    font-size: 0.8125rem;
-    color: var(--text-secondary);
-    line-height: 1.6;
-    margin: 0;
-    max-width: 260px;
-    margin: 0 auto;
-}
-.step-connector {
+.feature-card-lg::before {
+    content: '';
     position: absolute;
-    top: 28px;
-    right: -1.5rem;
-    width: 3rem;
-    height: 2px;
-    background: linear-gradient(90deg, var(--accent-cyan-dim), var(--glass-border));
-}
-.step-connector .connector-arrow {
-    position: absolute;
+    top: 0;
+    left: 0;
     right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--accent-cyan);
-    font-size: 0.625rem;
-    opacity: 0.4;
+    height: 3px;
+    background: var(--gradient-cyan-purple);
+    opacity: 0;
+    transition: opacity var(--transition-normal);
 }
-@media (max-width: 767.98px) {
-    .step-connector {
-        display: none;
-    }
+.feature-card-lg:hover {
+    border-color: var(--glass-border-hover);
+    box-shadow: var(--glass-shadow), 0 0 30px rgba(0, 212, 255, 0.06);
+    transform: translateY(-4px);
 }
-
-/* ============================================================
-   STATS / TRUST SECTION
-   ============================================================ */
-#trust {
-    position: relative;
+.feature-card-lg:hover::before {
+    opacity: 1;
 }
-#trust .trust-bg-accent {
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse at 30% 50%, rgba(0, 212, 255, 0.04) 0%, transparent 60%),
-                radial-gradient(ellipse at 70% 50%, rgba(124, 91, 254, 0.03) 0%, transparent 60%);
-    pointer-events: none;
-}
-.trust-counter {
-    text-align: center;
-    padding: 1.5rem 1rem;
-}
-.trust-counter .counter-icon {
-    width: 48px;
-    height: 48px;
+.feature-card-lg .feature-icon-lg {
+    width: 60px;
+    height: 60px;
     border-radius: var(--radius-md);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.125rem;
-    margin: 0 auto 1rem;
+    font-size: 1.5rem;
+    margin-bottom: 1.25rem;
 }
-.trust-counter .counter-icon.cyan { background: var(--accent-cyan-dim); color: var(--accent-cyan); }
-.trust-counter .counter-icon.orange { background: var(--accent-orange-dim); color: var(--accent-orange); }
-.trust-counter .counter-icon.success { background: var(--accent-success-dim); color: var(--accent-success); }
-.trust-counter .counter-icon.purple { background: var(--accent-purple-dim); color: var(--accent-purple); }
-.trust-counter .counter-value {
+.feature-card-lg .feature-icon-lg.cyan { background: var(--accent-cyan-dim); color: var(--accent-cyan); }
+.feature-card-lg .feature-icon-lg.purple { background: var(--accent-purple-dim); color: var(--accent-purple); }
+.feature-card-lg .feature-icon-lg.green { background: var(--accent-success-dim); color: var(--accent-success); }
+.feature-card-lg h4 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+.feature-card-lg p {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin: 0;
+}
+.feature-card-lg .feature-list {
+    list-style: none;
+    padding: 0;
+    margin: 1.25rem 0 0;
+}
+.feature-card-lg .feature-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    padding: 0.375rem 0;
+}
+.feature-card-lg .feature-list li i {
+    color: var(--accent-success);
+    font-size: 0.75rem;
+}
+
+/* ============================================================
+   STATS SECTION
+   ============================================================ */
+#stats {
+    position: relative;
+    padding: 4rem 0;
+    background: rgba(255, 255, 255, 0.01);
+    border-top: 1px solid var(--glass-border);
+    border-bottom: 1px solid var(--glass-border);
+}
+.stat-item {
+    text-align: center;
+    padding: 1.5rem 1rem;
+}
+.stat-item .stat-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+}
+.stat-item .stat-icon.cyan { color: var(--accent-cyan); }
+.stat-item .stat-icon.green { color: var(--accent-success); }
+.stat-item .stat-icon.purple { color: var(--accent-purple); }
+.stat-item .stat-icon.orange { color: var(--accent-orange); }
+.stat-item .stat-number {
     font-size: 2.25rem;
     font-weight: 800;
-    letter-spacing: -0.02em;
     font-family: var(--font-mono);
+    letter-spacing: -0.02em;
     line-height: 1.2;
 }
-.trust-counter .counter-label {
+.stat-item .stat-number .stat-plus {
+    color: var(--accent-cyan);
+    font-size: 1.5rem;
+}
+.stat-item .stat-label {
     font-size: 0.8125rem;
     color: var(--text-secondary);
     margin-top: 0.25rem;
 }
 
-/* Chart wrapper */
-.chart-wrapper {
-    background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur));
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-lg);
-    padding: 1.5rem;
+/* ============================================================
+   PLAYGROUND SECTION
+   ============================================================ */
+#playground {
+    position: relative;
+    padding: 5rem 0;
 }
-.chart-wrapper .chart-header {
+.playground-card {
+    position: relative;
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.05), rgba(124, 92, 255, 0.05));
+    border: 1px solid rgba(0, 212, 255, 0.1);
+    border-radius: var(--radius-xl);
+    padding: 3rem;
+    overflow: hidden;
+}
+.playground-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 30% 50%, rgba(0, 212, 255, 0.06) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 50%, rgba(124, 92, 255, 0.04) 0%, transparent 60%);
+    pointer-events: none;
+}
+.playground-card .playground-content {
+    position: relative;
+    z-index: 1;
+}
+.playground-card h3 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+}
+.playground-card p {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    max-width: 500px;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+}
+.playground-card .playground-tools {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
 }
-.chart-wrapper .chart-header h4 {
+.playground-card .playground-tools .pt-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.78125rem;
+    font-weight: 500;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    transition: all var(--transition-fast);
+}
+.playground-card .playground-tools .pt-badge:hover {
+    border-color: var(--accent-cyan);
+    color: var(--accent-cyan);
+    background: var(--accent-cyan-dim);
+}
+.playground-card .btn-playground {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.75rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    background: var(--accent-cyan);
+    color: #fff;
+    border: none;
+    transition: all var(--transition-normal);
+}
+.playground-card .btn-playground:hover {
+    box-shadow: 0 0 24px rgba(0, 212, 255, 0.25);
+    transform: translateY(-2px);
+}
+
+/* ============================================================
+   CTA SECTION
+   ============================================================ */
+#cta {
+    position: relative;
+    padding: 5rem 0;
+    text-align: center;
+}
+#cta h2 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    margin-bottom: 1rem;
+}
+#cta p {
+    font-size: 1.0625rem;
+    color: var(--text-secondary);
+    max-width: 500px;
+    margin: 0 auto 2rem;
+    line-height: 1.7;
+}
+#cta .btn-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 2.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+    border-radius: var(--radius-md);
+    background: var(--gradient-cyan-purple);
+    color: #fff;
+    border: none;
+    transition: all var(--transition-normal);
+}
+#cta .btn-cta:hover {
+    box-shadow: 0 0 40px rgba(0, 212, 255, 0.25);
+    transform: translateY(-2px);
+}
+#cta .btn-cta-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 2.5rem;
     font-size: 1rem;
     font-weight: 600;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--glass-border);
+    transition: all var(--transition-normal);
+    margin-left: 0.75rem;
 }
-.chart-wrapper .chart-header .chart-badge {
-    font-size: 0.71875rem;
-    padding: 0.25rem 0.625rem;
-    border-radius: 50px;
-    background: var(--accent-success-dim);
-    color: var(--accent-success);
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-}
-.chart-wrapper canvas {
-    width: 100% !important;
-    height: auto !important;
-    max-height: 280px;
-}
-.chart-wrapper .chart-loading {
-    min-height: 200px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-@keyframes shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+#cta .btn-cta-outline:hover {
+    border-color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.04);
+    transform: translateY(-2px);
 }
 
 /* ============================================================
-   SCROLL ANIMATIONS
+   SECTION HEADER
    ============================================================ */
-.fade-in-up {
-    opacity: 0;
-    transform: translateY(30px);
-    transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
-                transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+.section-header {
+    text-align: center;
+    margin-bottom: 3.5rem;
 }
-.fade-in-up.visible {
-    opacity: 1;
-    transform: translateY(0);
+.section-header h2 {
+    font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.75rem;
 }
-.fade-in-left {
-    opacity: 0;
-    transform: translateX(-30px);
-    transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
-                transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+.section-header .section-subtitle {
+    color: var(--text-secondary);
+    font-size: 1.0625rem;
+    max-width: 540px;
+    margin: 0 auto;
+    line-height: 1.7;
 }
-.fade-in-left.visible {
-    opacity: 1;
-    transform: translateX(0);
-}
-.fade-in-right {
-    opacity: 0;
-    transform: translateX(30px);
-    transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
-                transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.fade-in-right.visible {
-    opacity: 1;
-    transform: translateX(0);
-}
-.fade-in-scale {
-    opacity: 0;
-    transform: scale(0.92);
-    transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
-                transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.fade-in-scale.visible {
-    opacity: 1;
-    transform: scale(1);
+.section-header .section-accent {
+    display: inline-block;
+    width: 48px;
+    height: 3px;
+    background: var(--gradient-cyan-purple);
+    border-radius: 3px;
+    margin-top: 1rem;
 }
 
-.stagger-children > * {
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
-                transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.stagger-children.visible > *:nth-child(1) { transition-delay: 0.0s; }
-.stagger-children.visible > *:nth-child(2) { transition-delay: 0.1s; }
-.stagger-children.visible > *:nth-child(3) { transition-delay: 0.2s; }
-.stagger-children.visible > *:nth-child(4) { transition-delay: 0.3s; }
-.stagger-children.visible > *:nth-child(5) { transition-delay: 0.4s; }
-.stagger-children.visible > *:nth-child(6) { transition-delay: 0.5s; }
-.stagger-children.visible > * {
-    opacity: 1;
-    transform: translateY(0);
+/* Highlights section */
+#highlights {
+    position: relative;
+    padding: 5rem 0;
+    border-top: 1px solid var(--glass-border);
+    border-bottom: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.01);
 }
 
-@keyframes fade-in-up {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+/* Offline tool card */
+.tool-card-offline {
+    cursor: not-allowed !important;
+    opacity: 0.7;
+}
+.tool-card-offline:hover::before {
+    opacity: 1;
 }
 
 /* ============================================================
-   RESPONSIVE LANDING
+   RESPONSIVE
    ============================================================ */
 @media (max-width: 991.98px) {
-    #hero .hero-content {
-        padding: 3rem 1.5rem;
-    }
-    #hero .hero-stats {
-        gap: 1.5rem;
-    }
-    .hero-stat-divider {
-        display: none;
-    }
-    .section-cs {
-        padding: 3.5rem 0;
-    }
+    #hero .hero-content { padding: 4rem 1.5rem 3rem; }
+    #hero .hero-stats { gap: 1.5rem; }
+    .hero-stat-divider { display: none; }
+    .playground-card { padding: 2rem; }
 }
 @media (max-width: 575.98px) {
-    #hero .hero-content {
-        padding: 2rem 1rem;
-    }
-    #hero .hero-ctas {
-        flex-direction: column;
-    }
-    #hero .hero-ctas .btn-cs {
-        width: 100%;
-        justify-content: center;
-    }
-    #hero .hero-stats {
-        flex-direction: column;
-        gap: 1rem;
-    }
-    .hero-scan .scan-tabs {
-        flex-direction: column;
-        border-radius: var(--radius-md) var(--radius-md) 0 0;
-    }
-    .hero-scan .scan-tabs .scan-type-btn {
-        border-right: none;
-        border-bottom: 1px solid var(--glass-border);
-        justify-content: center;
-    }
-    #urlModeContent {
-        flex-direction: column;
-    }
-    #urlModeContent .btn-scan-submit {
-        justify-content: center;
-        border-radius: 0 0 var(--radius-md) var(--radius-md);
-    }
-    #hero {
-        min-height: auto;
-    }
-    .trust-counter .counter-value {
-        font-size: 1.75rem;
-    }
-    .threat-feed-body .threat-feed-table {
-        font-size: 0.75rem;
-    }
-    .threat-feed-body .threat-feed-table thead th,
-    .threat-feed-body .threat-feed-table tbody tr td {
-        padding: 0.5rem 0.75rem;
-    }
+    #hero .hero-content { padding: 3rem 1rem 2rem; }
+    #hero .hero-ctas { flex-direction: column; }
+    #hero .hero-ctas .btn-hero-primary,
+    #hero .hero-ctas .btn-hero-secondary { width: 100%; justify-content: center; }
+    #hero .hero-stats { flex-direction: column; gap: 1rem; }
+    #hero { min-height: auto; }
+    .stat-item .stat-number { font-size: 1.75rem; }
+    .playground-card { padding: 1.5rem; }
+    #cta .btn-cta-outline { margin-left: 0; margin-top: 0.75rem; }
 }
 </style>
 {% endblock %}
 
 {% block hero %}
 <!-- ============================================================
-     HERO SECTION
+     HERO SECTION — Premium Cyber Grid Background
      ============================================================ -->
-<section class="hero-gradient" id="hero">
-    <div id="particles-js"></div>
-
+<section id="hero">
+    <div class="cyber-grid"></div>
     <div class="hero-content">
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-xl-8 col-lg-10 text-center">
-                    <div class="hero-badge">
+                    <div class="hero-badge fade-up">
                         <span class="badge-dot"></span>
-                        Real-time threat intelligence — 99.7% detection rate
+                        Enterprise-Grade Threat Intelligence — 99.7% Detection Rate
                     </div>
 
-                    <h1 class="hero-title">
-                        Analyze. Detect.<br>
-                        <span class="gradient-text">Protect.</span>
+                    <h1 class="hero-title fade-up" style="transition-delay:0.1s">
+                        Next-Gen<br>
+                        <span class="gradient-text">Cybersecurity Analysis</span>
                     </h1>
 
-                    <p class="hero-subtitle mx-auto">
-                        Enterprise-grade cybersecurity analysis platform. Scan URLs, files, and emails
-                        for threats in real-time. Powered by advanced AI and global threat intelligence.
+                    <p class="hero-subtitle mx-auto fade-up" style="transition-delay:0.2s">
+                        Analyze URLs, files, emails, and domains in real-time against 50+ threat engines.
+                        AI-powered detection with actionable threat intelligence.
                     </p>
 
-                    <div class="hero-ctas justify-content-center">
-                        <a href="{% url 'url_scan' %}" class="btn-cs btn-hero-primary">
-                            <i class="fas fa-shield-halo"></i> Start Scanning
+                    <div class="hero-ctas justify-content-center fade-up" style="transition-delay:0.3s">
+                        <a href="{% url 'browser_isolation' %}" class="btn-hero-primary">
+                            <i class="bi bi-shield-fill-check"></i> Start Scanning
                         </a>
-                        <a href="{% url 'dashboard' %}" class="btn-cs btn-hero-secondary">
-                            <i class="fas fa-chart-pie"></i> View Dashboard
+                        <a href="{% url 'sandbox' %}" class="btn-hero-secondary">
+                            <i class="bi bi-box"></i> Explore Sandbox
                         </a>
                     </div>
 
-                    <div class="hero-stats justify-content-center">
+                    <div class="hero-stats justify-content-center fade-up" style="transition-delay:0.4s">
                         <div class="hero-stat">
                             <span class="hero-stat-value">
-                                <span class="counter" data-target="0" data-stat-key="files_scanned">0</span>
-                                <span class="stat-suffix">+</span>
+                                <span data-counter="0" id="scans-completed">0</span>
                             </span>
-                            <span class="hero-stat-label">Files Scanned</span>
+                            <span class="hero-stat-label">Scans Completed</span>
                         </div>
                         <div class="hero-stat-divider"></div>
                         <div class="hero-stat">
                             <span class="hero-stat-value">
-                                <span class="counter" data-target="0" data-stat-key="urls_checked">0</span>
-                                <span class="stat-suffix">+</span>
+                                <span data-counter="0" id="threats-neutralized">0</span>
                             </span>
-                            <span class="hero-stat-label">URLs Checked</span>
+                            <span class="hero-stat-label">Threats Neutralized</span>
                         </div>
                         <div class="hero-stat-divider"></div>
                         <div class="hero-stat">
                             <span class="hero-stat-value">
-                                <span class="counter" data-target="0" data-stat-key="threats_detected">0</span>
-                                <span class="stat-suffix">+</span>
+                                <span data-counter="0" id="uptime">0</span>
+                                <span class="stat-suffix">%</span>
                             </span>
-                            <span class="hero-stat-label">Threats Detected</span>
+                            <span class="hero-stat-label">Uptime</span>
                         </div>
                     </div>
 
-                    <div class="hero-scan">
-                        <div class="scan-tabs mx-auto">
-                            <button class="scan-type-btn active" data-type="url" id="scanTypeUrl">
-                                <i class="fas fa-link"></i> URL
+                    <div class="hero-scan-wrapper mx-auto fade-up" style="transition-delay:0.5s">
+                        <div class="input-group">
+                            <input type="text" id="heroScanInput" placeholder="Enter URL to scan — https://example.com" autocomplete="off">
+                            <button id="heroScanBtn">
+                                <i class="bi bi-search"></i> Scan
                             </button>
-                            <button class="scan-type-btn" data-type="file" id="scanTypeFile">
-                                <i class="fas fa-file"></i> File
-                            </button>
-                        </div>
-                        <div id="urlModeContent" class="scan-action-wrapper mx-auto">
-                            <input type="text" id="scanInput" placeholder="Enter URL to scan — https://example.com" autocomplete="off">
-                            <button class="btn-scan-submit" id="scanSubmitBtn">
-                                <i class="fas fa-magnifying-glass"></i> Scan
-                            </button>
-                        </div>
-                        <div id="fileModeContent" class="scan-action-wrapper mx-auto" style="display:none">
-                            <div class="file-drop-zone" id="fileDropZone">
-                                <i class="fas fa-cloud-arrow-up"></i>
-                                <p>Drag & drop a file here or <strong>browse</strong> to upload</p>
-                                <input type="file" id="fileInput" style="display:none" multiple>
-                                <button class="btn-scan-submit" id="fileScanBtn">
-                                    <i class="fas fa-magnifying-glass"></i> Upload & Scan
-                                </button>
-                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
 </section>
 {% endblock %}
 
 {% block content %}
 <!-- ============================================================
-     FEATURES SECTION
+     POPULAR TOOLS SECTION
      ============================================================ -->
-<section class="section-cs" id="features">
+<section id="tools">
     <div class="container">
-        <div class="section-header fade-in-up">
-            <h2>Everything you need to stay <span class="text-cyan">secure</span></h2>
-            <p class="section-subtitle">Comprehensive security analysis tools used by cybersecurity professionals worldwide to detect and neutralize threats.</p>
+        <div class="section-header fade-up">
+            <h2>Popular <span class="text-gradient-cyan">Tools</span></h2>
+            <p class="section-subtitle">Comprehensive security analysis toolkit — from URL scanning to dark web monitoring.</p>
             <span class="section-accent"></span>
         </div>
-        <div class="row g-4 stagger-children" id="featuresGrid">
-            <div class="col-lg-4 col-md-6">
-                <div class="feature-card">
-                    <div class="feature-icon cyan"><i class="fas fa-link"></i></div>
-                    <h4>URL Scanning</h4>
-                    <p>Real-time analysis of URLs against 50+ threat databases. Detect phishing, malware, and malicious redirects instantly.</p>
-                    <a href="{% url 'url_scan' %}" class="feature-link">Try Now <i class="fas fa-arrow-right"></i></a>
+        <div class="row g-4 stagger-children">
+            <div class="col-lg-3 col-md-6">
+                <a href="{% url 'browser_isolation' %}" class="tool-card text-decoration-none d-block">
+                    <div class="tool-icon cyan"><i class="bi bi-link-45deg"></i></div>
+                    <h5>URL &amp; Link Scanner</h5>
+                    <p>Scan URLs across 70+ threat vendors, then safely preview them in a server-side isolated browser. Zero risk to your device.</p>
+                    <div class="tool-status">
+                        <span class="status-dot safe pulse"></span>
+                        <span style="color:var(--accent-success)">Online</span>
+                    </div>
+                </a>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <a href="{% url 'file_scan' %}" class="tool-card text-decoration-none d-block">
+                    <div class="tool-icon danger"><i class="bi bi-file-earmark"></i></div>
+                    <h5>File Scanner</h5>
+                    <p>Upload and scan files for malware, viruses, and suspicious behavior with multi-engine detection.</p>
+                    <div class="tool-status">
+                        <span class="status-dot safe pulse"></span>
+                        <span style="color:var(--accent-success)">Online</span>
+                    </div>
+                </a>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <a href="{% url 'phishing_analysis' %}" class="tool-card text-decoration-none d-block">
+                    <div class="tool-icon orange"><i class="bi bi-shield-exclamation"></i></div>
+                    <h5>Phishing Detector</h5>
+                    <p>AI-powered email and website phishing analysis. Identify spoofed domains and fraudulent links.</p>
+                    <div class="tool-status">
+                        <span class="status-dot safe pulse"></span>
+                        <span style="color:var(--accent-success)">Online</span>
+                    </div>
+                </a>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <a href="{% url 'sandbox' %}" class="tool-card text-decoration-none d-block">
+                    <div class="tool-icon purple"><i class="bi bi-box"></i></div>
+                    <h5>Sandbox</h5>
+                    <p>Execute suspicious files in an isolated environment. Observe behavior and system changes safely.</p>
+                    <div class="tool-status">
+                        <span class="status-dot safe pulse"></span>
+                        <span style="color:var(--accent-success)">Online</span>
+                    </div>
+                </a>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <a href="{% url 'threat_intel' %}" class="tool-card text-decoration-none d-block">
+                    <div class="tool-icon green"><i class="bi bi-shield-check"></i></div>
+                    <h5>Threat Intel</h5>
+                    <p>Real-time global threat data aggregation from 100+ sources. Access IoC feeds and CVE data.</p>
+                    <div class="tool-status">
+                        <span class="status-dot safe pulse"></span>
+                        <span style="color:var(--accent-success)">Online</span>
+                    </div>
+                </a>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="tool-card text-decoration-none d-block tool-card-offline" title="Feature under development">
+                    <div class="tool-icon cyan"><i class="bi bi-hdd-network"></i></div>
+                    <h5>IP Scanner</h5>
+                    <p>Coming Soon</p>
+                    <div class="tool-status">
+                        <span class="status-dot" style="background:var(--text-muted)"></span>
+                        <span style="color:var(--text-muted)"><i class="bi bi-lock-fill" style="font-size:0.65rem;margin-right:3px"></i>Offline</span>
+                    </div>
                 </div>
             </div>
-            <div class="col-lg-4 col-md-6">
-                <div class="feature-card">
-                    <div class="feature-icon danger"><i class="fas fa-file-shield"></i></div>
-                    <h4>File Analysis</h4>
-                    <p>Upload and scan files for malware, viruses, and suspicious behavior. Multi-engine detection with detailed reports.</p>
-                    <a href="{% url 'file_scan' %}" class="feature-link">Try Now <i class="fas fa-arrow-right"></i></a>
+            <div class="col-lg-3 col-md-6">
+                <div class="tool-card text-decoration-none d-block tool-card-offline" title="Feature under development">
+                    <div class="tool-icon warning"><i class="bi bi-server"></i></div>
+                    <h5>DNS Lookup</h5>
+                    <p>Coming Soon</p>
+                    <div class="tool-status">
+                        <span class="status-dot" style="background:var(--text-muted)"></span>
+                        <span style="color:var(--text-muted)"><i class="bi bi-lock-fill" style="font-size:0.65rem;margin-right:3px"></i>Offline</span>
+                    </div>
                 </div>
             </div>
-            <div class="col-lg-4 col-md-6">
-                <div class="feature-card">
-                    <div class="feature-icon orange"><i class="fas fa-fish"></i></div>
-                    <h4>Phishing Detection</h4>
-                    <p>AI-powered email and website phishing analysis. Identify spoofed domains, fraudulent links, and social engineering.</p>
-                    <a href="{% url 'phishing_analysis' %}" class="feature-link">Try Now <i class="fas fa-arrow-right"></i></a>
-                </div>
-            </div>
-            <div class="col-lg-4 col-md-6">
-                <div class="feature-card">
-                    <div class="feature-icon purple"><i class="fas fa-cube"></i></div>
-                    <h4>Sandbox Environment</h4>
-                    <p>Execute suspicious files in an isolated sandbox environment. Observe behavior, network calls, and system changes safely.</p>
-                    <a href="{% url 'sandbox' %}" class="feature-link">Try Now <i class="fas fa-arrow-right"></i></a>
-                </div>
-            </div>
-            <div class="col-lg-4 col-md-6">
-                <div class="feature-card">
-                    <div class="feature-icon success"><i class="fas fa-shield-halo"></i></div>
-                    <h4>Threat Intelligence</h4>
-                    <p>Real-time global threat data aggregation. Access IOC feeds, CVE data, and emerging threat patterns from 100+ sources.</p>
-                    <a href="{% url 'threat_intel' %}" class="feature-link">Try Now <i class="fas fa-arrow-right"></i></a>
-                </div>
-            </div>
-            <div class="col-lg-4 col-md-6">
-                <div class="feature-card">
-                    <div class="feature-icon warning"><i class="fas fa-skull"></i></div>
-                    <h4>Dark Web Monitor</h4>
-                    <p>Continuous dark web surveillance for leaked credentials, stolen data, and mentions of your organization.</p>
-                    <a href="{% url 'dark_web' %}" class="feature-link">Try Now <i class="fas fa-arrow-right"></i></a>
-                </div>
+            <div class="col-lg-3 col-md-6">
+                <a href="{% url 'darkweb:index' %}" class="tool-card text-decoration-none d-block">
+                    <div class="tool-icon danger"><i class="bi bi-shield-exclamation"></i></div>
+                    <h5>Dark Web Monitor</h5>
+                    <p>Continuous dark web surveillance for leaked credentials and mentions of your organization.</p>
+                    <div class="tool-status">
+                        <span class="status-dot safe pulse"></span>
+                        <span style="color:var(--accent-success)">Online</span>
+                    </div>
+                </a>
             </div>
         </div>
     </div>
 </section>
 
 <!-- ============================================================
-     HOW IT WORKS
+     WHY CIPHERSCAN SECTION
      ============================================================ -->
-<section class="section-cs" id="how-it-works" style="background: rgba(255,255,255,0.01);">
+<section id="features">
     <div class="container">
-        <div class="section-header fade-in-up">
-            <h2>How it <span class="text-cyan">works</span></h2>
-            <p class="section-subtitle">From submission to actionable intelligence in seconds. Four simple steps to comprehensive threat analysis.</p>
+        <div class="section-header fade-up">
+            <h2>Why <span class="text-gradient-cyan">CipherScan</span></h2>
+            <p class="section-subtitle">Built for security professionals who demand accuracy, speed, and reliability.</p>
             <span class="section-accent"></span>
         </div>
-        <div class="row stagger-children" id="stepsRow">
-            <div class="col-md-3">
-                <div class="step-card">
-                    <div class="step-number"><span class="step-icon"><i class="fas fa-paper-plane"></i></span></div>
-                    <h4>Submit Your Target</h4>
-                    <p>Enter a URL, upload a file, or paste email headers. Multiple input formats supported.</p>
-                </div>
-            </div>
-            <div class="col-md-3 position-relative">
-                <div class="step-connector">
-                    <span class="connector-arrow"><i class="fas fa-chevron-right"></i></span>
-                </div>
-                <div class="step-card">
-                    <div class="step-number"><span class="step-icon"><i class="fas fa-microchip"></i></span></div>
+        <div class="row g-4">
+            <div class="col-lg-4 fade-up">
+                <div class="feature-card-lg">
+                    <div class="feature-icon-lg cyan"><i class="bi bi-cpu"></i></div>
                     <h4>AI-Powered Analysis</h4>
-                    <p>Advanced machine learning models analyze your submission against 50+ threat engines and databases.</p>
+                    <p>Advanced machine learning models analyze your submissions against 50+ threat engines simultaneously, delivering results in seconds with 99.7% accuracy.</p>
+                    <ul class="feature-list">
+                        <li><i class="bi bi-check2"></i> Multi-engine correlation</li>
+                        <li><i class="bi bi-check2"></i> Behavioral analysis</li>
+                        <li><i class="bi bi-check2"></i> Real-time threat scoring</li>
+                    </ul>
                 </div>
             </div>
-            <div class="col-md-3 position-relative">
-                <div class="step-connector">
-                    <span class="connector-arrow"><i class="fas fa-chevron-right"></i></span>
-                </div>
-                <div class="step-card">
-                    <div class="step-number"><span class="step-icon"><i class="fas fa-chart-simple"></i></span></div>
-                    <h4>Threat Scoring</h4>
-                    <p>Receive a comprehensive threat score with severity classification and detailed breakdown of findings.</p>
+            <div class="col-lg-4 fade-up" style="transition-delay:0.15s">
+                <div class="feature-card-lg">
+                    <div class="feature-icon-lg purple"><i class="bi bi-globe2"></i></div>
+                    <h4>Global Threat Network</h4>
+                    <p>Tap into the world's largest threat intelligence network. Correlate data from 100+ sources including VirusTotal, AlienVault, and emerging threat feeds.</p>
+                    <ul class="feature-list">
+                        <li><i class="bi bi-check2"></i> 100+ intelligence sources</li>
+                        <li><i class="bi bi-check2"></i> IoC aggregation</li>
+                        <li><i class="bi bi-check2"></i> CVE & zero-day tracking</li>
+                    </ul>
                 </div>
             </div>
-            <div class="col-md-3 position-relative">
-                <div class="step-connector" style="display:none;">
-                    <span class="connector-arrow"><i class="fas fa-chevron-right"></i></span>
-                </div>
-                <div class="step-card">
-                    <div class="step-number"><span class="step-icon"><i class="fas fa-file-lines"></i></span></div>
-                    <h4>Actionable Report</h4>
-                    <p>Get detailed reports with remediation steps, IoCs, and export options for your security team.</p>
+            <div class="col-lg-4 fade-up" style="transition-delay:0.3s">
+                <div class="feature-card-lg">
+                    <div class="feature-icon-lg green"><i class="bi bi-shield-fill-check"></i></div>
+                    <h4>Enterprise Security</h4>
+                    <p>Bank-grade encryption, SOC 2 compliant infrastructure, and granular access controls. Built for teams that take security seriously.</p>
+                    <ul class="feature-list">
+                        <li><i class="bi bi-check2"></i> End-to-end encryption</li>
+                        <li><i class="bi bi-check2"></i> Role-based access control</li>
+                        <li><i class="bi bi-check2"></i> Audit logging & compliance</li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -922,383 +837,164 @@
 </section>
 
 <!-- ============================================================
-     TRUST / STATS SECTION
+     HIGHLIGHTS SECTION
      ============================================================ -->
-<section class="section-cs" id="trust">
-    <div class="trust-bg-accent"></div>
+<section id="highlights">
     <div class="container">
-        <div class="section-header fade-in-up">
-            <h2>Trusted by <span class="text-cyan">thousands</span></h2>
-            <p class="section-subtitle">Security teams and individuals worldwide rely on CipherScan for their threat analysis needs.</p>
+        <div class="section-header fade-up">
+            <h2>Platform <span class="text-gradient-cyan">Highlights</span></h2>
+            <p class="section-subtitle">What makes CipherScan a trusted choice for security professionals.</p>
             <span class="section-accent"></span>
         </div>
-        <div class="row g-4 mb-5 stagger-children" id="trustCounters">
-            <div class="col-6 col-lg-3">
-                <div class="trust-counter">
-                    <div class="counter-icon cyan"><i class="fas fa-file"></i></div>
-                    <div class="counter-value"><span class="counter" data-target="0" data-stat-key="files_scanned">0</span></div>
-                    <div class="counter-label">Files Scanned</div>
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6 fade-up">
+                <div class="feature-card-lg text-center" style="padding:2rem 1.5rem">
+                    <div class="feature-icon-lg cyan mx-auto"><i class="bi bi-shield-fill-check"></i></div>
+                    <h4>VirusTotal Powered</h4>
+                    <p>Real-time malware intelligence using VirusTotal.</p>
                 </div>
             </div>
-            <div class="col-6 col-lg-3">
-                <div class="trust-counter">
-                    <div class="counter-icon orange"><i class="fas fa-link"></i></div>
-                    <div class="counter-value"><span class="counter" data-target="0" data-stat-key="urls_checked">0</span></div>
-                    <div class="counter-label">URLs Checked</div>
+            <div class="col-lg-3 col-md-6 fade-up" style="transition-delay:0.1s">
+                <div class="feature-card-lg text-center" style="padding:2rem 1.5rem">
+                    <div class="feature-icon-lg green mx-auto"><i class="bi bi-lock-fill"></i></div>
+                    <h4>Privacy First</h4>
+                    <p>Files are processed securely and never permanently stored.</p>
                 </div>
             </div>
-            <div class="col-6 col-lg-3">
-                <div class="trust-counter">
-                    <div class="counter-icon success"><i class="fas fa-shield"></i></div>
-                    <div class="counter-value"><span class="counter" data-target="0" data-stat-key="threats_detected">0</span></div>
-                    <div class="counter-label">Threats Blocked</div>
+            <div class="col-lg-3 col-md-6 fade-up" style="transition-delay:0.2s">
+                <div class="feature-card-lg text-center" style="padding:2rem 1.5rem">
+                    <div class="feature-icon-lg purple mx-auto"><i class="bi bi-cpu"></i></div>
+                    <h4>Multi-Engine Analysis</h4>
+                    <p>Analyze files using dozens of antivirus engines.</p>
                 </div>
             </div>
-            <div class="col-6 col-lg-3">
-                <div class="trust-counter">
-                    <div class="counter-icon purple"><i class="fas fa-users"></i></div>
-                    <div class="counter-value"><span class="counter" data-target="0" data-stat-key="users_protected">0</span></div>
-                    <div class="counter-label">Users Protected</div>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-lg-8 mx-auto">
-                <div class="chart-wrapper fade-in-up">
-                    <div class="chart-header">
-                        <h4><i class="fas fa-chart-line text-cyan me-2"></i> Threats Detected — Last 6 Months</h4>
-                        <span class="chart-badge" id="threatChangeBadge"><i class="fas fa-arrow-up"></i> <span id="threatChangeValue">--</span></span>
-                    </div>
-                    <div id="threatChartLoading" class="chart-loading">
-                        <div class="chart-loading-bar" style="width: 100%; height: 200px; border-radius: 8px; background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.03) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite;"></div>
-                    </div>
-                    <canvas id="threatChart" style="display:none"></canvas>
+            <div class="col-lg-3 col-md-6 fade-up" style="transition-delay:0.3s">
+                <div class="feature-card-lg text-center" style="padding:2rem 1.5rem">
+                    <div class="feature-icon-lg orange mx-auto"><i class="bi bi-graph-up-arrow"></i></div>
+                    <h4>Cyber Threat Intelligence</h4>
+                    <p>Rich security metadata and reputation analysis.</p>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
+<!-- ============================================================
+     CYBER PLAYGROUND SECTION
+     ============================================================ -->
+<section id="playground">
+    <div class="container">
+        <div class="playground-card">
+            <div class="playground-content">
+                <div class="row align-items-center">
+                    <div class="col-lg-7">
+                        <h3>Cyber <span class="text-gradient-cyan">Playground</span></h3>
+                        <p>Explore our interactive security tools lab. Test URLs, analyze hashes, decode payloads, and experiment with real security tools — all in one place.</p>
+                        <div class="playground-tools">
+                            <span class="pt-badge"><i class="bi bi-hdd-network"></i> Port Scanner</span>
+                            <span class="pt-badge"><i class="bi bi-hash"></i> Hash Calculator</span>
+                            <span class="pt-badge"><i class="bi bi-arrow-left-right"></i> Base64 Encode/Decode</span>
+                            <span class="pt-badge"><i class="bi bi-code-slash"></i> Regex Tester</span>
+                            <span class="pt-badge"><i class="bi bi-lock"></i> SSL Checker</span>
+                            <span class="pt-badge"><i class="bi bi-search"></i> WHOIS Lookup</span>
+                        </div>
+                        <a href="{% url 'sandbox' %}" class="btn-playground">
+                            <i class="bi bi-box"></i> Launch Playground
+                        </a>
+                    </div>
+                    <div class="col-lg-5 d-none d-lg-block text-center">
+                        <i class="bi bi-cpu" style="font-size:8rem;color:var(--accent-cyan);opacity:0.3;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
+<!-- ============================================================
+     CALL TO ACTION SECTION
+     ============================================================ -->
+<section id="cta">
+    <div class="container">
+        <div class="fade-up">
+            <h2>Ready to <span class="text-gradient-cyan">secure</span> your organization?</h2>
+            <p>Join thousands of security professionals who trust CipherScan for their threat analysis. Start for free — no credit card required.</p>
+            <div>
+                <a href="{% url 'signup' %}" class="btn-cta">
+                    <i class="bi bi-rocket-takeoff"></i> Get Started Free
+                </a>
+                <a href="{% url 'docs' %}" class="btn-cta-outline">
+                    <i class="bi bi-book"></i> View Documentation
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
 {% endblock %}
 
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
-    // -------------------------------------------------------
-    // 1. PARTICLES.JS
-    // -------------------------------------------------------
-    if (typeof particlesJS !== 'undefined' && document.getElementById('particles-js')) {
-        particlesJS('particles-js', {
-            particles: {
-                number: { value: 80, density: { enable: true, value_area: 800 } },
-                color: { value: '#00d4ff' },
-                shape: { type: 'circle' },
-                opacity: { value: 0.4, random: true, anim: { enable: true, speed: 0.5, opacity_min: 0.1 } },
-                size: { value: 3, random: true, anim: { enable: true, speed: 2, size_min: 0.5 } },
-                line_linked: {
-                    enable: true,
-                    distance: 150,
-                    color: '#00d4ff',
-                    opacity: 0.12,
-                    width: 1
-                },
-                move: {
-                    enable: true,
-                    speed: 1.2,
-                    direction: 'none',
-                    random: true,
-                    straight: false,
-                    out_mode: 'out',
-                    bounce: false
-                }
-            },
-            interactivity: {
-                detect_on: 'canvas',
-                events: {
-                    onhover: { enable: true, mode: 'grab' },
-                    onclick: { enable: true, mode: 'push' },
-                    resize: true
-                },
-                modes: {
-                    grab: { distance: 180, line_linked: { opacity: 0.15 } },
-                    push: { particles_nb: 4 }
-                }
-            },
-            retina_detect: true
-        });
-    }
-
-    // -------------------------------------------------------
-    // 2. SCAN TYPE TOGGLE (URL / File)
-    // -------------------------------------------------------
-    const scanTypeUrl = document.getElementById('scanTypeUrl');
-    const scanTypeFile = document.getElementById('scanTypeFile');
-    const urlModeContent = document.getElementById('urlModeContent');
-    const fileModeContent = document.getElementById('fileModeContent');
-    const scanInput = document.getElementById('scanInput');
-    const fileDropZone = document.getElementById('fileDropZone');
-    const fileInput = document.getElementById('fileInput');
-    const scanSubmitBtn = document.getElementById('scanSubmitBtn');
-    const fileScanBtn = document.getElementById('fileScanBtn');
-
-    // Remove file mode from DOM on load (URL is the default)
-    if (fileModeContent && fileModeContent.parentNode) fileModeContent.remove();
-
-    function activateUrlMode() {
-        if (scanTypeUrl.classList.contains('active')) return;
-        if (fileModeContent && fileModeContent.parentNode) fileModeContent.replaceWith(urlModeContent);
-        scanTypeUrl.classList.add('active');
-        scanTypeFile.classList.remove('active');
-    }
-
-    function activateFileMode() {
-        if (scanTypeFile.classList.contains('active')) return;
-        if (urlModeContent && urlModeContent.parentNode) urlModeContent.replaceWith(fileModeContent);
-        fileModeContent.style.display = '';
-        scanTypeFile.classList.add('active');
-        scanTypeUrl.classList.remove('active');
-    }
-
-    if (scanTypeUrl && scanTypeFile) {
-        scanTypeUrl.addEventListener('click', activateUrlMode);
-        scanTypeFile.addEventListener('click', activateFileMode);
-    }
-
-    // File drop zone
-    if (fileDropZone && fileInput) {
-        fileDropZone.addEventListener('click', function () { fileInput.click(); });
-        fileDropZone.addEventListener('dragover', function (e) {
-            e.preventDefault();
-            this.classList.add('dragover');
-        });
-        fileDropZone.addEventListener('dragleave', function () {
-            this.classList.remove('dragover');
-        });
-        fileDropZone.addEventListener('drop', function (e) {
-            e.preventDefault();
-            this.classList.remove('dragover');
-            if (e.dataTransfer.files.length) {
-                fileInput.files = e.dataTransfer.files;
-                if (window.CipherScan && window.CipherScan.toast) {
-                    window.CipherScan.toast.success('Files Ready', e.dataTransfer.files.length + ' file(s) selected for scanning.');
-                }
+    // Quick scan from hero — redirect to browser isolation
+    var heroScanInput = document.getElementById('heroScanInput');
+    var heroScanBtn = document.getElementById('heroScanBtn');
+    if (heroScanBtn && heroScanInput) {
+        function handleHomepageScan() {
+            var url = heroScanInput.value.trim();
+            if (!url) {
+                heroScanInput.focus();
+                heroScanInput.placeholder = 'Please enter a URL first...';
+                return;
             }
-        });
-        fileInput.addEventListener('change', function () {
-            if (this.files.length && window.CipherScan && window.CipherScan.toast) {
-                window.CipherScan.toast.success('Files Ready', this.files.length + ' file(s) selected for scanning.');
-            }
-        });
-    }
-
-    // URL scan submit
-    if (scanSubmitBtn) {
-        scanSubmitBtn.addEventListener('click', function () {
-            var url = scanInput ? scanInput.value.trim() : '';
-            if (url) {
-                window.location.href = (window.location.origin + '/url-scan/?q=' + encodeURIComponent(url));
-            } else if (window.CipherScan && window.CipherScan.toast) {
-                window.CipherScan.toast.warning('Input Required', 'Please enter a URL to scan.');
-            }
-        });
-        scanInput.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter') scanSubmitBtn.click();
-        });
-    }
-
-    // File scan submit
-    if (fileScanBtn) {
-        fileScanBtn.addEventListener('click', function () {
-            if (fileInput && fileInput.files.length) {
-                if (window.CipherScan && window.CipherScan.toast) {
-                    window.CipherScan.toast.info('Uploading', 'Uploading ' + fileInput.files.length + ' file(s) for analysis...');
-                }
-            } else if (window.CipherScan && window.CipherScan.toast) {
-                window.CipherScan.toast.warning('No File Selected', 'Please select a file or drag & drop one.');
-            }
-        });
-    }
-
-    // -------------------------------------------------------
-    // 3. ANIMATED COUNTERS
-    // -------------------------------------------------------
-    function animateCounters() {
-        document.querySelectorAll('.counter[data-target]').forEach(function (el) {
-            var target = parseInt(el.dataset.target, 10);
-            if (isNaN(target)) return;
-            var current = parseInt(el.textContent.replace(/,/g, ''), 10) || 0;
-            if (current >= target) return;
-            var duration = 2000;
-            var startTime = null;
-            function step(timestamp) {
-                if (!startTime) startTime = timestamp;
-                var progress = Math.min((timestamp - startTime) / duration, 1);
-                var eased = 1 - Math.pow(1 - progress, 3);
-                var value = Math.floor(eased * target);
-                el.textContent = value.toLocaleString();
-                if (progress < 1) {
-                    requestAnimationFrame(step);
-                } else {
-                    el.textContent = target.toLocaleString();
-                }
-            }
-            requestAnimationFrame(step);
-        });
-    }
-
-    // Fetch real stats from API and animate counters
-    fetch('/api/stats/')
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-            document.querySelectorAll('.counter[data-stat-key]').forEach(function (el) {
-                var key = el.dataset.statKey;
-                if (data[key] !== undefined) {
-                    el.dataset.target = data[key];
-                }
-            });
-            animateCounters();
-        })
-        .catch(function () {});
-
-    // -------------------------------------------------------
-    // 4. CHART.JS — Threat Trends (live data from API)
-    // -------------------------------------------------------
-    var chartCanvas = document.getElementById('threatChart');
-    var chartLoading = document.getElementById('threatChartLoading');
-    var threatChangeEl = document.getElementById('threatChangeValue');
-    var threatChartInstance = null;
-
-    function renderChart(labels, data) {
-        if (!chartCanvas || typeof Chart === 'undefined') return;
-
-        if (threatChartInstance) {
-            threatChartInstance.destroy();
-            threatChartInstance = null;
+            window.location.href = '/browser-isolation/?url=' + encodeURIComponent(url);
         }
-
-        chartCanvas.style.display = 'block';
-        if (chartLoading) chartLoading.style.display = 'none';
-
-        threatChartInstance = new Chart(chartCanvas, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Threats Detected',
-                    data: data,
-                    borderColor: '#00d4ff',
-                    backgroundColor: function (ctx) {
-                        var gradient = ctx.chart.ctx.createLinearGradient(0, 0, 0, 280);
-                        gradient.addColorStop(0, 'rgba(0, 212, 255, 0.2)');
-                        gradient.addColorStop(1, 'rgba(0, 212, 255, 0)');
-                        return gradient;
-                    },
-                    fill: true,
-                    tension: 0.4,
-                    pointBackgroundColor: '#00d4ff',
-                    pointBorderColor: '#0a0e1a',
-                    pointBorderWidth: 2,
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
-                    borderWidth: 2.5
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: '#121a30',
-                        titleColor: '#e8edf5',
-                        bodyColor: '#8892b0',
-                        borderColor: 'rgba(0, 212, 255, 0.15)',
-                        borderWidth: 1,
-                        padding: 12,
-                        cornerRadius: 8,
-                        displayColors: false
-                    }
-                },
-                scales: {
-                    x: {
-                        grid: { color: 'rgba(255, 255, 255, 0.03)', drawBorder: false },
-                        ticks: { color: '#5a6380', font: { family: 'Inter', size: 11 } }
-                    },
-                    y: {
-                        grid: { color: 'rgba(255, 255, 255, 0.03)', drawBorder: false },
-                        ticks: {
-                            color: '#5a6380',
-                            font: { family: 'Inter', size: 11 },
-                            callback: function (value) { return value.toLocaleString(); }
-                        },
-                        beginAtZero: false
-                    }
-                },
-                interaction: {
-                    intersect: false,
-                    mode: 'index'
-                }
+        heroScanBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            handleHomepageScan();
+        });
+        heroScanInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleHomepageScan();
             }
         });
     }
 
-    function loadThreatData() {
-        if (!chartCanvas || typeof Chart === 'undefined') return;
+    // Load live stats from backend
+    loadHomepageStats();
 
-        fetch('/api/threats/history')
-            .then(function (res) {
-                if (!res.ok) throw new Error('Failed to fetch threat data');
-                return res.json();
-            })
-            .then(function (data) {
-                if (data.labels && data.labels.length) {
-                    renderChart(data.labels, data.data);
-                } else {
-                    renderChart(['No Data'], [0]);
-                }
-                if (threatChangeEl && data.change_percent !== undefined) {
-                    var sign = data.change_percent >= 0 ? '+' : '';
-                    threatChangeEl.textContent = sign + data.change_percent + '%';
-                }
-            })
-            .catch(function () {
-                if (chartLoading) {
-                    chartLoading.innerHTML = '<p style="color:var(--text-muted);margin:0;font-size:0.875rem;">Unable to load threat data.</p>';
-                }
-            });
-    }
-
-    loadThreatData();
-
-
-
-    // -------------------------------------------------------
-    // 6. SCROLL ANIMATIONS (Intersection Observer)
-    // -------------------------------------------------------
-    function initScrollAnimations() {
-        var animElements = document.querySelectorAll('.fade-in-up, .fade-in-left, .fade-in-right, .fade-in-scale, .stagger-children');
-        if (!animElements.length) return;
-
-        var observer = new IntersectionObserver(function (entries) {
-            entries.forEach(function (entry) {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
-
-        animElements.forEach(function (el) {
-            observer.observe(el);
-        });
-    }
-    initScrollAnimations();
-
-    console.log('%cCipherScan%c Landing Page — Loaded',
+    console.log('%cCipherScan%c v2.0 — Premium Homepage Loaded',
         'color:#00d4ff;font-weight:700;font-size:1.2em;',
         'color:#8892b0;font-size:0.9em;');
 });
+
+async function loadHomepageStats() {
+    try {
+        const response = await fetch('/api/stats/');
+        const data = await response.json();
+
+        const scansEl = document.getElementById('scans-completed');
+        const threatsEl = document.getElementById('threats-neutralized');
+        const uptimeEl = document.getElementById('uptime');
+
+        if (scansEl) {
+            var total = (data.urls_checked || 0) + (data.files_scanned || 0);
+            scansEl.textContent = total.toLocaleString();
+            scansEl.setAttribute('data-counter', total);
+        }
+        if (threatsEl) {
+            var threats = data.threats_detected || 0;
+            threatsEl.textContent = threats.toLocaleString();
+            threatsEl.setAttribute('data-counter', threats);
+        }
+        if (uptimeEl) {
+            uptimeEl.textContent = '99.9';
+        }
+
+    } catch(err) {
+        console.error('Failed to load homepage stats:', err);
+    }
+}
 </script>
 {% endblock %}

@@ -1,0 +1,209 @@
+<div id="dwHowCalculated" class="dw-hc-section">
+  <div class="dw-hc-header">
+    <div class="dw-hc-header-icon">
+      <i class="fas fa-calculator"></i>
+    </div>
+    <div>
+      <h2 class="dw-hc-title">How We Calculated This Result</h2>
+      <p class="dw-hc-subtitle">CipherScan's methodology for determining your exposure score</p>
+    </div>
+  </div>
+
+  <div class="dw-hc-stages">
+    <!-- Stage 1: Identity Recognition -->
+    <div class="dw-hc-stage" data-stage="1">
+      <div class="dw-hc-stage-number">01</div>
+      <div class="dw-hc-stage-content">
+        <div class="dw-hc-stage-header">
+          <div class="dw-hc-stage-icon">
+            <i class="fas fa-fingerprint"></i>
+          </div>
+          <div>
+            <h3 class="dw-hc-stage-title">Identity Recognition</h3>
+            <p class="dw-hc-stage-desc">Validating and classifying the scanned identity</p>
+          </div>
+          <div class="dw-hc-stage-status" id="dwHcStage1Status">
+            <span class="dw-hc-status-badge dw-hc-status-pending">Pending</span>
+          </div>
+        </div>
+        <div class="dw-hc-stage-body" id="dwHcStage1Body">
+          <div class="dw-hc-check-list">
+            <div class="dw-hc-check-item" data-check="asset-type">
+              <div class="dw-hc-check-icon"><i class="fas fa-circle-notch fa-spin"></i></div>
+              <span class="dw-hc-check-text">Asset Type Detected</span>
+              <span class="dw-hc-check-detail" id="dwHcAssetType">—</span>
+            </div>
+            <div class="dw-hc-check-item" data-check="format">
+              <div class="dw-hc-check-icon"><i class="fas fa-circle-notch fa-spin"></i></div>
+              <span class="dw-hc-check-text">Format Validation</span>
+              <span class="dw-hc-check-detail" id="dwHcFormatVal">—</span>
+            </div>
+            <div class="dw-hc-check-item" data-check="classification">
+              <div class="dw-hc-check-icon"><i class="fas fa-circle-notch fa-spin"></i></div>
+              <span class="dw-hc-check-text">Identity Classification</span>
+              <span class="dw-hc-check-detail" id="dwHcClassification">—</span>
+            </div>
+            <div class="dw-hc-check-item" data-check="normalization">
+              <div class="dw-hc-check-icon"><i class="fas fa-circle-notch fa-spin"></i></div>
+              <span class="dw-hc-check-text">Normalization</span>
+              <span class="dw-hc-check-detail" id="dwHcNormalization">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stage 2: Intelligence Correlation -->
+    <div class="dw-hc-stage" data-stage="2">
+      <div class="dw-hc-stage-number">02</div>
+      <div class="dw-hc-stage-content">
+        <div class="dw-hc-stage-header">
+          <div class="dw-hc-stage-icon">
+            <i class="fas fa-project-diagram"></i>
+          </div>
+          <div>
+            <h3 class="dw-hc-stage-title">Intelligence Correlation</h3>
+            <p class="dw-hc-stage-desc">Cross-referencing identity across intelligence sources</p>
+          </div>
+          <div class="dw-hc-stage-status" id="dwHcStage2Status">
+            <span class="dw-hc-status-badge dw-hc-status-pending">Pending</span>
+          </div>
+        </div>
+        <div class="dw-hc-stage-body" id="dwHcStage2Body">
+          <div class="dw-hc-check-list" id="dwHcIntelList">
+            <div class="dw-hc-check-item" data-check="breach-intel">
+              <div class="dw-hc-check-icon"><i class="fas fa-circle-notch fa-spin"></i></div>
+              <span class="dw-hc-check-text">Checking breach intelligence</span>
+            </div>
+            <div class="dw-hc-check-item" data-check="exposed-identities">
+              <div class="dw-hc-check-icon"><i class="fas fa-circle-notch fa-spin"></i></div>
+              <span class="dw-hc-check-text">Matching exposed identities</span>
+            </div>
+            <div class="dw-hc-check-item" data-check="credential-datasets">
+              <div class="dw-hc-check-icon"><i class="fas fa-circle-notch fa-spin"></i></div>
+              <span class="dw-hc-check-text">Searching credential datasets</span>
+            </div>
+            <div class="dw-hc-check-item" data-check="leak-repos">
+              <div class="dw-hc-check-icon"><i class="fas fa-circle-notch fa-spin"></i></div>
+              <span class="dw-hc-check-text">Checking public leak repositories</span>
+            </div>
+            <div class="dw-hc-check-item" data-check="darkweb-intel">
+              <div class="dw-hc-check-icon"><i class="fas fa-circle-notch fa-spin"></i></div>
+              <span class="dw-hc-check-text">Checking simulated dark web intelligence</span>
+            </div>
+            <div class="dw-hc-check-item" data-check="historical">
+              <div class="dw-hc-check-icon"><i class="fas fa-circle-notch fa-spin"></i></div>
+              <span class="dw-hc-check-text">Cross-referencing historical incidents</span>
+            </div>
+          </div>
+          <div class="dw-hc-intel-sources" id="dwHcIntelSources" style="display:none">
+            <div class="dw-hc-intel-sources-label">Sources checked</div>
+            <div class="dw-hc-intel-sources-list" id="dwHcIntelSourcesList"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stage 3: Risk Calculation -->
+    <div class="dw-hc-stage" data-stage="3">
+      <div class="dw-hc-stage-number">03</div>
+      <div class="dw-hc-stage-content">
+        <div class="dw-hc-stage-header">
+          <div class="dw-hc-stage-icon">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <div>
+            <h3 class="dw-hc-stage-title">Risk Calculation</h3>
+            <p class="dw-hc-stage-desc">Weighted factors contributing to the exposure score</p>
+          </div>
+          <div class="dw-hc-stage-status" id="dwHcStage3Status">
+            <span class="dw-hc-status-badge dw-hc-status-pending">Pending</span>
+          </div>
+        </div>
+        <div class="dw-hc-stage-body" id="dwHcStage3Body">
+          <div class="dw-hc-factors" id="dwHcFactorsList"></div>
+          <div class="dw-hc-total-risk">
+            <div class="dw-hc-total-risk-label">Total Risk Score</div>
+            <div class="dw-hc-total-risk-value" id="dwHcTotalRisk">0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stage 4: Confidence Calculation -->
+    <div class="dw-hc-stage" data-stage="4">
+      <div class="dw-hc-stage-number">04</div>
+      <div class="dw-hc-stage-content">
+        <div class="dw-hc-stage-header">
+          <div class="dw-hc-stage-icon">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+          <div>
+            <h3 class="dw-hc-stage-title">Confidence Calculation</h3>
+            <p class="dw-hc-stage-desc">How reliable this assessment is</p>
+          </div>
+          <div class="dw-hc-stage-status" id="dwHcStage4Status">
+            <span class="dw-hc-status-badge dw-hc-status-pending">Pending</span>
+          </div>
+        </div>
+        <div class="dw-hc-stage-body" id="dwHcStage4Body">
+          <p class="dw-hc-conf-desc">Confidence is determined by the following factors:</p>
+          <div class="dw-hc-conf-factors" id="dwHcConfFactors">
+            <div class="dw-hc-conf-factor" data-factor="dataset">
+              <div class="dw-hc-conf-factor-info">
+                <span class="dw-hc-conf-factor-label">Dataset quality</span>
+                <span class="dw-hc-conf-factor-pct" id="dwHcConfPct1">0%</span>
+              </div>
+              <div class="dw-hc-conf-bar-bg">
+                <div class="dw-hc-conf-bar-fill" id="dwHcConfBar1"></div>
+              </div>
+            </div>
+            <div class="dw-hc-conf-factor" data-factor="sources">
+              <div class="dw-hc-conf-factor-info">
+                <span class="dw-hc-conf-factor-label">Number of correlated sources</span>
+                <span class="dw-hc-conf-factor-pct" id="dwHcConfPct2">0%</span>
+              </div>
+              <div class="dw-hc-conf-bar-bg">
+                <div class="dw-hc-conf-bar-fill" id="dwHcConfBar2"></div>
+              </div>
+            </div>
+            <div class="dw-hc-conf-factor" data-factor="recency">
+              <div class="dw-hc-conf-factor-info">
+                <span class="dw-hc-conf-factor-label">Recency of breaches</span>
+                <span class="dw-hc-conf-factor-pct" id="dwHcConfPct3">0%</span>
+              </div>
+              <div class="dw-hc-conf-bar-bg">
+                <div class="dw-hc-conf-bar-fill" id="dwHcConfBar3"></div>
+              </div>
+            </div>
+            <div class="dw-hc-conf-factor" data-factor="consistency">
+              <div class="dw-hc-conf-factor-info">
+                <span class="dw-hc-conf-factor-label">Consistency across sources</span>
+                <span class="dw-hc-conf-factor-pct" id="dwHcConfPct4">0%</span>
+              </div>
+              <div class="dw-hc-conf-bar-bg">
+                <div class="dw-hc-conf-bar-fill" id="dwHcConfBar4"></div>
+              </div>
+            </div>
+            <div class="dw-hc-conf-factor" data-factor="match">
+              <div class="dw-hc-conf-factor-info">
+                <span class="dw-hc-conf-factor-label">Identity match confidence</span>
+                <span class="dw-hc-conf-factor-pct" id="dwHcConfPct5">0%</span>
+              </div>
+              <div class="dw-hc-conf-bar-bg">
+                <div class="dw-hc-conf-bar-fill" id="dwHcConfBar5"></div>
+              </div>
+            </div>
+          </div>
+          <div class="dw-hc-final-confidence" title="Confidence indicates how certain CipherScan is about this assessment. It does NOT indicate risk.">
+            <div class="dw-hc-final-confidence-label">Final Confidence</div>
+            <div class="dw-hc-final-confidence-value" id="dwHcFinalConfidence">0%</div>
+            <div class="dw-hc-final-bar-bg">
+              <div class="dw-hc-final-bar-fill" id="dwHcFinalBar"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

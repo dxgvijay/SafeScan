@@ -1,0 +1,204 @@
+{% extends 'pages/tools/base_tool.html' %}{% load static %}
+
+{% block tool_id %}regex{% endblock %}
+{% block tool_name %}Regex Tester{% endblock %}
+{% block tool_icon_class %}rx-icon{% endblock %}
+{% block tool_icon %}<i class="bi bi-code-slash"></i>{% endblock %}
+{% block tool_title %}Regex Tester{% endblock %}
+{% block tool_desc %}Test regular expressions against any text with support for all common flags, capture groups, match highlighting and detailed results.{% endblock %}
+
+{% block tool_input %}
+<div class="tool-input-group">
+  <label for="rx-pattern">Pattern</label>
+  <input type="text" id="rx-pattern" placeholder="e.g. \b[A-Z][a-z]+\b" value="\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b">
+</div>
+<div class="tool-input-group">
+  <label>Flags</label>
+  <div class="tool-flags-wrap" id="rx-flags">
+    <button class="tool-flag-btn" data-flag="g" onclick="toggleFlag(this)">g (global)</button>
+    <button class="tool-flag-btn active" data-flag="i" onclick="toggleFlag(this)">i (ignore case)</button>
+    <button class="tool-flag-btn" data-flag="m" onclick="toggleFlag(this)">m (multiline)</button>
+    <button class="tool-flag-btn" data-flag="s" onclick="toggleFlag(this)">s (dotall)</button>
+    <button class="tool-flag-btn" data-flag="u" onclick="toggleFlag(this)">u (unicode)</button>
+    <button class="tool-flag-btn" data-flag="y" onclick="toggleFlag(this)">y (sticky)</button>
+  </div>
+</div>
+<div class="tool-input-group">
+  <label for="rx-test">Test String</label>
+  <textarea id="rx-test" rows="6" style="min-height:120px;width:100%;padding:0.75rem 1rem;background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius-sm);color:var(--text-primary);font-family:var(--font-mono);font-size:0.85rem;line-height:1.6;resize:vertical;outline:none;">Here are some IPs: 192.168.1.1, 10.0.0.255, 172.16.0.1
+And some emails: user@example.com, admin@test.org
+Visited: https://cipherscan.ai and http://docs.cipherscan.ai</textarea>
+</div>
+<div class="tool-action-row">
+  <button class="tool-btn" onclick="testRegex()" id="rx-run-btn"><i class="bi-play-fill"></i> Test</button>
+  <button class="tool-btn tool-btn-outline tool-btn-sm" onclick="clearResults()"><i class="bi-eraser"></i> Clear</button>
+  <span class="tool-match-count" id="rx-count"></span>
+</div>
+<div class="tool-error" id="rx-error"></div>
+{% endblock %}
+
+{% block results_actions %}
+<button class="tool-btn tool-btn-outline tool-btn-sm" onclick="copyResults()" title="Copy results"><i class="bi-clipboard"></i></button>
+<button class="tool-btn tool-btn-outline tool-btn-sm" onclick="downloadTXT()" title="Download TXT"><i class="bi-download"></i> TXT</button>
+{% endblock %}
+
+{% block tool_sidebar %}
+<div class="sidebar-section">
+  <div class="sidebar-section-title"><i class="bi-lightning"></i>Quick Actions</div>
+  <button class="sidebar-btn run-btn" onclick="testRegex()"><i class="bi-play-fill"></i> Test Pattern</button>
+  <button class="sidebar-btn" onclick="document.getElementById('rx-pattern').value='';document.getElementById('rx-test').value='';clearResults()"><i class="bi-arrow-counterclockwise"></i> Reset</button>
+</div>
+<div class="sidebar-section">
+  <div class="sidebar-section-title"><i class="bi-info-circle"></i>Info</div>
+  <div class="sidebar-info-row"><span class="sidebar-info-label">Runtime</span><span class="sidebar-info-value">&lt;1s</span></div>
+  <div class="sidebar-info-row"><span class="sidebar-info-label">Difficulty</span><span class="sidebar-info-value">Medium</span></div>
+  <div class="sidebar-info-row"><span class="sidebar-info-label">API</span><span class="sidebar-info-value">Required</span></div>
+  <div class="sidebar-info-row"><span class="sidebar-info-label">Status</span><span class="sidebar-info-value online">Online</span></div>
+</div>
+<div class="sidebar-section">
+  <div class="sidebar-section-title"><i class="bi-keyboard"></i>Shortcuts</div>
+  <div class="sidebar-shortcut"><kbd>Ctrl</kbd><kbd>Enter</kbd> <span>Test</span></div>
+  <div class="sidebar-shortcut"><kbd>Esc</kbd> <span>Clear</span></div>
+</div>
+<div class="sidebar-section">
+  <div class="sidebar-section-title"><i class="bi-file-text"></i>Examples</div>
+  <button class="sidebar-btn" onclick="loadExample('ip')"><i class="bi-chevron-right"></i> IPv4 Addresses</button>
+  <button class="sidebar-btn" onclick="loadExample('email')"><i class="bi-chevron-right"></i> Email Addresses</button>
+  <button class="sidebar-btn" onclick="loadExample('url')"><i class="bi-chevron-right"></i> URLs</button>
+  <button class="sidebar-btn" onclick="loadExample('phone')"><i class="bi-chevron-right"></i> Phone Numbers</button>
+</div>
+{% endblock %}
+
+{% block related_tools %}
+{% include 'pages/tools/includes/related_tools.html' with current='regex' %}
+{% endblock %}
+
+{% block tool_extra_js %}
+<script>
+var lastResultData = null;
+
+function toggleFlag(btn) { btn.classList.toggle('active'); }
+
+function getFlags() {
+  var flags = '';
+  document.querySelectorAll('#rx-flags .tool-flag-btn.active').forEach(function(f) { flags += f.dataset.flag; });
+  return flags;
+}
+
+function testRegex() {
+  var pattern = document.getElementById('rx-pattern').value;
+  var testStr = document.getElementById('rx-test').value;
+  var errEl = document.getElementById('rx-error');
+  var countEl = document.getElementById('rx-count');
+  var card = document.getElementById('resultsCard');
+
+  errEl.classList.remove('show'); errEl.textContent = '';
+  card.classList.remove('show');
+  document.getElementById('resultsBody').innerHTML = '';
+  countEl.textContent = '';
+
+  if (!pattern) { errEl.textContent = 'Please enter a regex pattern.'; errEl.classList.add('show'); return; }
+  if (!testStr) { errEl.textContent = 'Please enter a test string.'; errEl.classList.add('show'); return; }
+
+  var flags = getFlags();
+
+  fetch('/api/regex/test/', {
+    method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCSRF() },
+    body: JSON.stringify({ pattern: pattern, flags: flags, test_string: testStr })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.error) { errEl.textContent = data.error; errEl.classList.add('show'); return; }
+    lastResultData = data;
+
+    countEl.textContent = data.match_count + ' match' + (data.match_count !== 1 ? 'es' : '') + ' found';
+
+    var html = '';
+    html += '<div class="result-line"><span class="result-label">Pattern</span><span class="result-value info">/' + esc(pattern) + '/' + esc(flags) + '</span></div>';
+    html += '<div class="result-line"><span class="result-label">Matches</span><span class="result-value ' + (data.match_count > 0 ? 'success' : '') + '">' + data.match_count + '</span></div>';
+
+    if (data.matches && data.matches.length > 0) {
+      html += '<div style="margin-top:0.75rem;max-height:300px;overflow-y:auto;">';
+      data.matches.forEach(function(m, i) {
+        html += '<div style="padding:0.5rem 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.82rem;">';
+        html += '<span style="color:var(--text-muted);margin-right:0.5rem;">#' + (i+1) + '</span>';
+        html += '<span style="color:var(--accent-success);font-family:var(--font-mono);">' + esc(m.full || m[0]) + '</span>';
+        html += '<span style="color:var(--text-muted);margin-left:0.5rem;font-size:0.75rem;">(pos: ' + (m.index != null ? m.index : m.position) + ')</span>';
+        var groups = m.groups || m.slice(1);
+        if (groups && groups.length > 0) {
+          html += '<div style="margin-left:1.5rem;color:var(--accent-cyan);font-size:0.78rem;margin-top:0.2rem;">Groups: ' + groups.map(function(g) { return esc(g || '(empty)'); }).join(', ') + '</div>';
+        }
+        html += '</div>';
+      });
+      html += '</div>';
+    } else {
+      html += '<div style="margin-top:0.5rem;color:var(--text-muted);font-size:0.8rem;">No matches found in test string.</div>';
+    }
+
+    document.getElementById('resultsBody').innerHTML = html;
+    card.classList.add('show');
+    document.getElementById('resultsActions').style.display = '';
+  })
+  .catch(function(err) {
+    errEl.textContent = 'Request failed: ' + err.message;
+    errEl.classList.add('show');
+  });
+}
+
+function clearResults() {
+  document.getElementById('resultsCard').classList.remove('show');
+  document.getElementById('rx-error').classList.remove('show');
+  document.getElementById('rx-count').textContent = '';
+  lastResultData = null;
+}
+
+function copyResults() {
+  var text = document.getElementById('resultsBody').textContent;
+  if (!text) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).catch(function(){});
+  }
+}
+
+function downloadTXT() {
+  if (!lastResultData) return;
+  var resultText = 'Pattern: /' + document.getElementById('rx-pattern').value + '/' + getFlags() + '\n';
+  resultText += 'Matches: ' + lastResultData.match_count + '\n\n';
+  (lastResultData.matches || []).forEach(function(m, i) {
+    resultText += 'Match #' + (i+1) + ': ' + (m.full || m[0]) + ' (pos: ' + (m.index != null ? m.index : m.position) + ')\n';
+    var groups = m.groups || m.slice(1);
+    if (groups && groups.length > 0) {
+      resultText += '  Groups: ' + groups.join(', ') + '\n';
+    }
+  });
+  var blob = new Blob([resultText], { type: 'text/plain' });
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'regex-results.txt';
+  a.click();
+}
+
+function loadExample(type) {
+  var examples = {
+    ip: { pattern: '\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b', test: 'Here are some IPs: 192.168.1.1, 10.0.0.255, 172.16.0.1\nAnd 8.8.8.8 is Google DNS.' },
+    email: { pattern: '\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\\b', test: 'Contact: user@example.com, admin@test.org\nSupport: help@cipherscan.ai' },
+    url: { pattern: 'https?://[\\w.-]+\\.[a-z]{2,}(?:/[\\w./-]*)?', test: 'Visit https://cipherscan.ai and http://docs.cipherscan.ai\nAlso https://github.com for source code.' },
+    phone: { pattern: '\\+?\\d{1,3}[-.\\s]?\\(?\\d{1,4}\\)?[-.\\s]?\\d{1,4}[-.\\s]?\\d{1,9}', test: 'Call +1 (555) 123-4567 or +44 20 7946 0958\nOr dial 1-800-555-0199 for support.' }
+  };
+  var ex = examples[type];
+  if (!ex) return;
+  document.getElementById('rx-pattern').value = ex.pattern;
+  document.getElementById('rx-test').value = ex.test;
+}
+
+function getCSRF() {
+  var val = null;
+  document.cookie.split(';').forEach(function(c) { c = c.trim(); if (c.startsWith('csrftoken=')) val = decodeURIComponent(c.substring(10)); });
+  return val;
+}
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+document.addEventListener('keydown', function(e) {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); testRegex(); }
+  if (e.key === 'Escape') { clearResults(); }
+});
+</script>
+{% endblock %}

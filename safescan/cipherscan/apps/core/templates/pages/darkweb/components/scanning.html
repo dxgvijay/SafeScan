@@ -1,0 +1,37 @@
+<div id="dwScanning" class="dw-scanning-dashboard">
+  <div class="dw-scanning-inner">
+    <div class="dw-scanning-shield-wrap">
+      <div class="dw-scanning-shield">
+        <i class="fas fa-shield-halved"></i>
+      </div>
+      <svg class="dw-scanning-ring" viewBox="0 0 120 120">
+        <defs>
+          <linearGradient id="dwScanGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#7850FF" />
+            <stop offset="100%" stop-color="#00FFC8" />
+          </linearGradient>
+        </defs>
+        <circle class="dw-scanning-ring-bg" cx="60" cy="60" r="54" fill="none" stroke-width="4" />
+        <circle class="dw-scanning-ring-fill" id="dwScanningRing" cx="60" cy="60" r="54" fill="none" stroke-width="4"
+          stroke-linecap="round" stroke-dasharray="339.292" stroke-dashoffset="339.292" />
+      </svg>
+    </div>
+
+    <div class="dw-scanning-progress-section">
+      <div class="dw-scanning-progress-bar-bg">
+        <div class="dw-scanning-progress-bar-fill" id="dwScanningProgress"></div>
+      </div>
+      <div class="dw-scanning-percent" id="dwScanningPercent">0%</div>
+    </div>
+
+    <div class="dw-scanning-status" id="dwScanningStatus" role="status" aria-live="polite">
+      <i class="fas fa-circle-notch fa-spin me-2" aria-hidden="true"></i>
+      <span id="dwScanningStatusText">Initializing scan engine...</span>
+    </div>
+
+    <div class="dw-scanning-timer" id="dwScanningTimer" aria-hidden="true">
+      <i class="far fa-clock me-1" aria-hidden="true"></i>
+      <span id="dwScanningElapsed">0.0</span>s
+    </div>
+  </div>
+</div>

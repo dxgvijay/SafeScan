@@ -1,7 +1,7 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 {% load static %}
 
-{% block title %}File Scanner & Malware Analysis — CipherScan{% endblock %}
+{% block title %}File Scanner & Malware Analysis â€” CipherScan{% endblock %}
 
 {% block body_class %}full-width{% endblock %}
 
@@ -428,88 +428,88 @@
 
     <!-- Drop Zone -->
     <div class="drop-zone" id="dropZone">
-      <div class="dz-icon"><i class="fas fa-cloud-arrow-up"></i></div>
+      <div class="dz-icon"><i class="bi-cloud-upload"></i></div>
       <div class="dz-title">Drag &amp; Drop your file here</div>
       <div class="dz-sub">or</div>
-      <button class="dz-btn" id="dzBrowseBtn" type="button"><i class="fas fa-folder-open me-1"></i> click to browse</button>
+      <button class="dz-btn" id="dzBrowseBtn" type="button"><i class="bi-folder2-open me-1"></i> click to browse</button>
       <input type="file" id="fileInput">
-      <div class="dz-max"><i class="fas fa-info-circle me-1"></i> Max File Size: 100 MB</div>
+      <div class="dz-max"><i class="bi-info-circle me-1"></i> Max File Size: 100 MB</div>
 
       <!-- Supported formats -->
       <div class="dz-formats">
         <div class="dz-fmt-group">
           <span class="fg-label">Documents</span>
           <div class="fg-badges">
-            <span><i class="fas fa-file-pdf"></i> PDF</span>
-            <span><i class="fas fa-file-word"></i> DOCX</span>
-            <span><i class="fas fa-file-word"></i> DOC</span>
-            <span><i class="fas fa-file-excel"></i> XLS</span>
-            <span><i class="fas fa-file-excel"></i> XLSX</span>
-            <span><i class="fas fa-file-powerpoint"></i> PPTX</span>
+            <span><i class="bi-filetype-pdf"></i> PDF</span>
+            <span><i class="bi-filetype-docx"></i> DOCX</span>
+            <span><i class="bi-filetype-docx"></i> DOC</span>
+            <span><i class="bi-filetype-xlsx"></i> XLS</span>
+            <span><i class="bi-filetype-xlsx"></i> XLSX</span>
+            <span><i class="bi-filetype-pptx"></i> PPTX</span>
           </div>
         </div>
         <div class="dz-fmt-group">
           <span class="fg-label">Executables</span>
           <div class="fg-badges">
-            <span><i class="fas fa-cog"></i> EXE</span>
-            <span><i class="fas fa-cog"></i> DLL</span>
-            <span><i class="fas fa-cog"></i> SYS</span>
-            <span><i class="fas fa-cog"></i> MSI</span>
-            <span><i class="fas fa-apple-alt"></i> APP</span>
+            <span><i class="bi-gear"></i> EXE</span>
+            <span><i class="bi-gear"></i> DLL</span>
+            <span><i class="bi-gear"></i> SYS</span>
+            <span><i class="bi-gear"></i> MSI</span>
+            <span><i class="bi-apple"></i> APP</span>
           </div>
         </div>
         <div class="dz-fmt-group">
           <span class="fg-label">Scripts</span>
           <div class="fg-badges">
-            <span><i class="fas fa-terminal"></i> BAT</span>
-            <span><i class="fas fa-terminal"></i> PS1</span>
-            <span><i class="fas fa-terminal"></i> SH</span>
-            <span><i class="fas fa-terminal"></i> CMD</span>
-            <span><i class="fas fa-code"></i> VBS</span>
-            <span><i class="fas fa-code"></i> HTA</span>
+            <span><i class="bi-terminal"></i> BAT</span>
+            <span><i class="bi-terminal"></i> PS1</span>
+            <span><i class="bi-terminal"></i> SH</span>
+            <span><i class="bi-terminal"></i> CMD</span>
+            <span><i class="bi-code"></i> VBS</span>
+            <span><i class="bi-code"></i> HTA</span>
           </div>
         </div>
         <div class="dz-fmt-group">
           <span class="fg-label">Archives</span>
           <div class="fg-badges">
-            <span><i class="fas fa-file-archive"></i> ZIP</span>
-            <span><i class="fas fa-file-archive"></i> RAR</span>
-            <span><i class="fas fa-file-archive"></i> 7Z</span>
-            <span><i class="fas fa-file-archive"></i> TAR</span>
-            <span><i class="fas fa-file-archive"></i> GZ</span>
+            <span><i class="bi-file-zip"></i> ZIP</span>
+            <span><i class="bi-file-zip"></i> RAR</span>
+            <span><i class="bi-file-zip"></i> 7Z</span>
+            <span><i class="bi-file-zip"></i> TAR</span>
+            <span><i class="bi-file-zip"></i> GZ</span>
           </div>
         </div>
         <div class="dz-fmt-group">
           <span class="fg-label">Source Code</span>
           <div class="fg-badges">
-            <span><i class="fab fa-js"></i> JS</span>
-            <span><i class="fab fa-python"></i> PY</span>
-            <span><i class="fab fa-php"></i> PHP</span>
-            <span><i class="fas fa-code"></i> RB</span>
-            <span><i class="fas fa-code"></i> GO</span>
-            <span><i class="fas fa-code"></i> RS</span>
-            <span><i class="fab fa-java"></i> JAVA</span>
+            <span><i class="bi-filetype-js"></i> JS</span>
+            <span><i class="bi-filetype-py"></i> PY</span>
+            <span><i class="bi-filetype-php"></i> PHP</span>
+            <span><i class="bi-code"></i> RB</span>
+            <span><i class="bi-code"></i> GO</span>
+            <span><i class="bi-code"></i> RS</span>
+            <span><i class="bi-filetype-java"></i> JAVA</span>
           </div>
         </div>
         <div class="dz-fmt-group">
           <span class="fg-label">Mobile</span>
           <div class="fg-badges">
-            <span><i class="fab fa-android"></i> APK</span>
-            <span><i class="fab fa-java"></i> JAR</span>
-            <span><i class="fas fa-cube"></i> DEX</span>
+            <span><i class="bi-android2"></i> APK</span>
+            <span><i class="bi-filetype-java"></i> JAR</span>
+            <span><i class="bi-box"></i> DEX</span>
           </div>
         </div>
         <div class="dz-fmt-group">
           <span class="fg-label">Media</span>
           <div class="fg-badges">
-            <span><i class="fas fa-music"></i> MP3</span>
-            <span><i class="fas fa-video"></i> MP4</span>
+            <span><i class="bi-music-note"></i> MP3</span>
+            <span><i class="bi-film"></i> MP4</span>
           </div>
         </div>
         <div class="dz-fmt-group">
           <span class="fg-label">Generic</span>
           <div class="fg-badges">
-            <span><i class="fas fa-binary"></i> BIN</span>
+            <span><i class="bi-file-binary"></i> BIN</span>
           </div>
         </div>
       </div>
@@ -519,7 +519,7 @@
 
     <div class="hash-search">
       <input type="text" id="hashInput" placeholder="Enter MD5, SHA1, or SHA256 hash" autocomplete="off" spellcheck="false">
-      <button class="hs-btn" id="hashSearchBtn"><i class="fas fa-magnifying-glass"></i> Search Existing Report</button>
+      <button class="hs-btn" id="hashSearchBtn"><i class="bi-search"></i> Search Existing Report</button>
     </div>
   </div>
 </section>
@@ -533,39 +533,39 @@
     </div>
     <div class="cap-grid">
       <div class="cap-card fade-up">
-        <div class="cc-icon"><i class="fas fa-microscope"></i></div>
+        <div class="cc-icon"><i class="bi-microscope"></i></div>
         <h4>Static Analysis</h4>
         <ul>
-          <li><i class="fas fa-check-circle"></i> MD5 / SHA1 / SHA256 / SHA512</li>
-          <li><i class="fas fa-check-circle"></i> Magic bytes &amp; MIME detection</li>
-          <li><i class="fas fa-check-circle"></i> Entropy analysis (packer / encryption detect)</li>
-          <li><i class="fas fa-check-circle"></i> PE header analysis (EXE / DLL)</li>
-          <li><i class="fas fa-check-circle"></i> Macro detection (Office files)</li>
-          <li><i class="fas fa-check-circle"></i> String extraction &amp; pattern matching</li>
+          <li><i class="bi-check-circle"></i> MD5 / SHA1 / SHA256 / SHA512</li>
+          <li><i class="bi-check-circle"></i> Magic bytes &amp; MIME detection</li>
+          <li><i class="bi-check-circle"></i> Entropy analysis (packer / encryption detect)</li>
+          <li><i class="bi-check-circle"></i> PE header analysis (EXE / DLL)</li>
+          <li><i class="bi-check-circle"></i> Macro detection (Office files)</li>
+          <li><i class="bi-check-circle"></i> String extraction &amp; pattern matching</li>
         </ul>
       </div>
       <div class="cap-card fade-up">
-        <div class="cc-icon"><i class="fas fa-shield-halo"></i></div>
+        <div class="cc-icon"><i class="bi-shield-fill-check"></i></div>
         <h4>Vendor Scanning</h4>
         <ul>
-          <li><i class="fas fa-check-circle"></i> 70+ AV engines via VirusTotal</li>
-          <li><i class="fas fa-check-circle"></i> Detection ratio &amp; severity badge</li>
-          <li><i class="fas fa-check-circle"></i> Per-vendor result breakdown</li>
-          <li><i class="fas fa-check-circle"></i> Historical scan lookup</li>
-          <li><i class="fas fa-check-circle"></i> Community vote &amp; reputation</li>
-          <li><i class="fas fa-check-circle"></i> First-seen / last-analysis timestamps</li>
+          <li><i class="bi-check-circle"></i> 70+ AV engines via VirusTotal</li>
+          <li><i class="bi-check-circle"></i> Detection ratio &amp; severity badge</li>
+          <li><i class="bi-check-circle"></i> Per-vendor result breakdown</li>
+          <li><i class="bi-check-circle"></i> Historical scan lookup</li>
+          <li><i class="bi-check-circle"></i> Community vote &amp; reputation</li>
+          <li><i class="bi-check-circle"></i> First-seen / last-analysis timestamps</li>
         </ul>
       </div>
       <div class="cap-card fade-up">
-        <div class="cc-icon"><i class="fas fa-brain"></i></div>
+        <div class="cc-icon"><i class="bi-brain"></i></div>
         <h4>Deep Analysis</h4>
         <ul>
-          <li><i class="fas fa-check-circle"></i> PDF structure &amp; JavaScript analysis</li>
-          <li><i class="fas fa-check-circle"></i> Office macro extraction &amp; deobfuscation</li>
-          <li><i class="fas fa-check-circle"></i> Script deobfuscation (JS / VBS / PS1)</li>
-          <li><i class="fas fa-check-circle"></i> Archive bomb &amp; zip-slip detection</li>
-          <li><i class="fas fa-check-circle"></i> APK permission &amp; manifest review</li>
-          <li><i class="fas fa-check-circle"></i> YARA rule matching (5000+ rules)</li>
+          <li><i class="bi-check-circle"></i> PDF structure &amp; JavaScript analysis</li>
+          <li><i class="bi-check-circle"></i> Office macro extraction &amp; deobfuscation</li>
+          <li><i class="bi-check-circle"></i> Script deobfuscation (JS / VBS / PS1)</li>
+          <li><i class="bi-check-circle"></i> Archive bomb &amp; zip-slip detection</li>
+          <li><i class="bi-check-circle"></i> APK permission &amp; manifest review</li>
+          <li><i class="bi-check-circle"></i> YARA rule matching (5000+ rules)</li>
         </ul>
       </div>
     </div>
@@ -581,9 +581,9 @@
     </div>
     <div class="fs-table-wrap fade-up">
       <div class="fst-header">
-        <h5><i class="fas fa-clock-rotate" style="color:var(--purple);"></i> Latest Submissions</h5>
+        <h5><i class="bi-clock-history" style="color:var(--purple);"></i> Latest Submissions</h5>
         <div class="fst-search">
-          <i class="fas fa-search"></i>
+          <i class="bi-search"></i>
           <input type="text" id="tableSearch" placeholder="Filter by filename..." autocomplete="off">
         </div>
       </div>
@@ -608,7 +608,7 @@
 <div class="fs-modal-overlay" id="uploadModal">
   <div class="fs-modal">
     <div class="fsm-header">
-      <h4><i class="fas fa-file-circle-check" style="color:var(--purple);margin-right:.5rem;"></i> Analyzing File</h4>
+      <h4><i class="bi-file-check" style="color:var(--purple);margin-right:.5rem;"></i> Analyzing File</h4>
       <p id="fsmFileName">scanning...</p>
     </div>
     <div class="fsm-step active" data-step="0">
@@ -764,7 +764,7 @@ document.addEventListener('DOMContentLoaded', function () {
             setTimeout(function () {
               modal.classList.remove('active');
               if (window.CipherScan && window.CipherScan.toast)
-                window.CipherScan.toast.success('Scan Complete', file.name + ' — Analysis finished.');
+                window.CipherScan.toast.success('Scan Complete', file.name + ' â€” Analysis finished.');
             }, 1200);
           }
         }, delay);
@@ -782,18 +782,18 @@ document.addEventListener('DOMContentLoaded', function () {
     { name:'script_obfuscated.js',type:'JS',   det:'4/72', threat:'medium',   date:'2025-06-16 11:55' },
   ];
   var icons = {
-    PDF:'fa-file-pdf', EXE:'fa-cog', DLL:'fa-cog', MSI:'fa-cog',
-    DOC:'fa-file-word', DOCX:'fa-file-word',
-    XLS:'fa-file-excel', XLSX:'fa-file-excel', PPTX:'fa-file-powerpoint',
-    ZIP:'fa-file-archive', RAR:'fa-file-archive', '7Z':'fa-file-archive',
-    TAR:'fa-file-archive', GZ:'fa-file-archive',
-    JS:'fab fa-js', PY:'fab fa-python', PHP:'fab fa-php',
-    PS1:'fa-terminal', BAT:'fa-terminal', SH:'fa-terminal', CMD:'fa-terminal',
-    VBS:'fa-code', HTA:'fa-code',
-    APK:'fab fa-android', JAR:'fab fa-java', DEX:'fa-cube',
-    BIN:'fa-binary', RB:'fa-code', GO:'fa-code', RS:'fa-code', JAVA:'fab fa-java',
-    SYS:'fa-cog', APP:'fa-apple-alt',
-    MP3:'fa-music', MP4:'fa-video',
+    PDF:'bi-filetype-pdf', EXE:'bi-gear', DLL:'bi-gear', MSI:'bi-gear',
+    DOC:'bi-filetype-docx', DOCX:'bi-filetype-docx',
+    XLS:'bi-filetype-xlsx', XLSX:'bi-filetype-xlsx', PPTX:'bi-filetype-pptx',
+    ZIP:'bi-file-zip', RAR:'bi-file-zip', '7Z':'bi-file-zip',
+    TAR:'bi-file-zip', GZ:'bi-file-zip',
+    JS:'bi-filetype-js', PY:'bi-filetype-py', PHP:'bi-filetype-php',
+    PS1:'bi-terminal', BAT:'bi-terminal', SH:'bi-terminal', CMD:'bi-terminal',
+    VBS:'bi-code', HTA:'bi-code',
+    APK:'bi-android2', JAR:'bi-filetype-java', DEX:'bi-box',
+    BIN:'bi-file-binary', RB:'bi-code', GO:'bi-code', RS:'bi-code', JAVA:'bi-filetype-java',
+    SYS:'bi-gear', APP:'bi-apple',
+    MP3:'bi-music-note', MP4:'bi-film',
   };
   var badges = {
     clean:'badge-cs-safe', low:'badge-cs-info',
@@ -804,16 +804,16 @@ document.addEventListener('DOMContentLoaded', function () {
     var tbody = document.getElementById('scansBody');
     if (!tbody) return;
     if (!data || !data.length) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text-muted);"><i class="fas fa-inbox" style="font-size:1.5rem;display:block;margin-bottom:.5rem;"></i>No results.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text-muted);"><i class="bi-inbox" style="font-size:1.5rem;display:block;margin-bottom:.5rem;"></i>No results.</td></tr>';
       return;
     }
     tbody.innerHTML = data.map(function (s) {
-      var icon = icons[s.type] || 'fa-file';
+      var icon = icons[s.type] || 'bi-file-earmark';
       var badge = badges[s.threat] || 'badge-cs-info';
       var label = s.threat.charAt(0).toUpperCase() + s.threat.slice(1);
       return '<tr>' +
         '<td><span class="fst-name">' + s.name + '</span></td>' +
-        '<td><span class="fst-type"><i class="fas ' + icon + '"></i> ' + s.type + '</span></td>' +
+        '<td><span class="fst-type"><i class="bi ' + icon + '"></i> ' + s.type + '</span></td>' +
         '<td><span class="fst-detections">' + s.det + '</span></td>' +
         '<td><span class="badge-cs ' + badge + '" style="font-size:.65625rem;padding:.1875rem .5rem;">' + label + '</span></td>' +
         '<td><span class="fst-date">' + s.date + '</span></td>' +
@@ -842,7 +842,7 @@ document.addEventListener('DOMContentLoaded', function () {
     fadeEls.forEach(function (el) { obs.observe(el); });
   }
 
-  console.log('%cCipherScan%c File Scanner — Loaded',
+  console.log('%cCipherScan%c File Scanner â€” Loaded',
     'color:#a855f7;font-weight:700;font-size:1.2em;',
     'color:#8892b0;font-size:.9em;');
 });

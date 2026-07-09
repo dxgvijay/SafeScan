@@ -1,14 +1,14 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Security Analysis Tools — CipherScan{% endblock %}
+{% block title %}Security Analysis Tools â€” CipherScan{% endblock %}
 
 {% block body_class %}full-width{% endblock %}
 
 {% block extra_css %}
 <style>
 /* ============================================================
-   TOOLS PAGE — Hero / Search
+   TOOLS PAGE â€” Hero / Search
    ============================================================ */
 .tools-hero {
     position: relative;
@@ -416,7 +416,7 @@
 .tool-card .tool-launch.launch-reports:hover { background: rgba(0, 212, 255, 0.18); box-shadow: 0 0 24px rgba(0, 212, 255, 0.1); }
 
 /* ============================================================
-   ACCORDION — How Each Tool Works
+   ACCORDION â€” How Each Tool Works
    ============================================================ */
 .accordion-section {
     padding: 3rem 0 4rem;
@@ -673,7 +673,7 @@
     <div class="hero-inner">
         <div class="hero-badge">
             <span class="badge-dot"></span>
-            17 security tools — one platform
+            17 security tools â€” one platform
         </div>
         <h1>Security <span class="highlight">Analysis Tools</span></h1>
         <p class="hero-sub">
@@ -682,14 +682,14 @@
         </p>
 
         <div class="search-bar-wrapper">
-            <i class="fas fa-search search-icon"></i>
+            <i class="bi-search search-icon"></i>
             <input type="text" id="toolSearchInput" placeholder="Search by URL, file hash, IP, domain, email&hellip;" autocomplete="off">
             <span class="search-shortcut">Ctrl+K</span>
         </div>
 
         <div class="stats-ticker">
             <div class="ticker-item">
-                <span class="ticker-icon cyan"><i class="fas fa-link"></i></span>
+                <span class="ticker-icon cyan"><i class="bi-link-45deg"></i></span>
                 <span>
                     <span class="ticker-val"><span id="urlsToday">12,847</span></span>
                     <span class="ticker-label">URLs scanned today</span>
@@ -697,7 +697,7 @@
             </div>
             <div class="ticker-divider"></div>
             <div class="ticker-item">
-                <span class="ticker-icon orange"><i class="fas fa-file"></i></span>
+                <span class="ticker-icon orange"><i class="bi-file-earmark"></i></span>
                 <span>
                     <span class="ticker-val"><span id="filesToday">4,293</span></span>
                     <span class="ticker-label">files analyzed</span>
@@ -705,7 +705,7 @@
             </div>
             <div class="ticker-divider"></div>
             <div class="ticker-item">
-                <span class="ticker-icon danger"><i class="fas fa-shield"></i></span>
+                <span class="ticker-icon danger"><i class="bi-shield"></i></span>
                 <span>
                     <span class="ticker-val"><span id="threatsToday">1,847</span></span>
                     <span class="ticker-label">threats blocked</span>
@@ -728,12 +728,12 @@
         </div>
 
         <div class="row g-4">
-            <!-- Card 1 — Phishing Analyzer -->
+            <!-- Card 1 â€” Phishing Analyzer -->
             <div class="col-lg-4 col-md-6">
                 <div class="tool-card theme-phishing fade-in-up">
                     <div class="card-bg-glow"></div>
                     <div class="card-content">
-                        <div class="tool-icon-wrap ic-phishing"><i class="fas fa-fish"></i></div>
+                        <div class="tool-icon-wrap ic-phishing"><i class="bi-fish"></i></div>
                         <h3 class="tool-name" style="color:#ff4757;">Phishing Analyzer</h3>
                         <p class="tool-desc">Analyze email headers, detect spoofing, and block phishing campaigns with AI-driven inspection.</p>
                         <div class="tool-scan-counter">
@@ -747,18 +747,18 @@
                             <span class="tb">DMARC/SPF</span>
                         </div>
                         <a href="{% url 'phishing_analysis' %}" class="tool-launch launch-phishing">
-                            Launch Tool <i class="fas fa-arrow-right"></i>
+                            Launch Tool <i class="bi-arrow-right"></i>
                         </a>
                     </div>
                 </div>
             </div>
 
-            <!-- Card 2 — URL Scanner -->
+            <!-- Card 2 â€” URL Scanner -->
             <div class="col-lg-4 col-md-6">
                 <div class="tool-card theme-url fade-in-up">
                     <div class="card-bg-glow"></div>
                     <div class="card-content">
-                        <div class="tool-icon-wrap ic-url"><i class="fas fa-link"></i></div>
+                        <div class="tool-icon-wrap ic-url"><i class="bi-link-45deg"></i></div>
                         <h3 class="tool-name" style="color:#00d4ff;">URL Scanner</h3>
                         <p class="tool-desc">Deep scan any URL against 70+ threat databases. Detect phishing, malware, and malicious redirects.</p>
                         <div class="tool-scan-counter">
@@ -771,19 +771,19 @@
                             <span class="tb">SSL Check</span>
                             <span class="tb">Redirect Trace</span>
                         </div>
-                        <a href="{% url 'url_scan' %}" class="tool-launch launch-url">
-                            Launch Tool <i class="fas fa-arrow-right"></i>
+                        <a href="{% url 'browser_isolation' %}" class="tool-launch launch-url">
+                            Launch Tool <i class="bi-arrow-right"></i>
                         </a>
                     </div>
                 </div>
             </div>
 
-            <!-- Card 3 — File Scanner -->
+            <!-- Card 3 â€” File Scanner -->
             <div class="col-lg-4 col-md-6">
                 <div class="tool-card theme-file fade-in-up">
                     <div class="card-bg-glow"></div>
                     <div class="card-content">
-                        <div class="tool-icon-wrap ic-file"><i class="fas fa-file-shield"></i></div>
+                        <div class="tool-icon-wrap ic-file"><i class="bi-shield-check"></i></div>
                         <h3 class="tool-name" style="color:#7c5bfe;">File Scanner</h3>
                         <p class="tool-desc">Upload files for multi-engine malware detection. Supports PDFs, executables, archives, and documents.</p>
                         <div class="tool-scan-counter">
@@ -799,18 +799,18 @@
                             <span class="tb">ZIP</span>
                         </div>
                         <a href="{% url 'file_scan' %}" class="tool-launch launch-file">
-                            Launch Tool <i class="fas fa-arrow-right"></i>
+                            Launch Tool <i class="bi-arrow-right"></i>
                         </a>
                     </div>
                 </div>
             </div>
 
-            <!-- Card 4 — Code Sandbox -->
+            <!-- Card 4 â€” Code Sandbox -->
             <div class="col-lg-4 col-md-6">
                 <div class="tool-card theme-sandbox fade-in-up">
                     <div class="card-bg-glow"></div>
                     <div class="card-content">
-                        <div class="tool-icon-wrap ic-sandbox"><i class="fas fa-terminal"></i></div>
+                        <div class="tool-icon-wrap ic-sandbox"><i class="bi-terminal"></i></div>
                         <h3 class="tool-name" style="color:#00ff88;">Code Sandbox</h3>
                         <p class="tool-desc">Execute and analyze suspicious code in an isolated environment. Observe behavior in real time.</p>
                         <div class="tool-scan-counter">
@@ -827,18 +827,18 @@
                             <span class="tb">Java</span>
                         </div>
                         <a href="{% url 'sandbox' %}" class="tool-launch launch-sandbox">
-                            Launch Tool <i class="fas fa-arrow-right"></i>
+                            Launch Tool <i class="bi-arrow-right"></i>
                         </a>
                     </div>
                 </div>
             </div>
 
-            <!-- Card 5 — IP/Domain Intel -->
+            <!-- Card 5 â€” IP/Domain Intel -->
             <div class="col-lg-4 col-md-6">
                 <div class="tool-card theme-intel fade-in-up">
                     <div class="card-bg-glow"></div>
                     <div class="card-content">
-                        <div class="tool-icon-wrap ic-intel"><i class="fas fa-radar"></i></div>
+                        <div class="tool-icon-wrap ic-intel"><i class="bi-radar"></i></div>
                         <h3 class="tool-name" style="color:#ffd93d;">IP &amp; Domain Intel</h3>
                         <p class="tool-desc">Investigate IP addresses and domains. Geolocation, ASN data, blacklist status, and open ports.</p>
                         <div class="tool-scan-counter">
@@ -852,18 +852,18 @@
                             <span class="tb">Port Scan</span>
                         </div>
                         <a href="{% url 'ip_scan' %}" class="tool-launch launch-intel">
-                            Launch Tool <i class="fas fa-arrow-right"></i>
+                            Launch Tool <i class="bi-arrow-right"></i>
                         </a>
                     </div>
                 </div>
             </div>
 
-            <!-- Card 6 — Reports & History -->
+            <!-- Card 6 â€” Reports & History -->
             <div class="col-lg-4 col-md-6">
                 <div class="tool-card theme-reports fade-in-up">
                     <div class="card-bg-glow"></div>
                     <div class="card-content">
-                        <div class="tool-icon-wrap ic-reports"><i class="fas fa-chart-simple"></i></div>
+                        <div class="tool-icon-wrap ic-reports"><i class="bi-bar-chart"></i></div>
                         <h3 class="tool-name" style="color:#00d4ff;">Reports &amp; History</h3>
                         <p class="tool-desc">Access your full scan history, generate PDF reports, and integrate via our REST API.</p>
                         <div class="tool-scan-counter">
@@ -877,7 +877,7 @@
                             <span class="tb">Saved Reports</span>
                         </div>
                         <a href="{% url 'scan_history' %}" class="tool-launch launch-reports">
-                            Launch Tool <i class="fas fa-arrow-right"></i>
+                            Launch Tool <i class="bi-arrow-right"></i>
                         </a>
                     </div>
                 </div>
@@ -887,7 +887,7 @@
 </section>
 
 <!-- ============================================================
-     ACCORDION — How Each Tool Works
+     ACCORDION â€” How Each Tool Works
      ============================================================ -->
 <section class="accordion-section" id="howItWorks">
     <div class="container">
@@ -901,7 +901,7 @@
                         <span class="ah-dot" style="background:#ff4757;"></span>
                         <span class="ah-tool-name">Phishing Analyzer</span>
                     </div>
-                    <i class="fas fa-chevron-down ah-arrow"></i>
+                    <i class="bi-chevron-down ah-arrow"></i>
                 </div>
                 <div class="accord-body" id="acc-1">
                     <div class="accord-body-inner">
@@ -921,7 +921,7 @@
                         <span class="ah-dot" style="background:#00d4ff;"></span>
                         <span class="ah-tool-name">URL Scanner</span>
                     </div>
-                    <i class="fas fa-chevron-down ah-arrow"></i>
+                    <i class="bi-chevron-down ah-arrow"></i>
                 </div>
                 <div class="accord-body" id="acc-2">
                     <div class="accord-body-inner">
@@ -941,7 +941,7 @@
                         <span class="ah-dot" style="background:#7c5bfe;"></span>
                         <span class="ah-tool-name">File Scanner</span>
                     </div>
-                    <i class="fas fa-chevron-down ah-arrow"></i>
+                    <i class="bi-chevron-down ah-arrow"></i>
                 </div>
                 <div class="accord-body" id="acc-3">
                     <div class="accord-body-inner">
@@ -961,7 +961,7 @@
                         <span class="ah-dot" style="background:#00ff88;"></span>
                         <span class="ah-tool-name">Code Sandbox</span>
                     </div>
-                    <i class="fas fa-chevron-down ah-arrow"></i>
+                    <i class="bi-chevron-down ah-arrow"></i>
                 </div>
                 <div class="accord-body" id="acc-4">
                     <div class="accord-body-inner">
@@ -981,7 +981,7 @@
                         <span class="ah-dot" style="background:#ffd93d;"></span>
                         <span class="ah-tool-name">IP &amp; Domain Intel</span>
                     </div>
-                    <i class="fas fa-chevron-down ah-arrow"></i>
+                    <i class="bi-chevron-down ah-arrow"></i>
                 </div>
                 <div class="accord-body" id="acc-5">
                     <div class="accord-body-inner">
@@ -1001,7 +1001,7 @@
                         <span class="ah-dot" style="background:#00d4ff;"></span>
                         <span class="ah-tool-name">Reports &amp; History</span>
                     </div>
-                    <i class="fas fa-chevron-down ah-arrow"></i>
+                    <i class="bi-chevron-down ah-arrow"></i>
                 </div>
                 <div class="accord-body" id="acc-6">
                     <div class="accord-body-inner">
@@ -1025,10 +1025,10 @@
     <div class="container">
         <div class="api-card fade-in-up">
             <div class="api-content">
-                <h3><i class="fas fa-code text-cyan me-2"></i> Automate your security scans with our <span class="text-cyan">API</span></h3>
+                <h3><i class="bi-code text-cyan me-2"></i> Automate your security scans with our <span class="text-cyan">API</span></h3>
                 <p class="api-sub">Integrate CipherScan into your CI/CD pipeline, SIEM, or custom workflow. One API key unlocks every tool.</p>
                 <div class="api-code-block">
-                    <button class="code-copy-btn" id="copyCurlBtn"><i class="fas fa-copy me-1"></i> Copy</button>
+                    <button class="code-copy-btn" id="copyCurlBtn"><i class="bi-files me-1"></i> Copy</button>
                     <pre><code><span class="code-comment"># Scan a URL with CipherScan API</span>
 curl -X POST https://api.cipherscan.io/v1/scan \
   <span class="code-keyword">-H</span> <span class="code-string">"Authorization: Bearer cs_api_xxxxxxxxxxxx"</span> \
@@ -1040,8 +1040,8 @@ curl -X POST https://api.cipherscan.io/v1/scan \
   }'</span></code></pre>
                 </div>
                 <div class="api-bottom">
-                    <a href="{% url 'api_settings' %}" class="btn-api"><i class="fas fa-key"></i> Get Your API Key</a>
-                    <a href="{% url 'api_docs' %}" class="api-doc-link"><i class="fas fa-book me-1"></i> Read the API docs</a>
+                    <a href="{% url 'api_settings' %}" class="btn-api"><i class="bi-key"></i> Get Your API Key</a>
+                    <a href="{% url 'api_docs' %}" class="api-doc-link"><i class="bi-book me-1"></i> Read the API docs</a>
                 </div>
             </div>
         </div>
@@ -1054,7 +1054,7 @@ curl -X POST https://api.cipherscan.io/v1/scan \
 document.addEventListener('DOMContentLoaded', function () {
 
     // -------------------------------------------------------
-    // 1. KEYBOARD SHORTCUT — Ctrl+K focuses search
+    // 1. KEYBOARD SHORTCUT â€” Ctrl+K focuses search
     // -------------------------------------------------------
     var searchInput = document.getElementById('toolSearchInput');
     if (searchInput) {
@@ -1064,7 +1064,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 searchInput.focus();
             }
         });
-        // Redirect on enter — heuristic: if it looks like a URL, go to URL scanner
+        // Redirect on enter â€” heuristic: if it looks like a URL, go to URL scanner
         searchInput.addEventListener('keydown', function (e) {
             if (e.key === 'Enter') {
                 var val = this.value.trim();
@@ -1073,14 +1073,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(val)) type = 'ip';
                 else if (/\.(com|net|org|io|gov|edu|xyz|top|tk|ru|cn|info|biz)\b/.test(val)) type = 'domain';
                 else if (/^[a-fA-F0-9]{32}$/.test(val) || /^[a-fA-F0-9]{40}$/.test(val) || /^[a-fA-F0-9]{64}$/.test(val)) type = 'hash';
-                var base = { url: '{% url "url_scan" %}', ip: '{% url "ip_scan" %}', domain: '{% url "domain_scan" %}', hash: '{% url "file_scan" %}' };
+                var base = { url: '{% url "browser_isolation" %}', ip: '{% url "ip_scan" %}', domain: '{% url "domain_scan" %}', hash: '{% url "file_scan" %}' };
                 window.location.href = (base[type] || base.url) + '?q=' + encodeURIComponent(val);
             }
         });
     }
 
     // -------------------------------------------------------
-    // 2. STATS TICKER — Live counters (animated count-up)
+    // 2. STATS TICKER â€” Live counters (animated count-up)
     // -------------------------------------------------------
     function animateTicker(id, target) {
         var el = document.getElementById(id);
@@ -1111,7 +1111,7 @@ document.addEventListener('DOMContentLoaded', function () {
     animateTicker('reportsCount', 2451);
 
     // -------------------------------------------------------
-    // 3. ACCORDION — How Each Tool Works
+    // 3. ACCORDION â€” How Each Tool Works
     // -------------------------------------------------------
     var accordHeaders = document.querySelectorAll('.accord-header');
     accordHeaders.forEach(function (header) {
@@ -1145,9 +1145,9 @@ document.addEventListener('DOMContentLoaded', function () {
             var text = codeEl ? codeEl.textContent : '';
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(text).then(function () {
-                    copyBtn.innerHTML = '<i class="fas fa-check me-1"></i> Copied!';
+                    copyBtn.innerHTML = '<i class="bi-check me-1"></i> Copied!';
                     setTimeout(function () {
-                        copyBtn.innerHTML = '<i class="fas fa-copy me-1"></i> Copy';
+                        copyBtn.innerHTML = '<i class="bi-files me-1"></i> Copy';
                     }, 2000);
                 }).catch(function () {
                     fallbackCopy(text);
@@ -1167,9 +1167,9 @@ document.addEventListener('DOMContentLoaded', function () {
         try {
             document.execCommand('copy');
             if (copyBtn) {
-                copyBtn.innerHTML = '<i class="fas fa-check me-1"></i> Copied!';
+                copyBtn.innerHTML = '<i class="bi-check me-1"></i> Copied!';
                 setTimeout(function () {
-                    copyBtn.innerHTML = '<i class="fas fa-copy me-1"></i> Copy';
+                    copyBtn.innerHTML = '<i class="bi-files me-1"></i> Copy';
                 }, 2000);
             }
         } catch (e) {}
@@ -1192,7 +1192,7 @@ document.addEventListener('DOMContentLoaded', function () {
         animEls.forEach(function (el) { observer.observe(el); });
     }
 
-    console.log('%cCipherScan%c Tools Hub — Loaded',
+    console.log('%cCipherScan%c Tools Hub â€” Loaded',
         'color:#00d4ff;font-weight:700;font-size:1.2em;',
         'color:#8892b0;font-size:0.9em;');
 });

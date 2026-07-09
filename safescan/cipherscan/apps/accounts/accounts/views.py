@@ -111,7 +111,7 @@ def dashboard_view(request):
     total_scans = ScanHistory.objects.filter(user=user).count()
     today_scans = ScanHistory.objects.filter(user=user, created_at__gte=today_start).count()
     malicious_finds = ScanHistory.objects.filter(
-        user=user, threat_level='malicious'
+        user=user, verdict='MALICIOUS'
     ).count()
     recent_scans = ScanHistory.objects.filter(user=user)[:10]
 

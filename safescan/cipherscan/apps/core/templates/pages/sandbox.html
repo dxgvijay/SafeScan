@@ -1,18 +1,283 @@
-{% extends 'base.html' %}{% load static %}{% block title %}Code Sandbox — CipherScan{% endblock %}{% block body_class %}full-width{% endblock %}{% block content %}<style>@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');:root{--matrix:#00ff41;--matrix-dim:rgba(0,255,65,.12);--matrix-glow:0 0 24px rgba(0,255,65,.3);--matrix-bg:#0d1a0d;--matrix-card:rgba(10,25,10,.75);--matrix-border:rgba(0,255,65,.12)}.sandbox-hero{position:relative;min-height:80vh;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#0a120a;padding:2rem}#matrixCanvas{position:absolute;inset:0;z-index:0;opacity:.5}.sandbox-hero-content{position:relative;z-index:1;text-align:center;max-width:720px}.sandbox-hero-content .hero-badge{display:inline-flex;align-items:center;gap:.5rem;padding:.35rem 1rem;border-radius:50px;border:1px solid var(--matrix-border);background:var(--matrix-dim);color:var(--matrix);font-size:.75rem;font-weight:600;margin-bottom:1.5rem;letter-spacing:.04em}.sandbox-hero-content h1{font-family:'JetBrains Mono',monospace;font-size:3rem;font-weight:700;margin-bottom:.75rem;background:linear-gradient(135deg,#00ff41,#66ff99);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15}.sandbox-hero-content p{font-size:1.1rem;color:rgba(0,255,65,.6);margin-bottom:2rem;max-width:560px;margin-inline:auto;line-height:1.6}.sandbox-hero-content .btn-matrix{display:inline-flex;align-items:center;gap:.75rem;padding:.9rem 2rem;border-radius:var(--radius-md);background:linear-gradient(135deg,#00ff41,#00cc33);color:#0a120a;font-weight:700;font-size:.9375rem;border:none;cursor:pointer;transition:all .3s ease;text-decoration:none;font-family:var(--font-ui)}.sandbox-hero-content .btn-matrix:hover{box-shadow:0 0 40px rgba(0,255,65,.4);transform:translateY(-3px) scale(1.02);color:#0a120a}.sandbox-hero-content .btn-matrix i{font-size:1rem}.sandbox-hero-content .hero-stats{display:flex;gap:2.5rem;justify-content:center;margin-top:2.5rem;flex-wrap:wrap}.sandbox-hero-content .hero-stats .hs-item{text-align:center}.sandbox-hero-content .hero-stats .hs-item .hs-num{font-family:'JetBrains Mono',monospace;font-size:1.75rem;font-weight:700;color:var(--matrix)}.sandbox-hero-content .hero-stats .hs-item .hs-label{font-size:.75rem;color:rgba(0,255,65,.4);margin-top:.125rem}.sandbox-hero-content .hero-stats .hs-item .hs-label i{font-size:.5rem;vertical-align:middle}.sandbox-section{padding:4rem 2rem;position:relative}.sandbox-section h2{font-family:'JetBrains Mono',monospace;font-size:1.5rem;font-weight:700;margin-bottom:.5rem;color:var(--matrix)}.sandbox-section .section-sub{color:rgba(0,255,65,.5);font-size:.875rem;margin-bottom:2rem;max-width:480px}.lang-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem}.lang-card{display:flex;flex-direction:column;padding:1.25rem;border-radius:var(--radius-md);border:1px solid var(--matrix-border);background:var(--matrix-card);transition:all .3s ease;cursor:pointer;position:relative;overflow:hidden}.lang-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--matrix),transparent);transform:translateX(-100%);transition:transform .4s ease}.lang-card:hover{border-color:rgba(0,255,65,.3);transform:translateY(-3px);box-shadow:0 0 30px rgba(0,255,65,.1)}.lang-card:hover::before{transform:translateX(100%)}.lang-card .lang-icon{font-size:1.75rem;margin-bottom:.625rem;color:var(--matrix)}.lang-card .lang-icon img{width:28px;height:28px;filter:brightness(0) saturate(100%) invert(58%) sepia(100%) saturate(500%) hue-rotate(90deg)}.lang-card .lang-name{font-size:.875rem;font-weight:600;color:var(--text-primary)}.lang-card .lang-version{font-size:.71875rem;color:rgba(0,255,65,.4);margin-bottom:.75rem;font-family:'JetBrains Mono',monospace}.lang-card .btn-lang{width:100%;padding:.4rem;border-radius:var(--radius-sm);background:var(--matrix-dim);border:1px solid var(--matrix-border);color:var(--matrix);font-size:.71875rem;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;text-align:center}.lang-card .btn-lang:hover{background:rgba(0,255,65,.2);box-shadow:0 0 20px rgba(0,255,65,.15)}.security-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}.security-card{padding:1.5rem;border-radius:var(--radius-md);border:1px solid var(--matrix-border);background:var(--matrix-card);transition:all .3s ease}.security-card:hover{border-color:rgba(0,255,65,.25);transform:translateY(-2px)}.security-card .sec-icon{font-size:1.75rem;margin-bottom:.75rem;display:block}.security-card h4{font-size:.9375rem;font-weight:600;color:var(--text-primary);margin-bottom:.375rem}.security-card p{font-size:.78125rem;color:rgba(0,255,65,.5);line-height:1.5;margin-bottom:0}.demo-section{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:2rem}.demo-editor-panel{border-radius:var(--radius-md);border:1px solid var(--matrix-border);overflow:hidden;background:#0d1a0d}.demo-editor-panel .editor-header{display:flex;align-items:center;justify-content:space-between;padding:.5rem 1rem;background:rgba(0,255,65,.04);border-bottom:1px solid var(--matrix-border)}.demo-editor-panel .editor-header .lang-tab{display:flex;align-items:center;gap:.5rem;font-size:.75rem;color:var(--matrix)}.demo-editor-panel .editor-header .lang-tab .tab-dot{width:8px;height:8px;border-radius:50%;background:var(--matrix)}.demo-editor-panel .editor-body{padding:1rem;font-family:'JetBrains Mono',monospace;font-size:.8125rem;line-height:1.6;color:rgba(0,255,65,.85);min-height:200px;background:rgba(0,0,0,.3);white-space:pre-wrap;overflow-x:auto}.demo-editor-panel .editor-body .comment{color:rgba(0,255,65,.35)}.demo-editor-panel .editor-body .keyword{color:#66ff99;font-weight:600}.demo-editor-panel .editor-body .string{color:#00ffcc}.demo-editor-panel .editor-body .function{color:#00ff41}.demo-output{border-radius:var(--radius-md);border:1px solid var(--matrix-border);overflow:hidden;background:#0d1a0d}.demo-output .output-header{display:flex;align-items:center;gap:.5rem;padding:.5rem 1rem;background:rgba(0,255,65,.04);border-bottom:1px solid var(--matrix-border);font-size:.6875rem;color:rgba(0,255,65,.5);text-transform:uppercase;letter-spacing:.05em}.demo-output .output-header .out-dot{width:8px;height:8px;border-radius:50%;background:var(--matrix)}.demo-output .output-body{padding:1rem;font-family:'JetBrains Mono',monospace;font-size:.8125rem;line-height:1.6;color:var(--matrix);min-height:200px;background:rgba(0,0,0,.3);white-space:pre-wrap}.demo-output .output-body .prompt{color:rgba(0,255,65,.3)}.demo-lang-switcher{display:flex;gap:.375rem;flex-wrap:wrap;margin-top:1rem}.demo-lang-switcher button{padding:.3rem .75rem;border-radius:20px;border:1px solid var(--matrix-border);background:transparent;color:rgba(0,255,65,.5);font-size:.71875rem;cursor:pointer;transition:all .2s;font-family:var(--font-ui)}.demo-lang-switcher button:hover{border-color:var(--matrix);color:var(--matrix)}.demo-lang-switcher button.active{background:var(--matrix-dim);border-color:var(--matrix);color:var(--matrix)}.demo-cta{display:flex;justify-content:center;margin-top:1.5rem}.snippets-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem}.snippet-card{padding:1.25rem;border-radius:var(--radius-md);border:1px solid var(--matrix-border);background:var(--matrix-card);transition:all .3s ease}.snippet-card:hover{border-color:rgba(0,255,65,.25);transform:translateY(-2px);box-shadow:0 0 20px rgba(0,255,65,.08)}.snippet-card .snippet-top{display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem;margin-bottom:.75rem}.snippet-card .snippet-top .snippet-icon{width:36px;height:36px;border-radius:var(--radius-sm);background:var(--matrix-dim);display:flex;align-items:center;justify-content:center;font-size:.875rem;color:var(--matrix)}.snippet-card .snippet-top .snippet-lang{font-family:'JetBrains Mono',monospace;font-size:.625rem;font-weight:600;padding:.2rem .5rem;border-radius:4px;background:rgba(0,255,65,.1);color:var(--matrix);text-transform:uppercase}.snippet-card h4{font-size:.875rem;font-weight:600;color:var(--text-primary);margin-bottom:.25rem}.snippet-card p{font-size:.75rem;color:rgba(0,255,65,.45);line-height:1.4;margin-bottom:1rem}.snippet-card .btn-snippet{width:100%;padding:.35rem;border-radius:var(--radius-sm);border:1px solid var(--matrix-border);background:transparent;color:var(--matrix);font-size:.71875rem;font-weight:500;cursor:pointer;transition:all .2s;text-align:center;text-decoration:none;display:block}.snippet-card .btn-snippet:hover{background:var(--matrix-dim)}.feed-section{margin-top:2rem}.feed-table{width:100%;border-collapse:separate;border-spacing:0;font-size:.8125rem}.feed-table thead th{padding:.625rem .75rem;border-bottom:1px solid var(--matrix-border);font-family:'JetBrains Mono',monospace;font-size:.625rem;text-transform:uppercase;letter-spacing:.06em;color:rgba(0,255,65,.4);font-weight:600}.feed-table tbody td{padding:.5rem .75rem;border-bottom:1px solid rgba(0,255,65,.04);color:rgba(0,255,65,.7);vertical-align:middle}.feed-table tbody tr{transition:background .2s}.feed-table tbody tr:hover{background:rgba(0,255,65,.03)}.feed-table tbody tr td:first-child{font-family:'JetBrains Mono',monospace;font-size:.6875rem;color:rgba(0,255,65,.4)}.feed-table tbody tr td:nth-child(2){font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--matrix)}.feed-table tbody tr td:last-child{font-size:.6875rem;color:rgba(0,255,65,.3);text-align:right}.feed-empty{text-align:center;padding:2rem;color:rgba(0,255,65,.3)}.feed-empty i{font-size:2rem;display:block;margin-bottom:.5rem}.matrix-divider{height:1px;background:linear-gradient(90deg,transparent,var(--matrix-border),transparent);margin:0}.matrix-badge{display:inline-flex;align-items:center;gap:.375rem;padding:.2rem .625rem;border-radius:50px;background:var(--matrix-dim);border:1px solid var(--matrix-border);color:var(--matrix);font-size:.6875rem;font-weight:600}.container-sandbox{max-width:1280px;margin:0 auto;padding:0 2rem}.sandbox-theme{background:#0a120a}.sandbox-theme .card-cs{background:var(--matrix-card);border-color:var(--matrix-border)}@media(max-width:1200px){.lang-grid,.snippets-grid{grid-template-columns:repeat(3,1fr)}}@media(max-width:992px){.lang-grid,.snippets-grid,.security-grid{grid-template-columns:repeat(2,1fr)}.demo-section{grid-template-columns:1fr}.sandbox-hero-content h1{font-size:2.25rem}}@media(max-width:576px){.lang-grid,.snippets-grid,.security-grid{grid-template-columns:1fr}.sandbox-hero-content h1{font-size:1.75rem}.sandbox-hero-content .hero-stats{gap:1.5rem}.container-sandbox{padding:0 1rem}.sandbox-section{padding:2.5rem 1rem}}</style><section class="sandbox-hero"><canvas id="matrixCanvas"></canvas><div class="sandbox-hero-content"><div class="hero-badge"><i class="fas fa-shield-halo"></i> Isolated Cloud Sandbox</div><h1>Secure Code Sandbox</h1><p>Run code in any language inside an isolated, sandboxed environment. Zero risk, full visibility.</p><a href="#" class="btn-matrix"><i class="fas fa-play"></i> Launch Sandbox <i class="fas fa-arrow-right" style="font-size:.75rem"></i></a><div class="hero-stats"><div class="hs-item"><div class="hs-num">847k</div><div class="hs-label"><i class="fas fa-circle" style="font-size:.375rem;margin-right:.25rem"></i> Executions</div></div><div class="hs-item"><div class="hs-num">12</div><div class="hs-label"><i class="fas fa-circle" style="font-size:.375rem;margin-right:.25rem"></i> Languages</div></div><div class="hs-item"><div class="hs-num">99.9%</div><div class="hs-label"><i class="fas fa-circle" style="font-size:.375rem;margin-right:.25rem"></i> Uptime</div></div></div></div></section><section class="sandbox-section sandbox-theme"><div class="container-sandbox"><h2><i class="fas fa-code me-2"></i>Available Languages</h2><p class="section-sub">Choose from 12 runtimes — all pre-installed and ready to execute.</p><div class="lang-grid"><div class="lang-card"><div class="lang-icon"><i class="fab fa-python"></i></div><div class="lang-name">Python</div><div class="lang-version">3.11</div><a href="#" class="btn-lang"><i class="fas fa-play me-1" style="font-size:.5rem"></i> Open in Sandbox</a></div><div class="lang-card"><div class="lang-icon"><i class="fab fa-js"></i></div><div class="lang-name">JavaScript (Node)</div><div class="lang-version">20 LTS</div><a href="#" class="btn-lang"><i class="fas fa-play me-1" style="font-size:.5rem"></i> Open in Sandbox</a></div><div class="lang-card"><div class="lang-icon"><i class="fas fa-terminal"></i></div><div class="lang-name">Bash / Shell</div><div class="lang-version">5.2</div><a href="#" class="btn-lang"><i class="fas fa-play me-1" style="font-size:.5rem"></i> Open in Sandbox</a></div><div class="lang-card"><div class="lang-icon"><i class="fas fa-c"></i></div><div class="lang-name">C</div><div class="lang-version">GCC 13</div><a href="#" class="btn-lang"><i class="fas fa-play me-1" style="font-size:.5rem"></i> Open in Sandbox</a></div><div class="lang-card"><div class="lang-icon"><i class="fas fa-c"></i></div><div class="lang-name">C++</div><div class="lang-version">G++ 13</div><a href="#" class="btn-lang"><i class="fas fa-play me-1" style="font-size:.5rem"></i> Open in Sandbox</a></div><div class="lang-card"><div class="lang-icon"><i class="fab fa-php"></i></div><div class="lang-name">PHP</div><div class="lang-version">8.2</div><a href="#" class="btn-lang"><i class="fas fa-play me-1" style="font-size:.5rem"></i> Open in Sandbox</a></div><div class="lang-card"><div class="lang-icon"><i class="fab fa-ruby"></i></div><div class="lang-name">Ruby</div><div class="lang-version">3.2</div><a href="#" class="btn-lang"><i class="fas fa-play me-1" style="font-size:.5rem"></i> Open in Sandbox</a></div><div class="lang-card"><div class="lang-icon"><i class="fab fa-golang"></i></div><div class="lang-name">Go</div><div class="lang-version">1.21</div><a href="#" class="btn-lang"><i class="fas fa-play me-1" style="font-size:.5rem"></i> Open in Sandbox</a></div><div class="lang-card"><div class="lang-icon"><i class="fas fa-r"></i></div><div class="lang-name">Rust</div><div class="lang-version">1.74</div><a href="#" class="btn-lang"><i class="fas fa-play me-1" style="font-size:.5rem"></i> Open in Sandbox</a></div><div class="lang-card"><div class="lang-icon"><i class="fab fa-java"></i></div><div class="lang-name">Java</div><div class="lang-version">21</div><a href="#" class="btn-lang"><i class="fas fa-play me-1" style="font-size:.5rem"></i> Open in Sandbox</a></div><div class="lang-card"><div class="lang-icon"><i class="fas fa-code"></i></div><div class="lang-name">Perl</div><div class="lang-version">5.36</div><a href="#" class="btn-lang"><i class="fas fa-play me-1" style="font-size:.5rem"></i> Open in Sandbox</a></div><div class="lang-card"><div class="lang-icon"><i class="fas fa-r"></i></div><div class="lang-name">R</div><div class="lang-version">4.3</div><a href="#" class="btn-lang"><i class="fas fa-play me-1" style="font-size:.5rem"></i> Open in Sandbox</a></div></div></div></section><div class="matrix-divider"></div><section class="sandbox-section sandbox-theme"><div class="container-sandbox"><h2><i class="fas fa-shield-halo me-2"></i>Security Guarantees</h2><p class="section-sub">Every execution runs in a fireproof container. Here's what's enforced.</p><div class="security-grid"><div class="security-card"><span class="sec-icon">🔒</span><h4>Network Isolated</h4><p>No internet access from the sandbox. All network requests are blocked at the kernel level.</p></div><div class="security-card"><span class="sec-icon">⏱</span><h4>10s Time Limit</h4><p>Automatic kill after 10 seconds of execution. Prevents runaway processes and resource abuse.</p></div><div class="security-card"><span class="sec-icon">💾</span><h4>64MB RAM Cap</h4><p>Memory usage is strictly limited to 64MB per execution. No swapping, no leaks.</p></div><div class="security-card"><span class="sec-icon">🚫</span><h4>No System Access</h4><p>Restricted file system — read-only system paths. Can only write to temporary scratch space.</p></div><div class="security-card"><span class="sec-icon">🧹</span><h4>Auto Cleanup</h4><p>All temp files and containers are destroyed immediately after execution completes.</p></div><div class="security-card"><span class="sec-icon">👁</span><h4>Full Logging</h4><p>Every execution is logged: command, output, exit code, duration, and resource usage.</p></div></div></div></section><div class="matrix-divider"></div><section class="sandbox-section sandbox-theme"><div class="container-sandbox"><h2><i class="fas fa-laptop-code me-2"></i>Quick Demo</h2><p class="section-sub">See it in action. Try Python, JavaScript, or Bash with one click.</p><div class="demo-section"><div class="demo-editor-panel"><div class="editor-header"><div class="lang-tab"><span class="tab-dot"></span> <span id="demoLangLabel">Python 3.11</span></div><span class="matrix-badge">READ-ONLY</span></div><div class="editor-body" id="demoEditor"><span class="comment"># A simple Python script</span>
-<span class="keyword">def</span> <span class="function">greet</span>(name):
-    <span class="keyword">return</span> <span class="string">f"Hello, {name}! Welcome to the sandbox."</span>
+﻿{% extends 'base.html' %}{% load static %}{% block title %}Cyber Security Playground — CipherScan{% endblock %}{% block body_class %}full-width{% endblock %}{% block extra_css %}<link rel="stylesheet" href="{% static 'css/pages/sandbox.css' %}">{% endblock %}{% block content %}
 
-<span class="keyword">def</span> <span class="function">fib</span>(n):
-    a, b = <span class="number">0</span>, <span class="number">1</span>
-    <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="function">range</span>(n):
-        <span class="function">print</span>(a, end=<span class="string">" "</span>)
-        a, b = b, a + b
+<!-- ══════════════ HERO ══════════════ -->
+<section class="sandbox-hero">
+  <div class="hero-grid-bg"></div>
+  <div class="sandbox-hero-content">
+    <div class="hero-badge"><i class="bi-shield"></i> CipherScan Sandbox</div>
+    <h1 class="hero-title">Cyber Security Playground</h1>
+    <p class="hero-subtitle">Practice, analyze, test and experiment with secure cybersecurity tools running inside isolated environments.</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="hero-stat-number" id="stat-tools">12</div><div class="hero-stat-label">Interactive Tools</div></div>
+      <div class="hero-stat"><div class="hero-stat-number" id="stat-langs">12</div><div class="hero-stat-label">Languages</div></div>
+      <div class="hero-stat"><div class="hero-stat-number" id="stat-utils">6</div><div class="hero-stat-label">Utilities</div></div>
+    </div>
+    <div class="hero-actions">
+      <a href="#tools-section" class="btn-hero-primary"><i class="bi-flask"></i> Explore Tools</a>
+      <a href="{% url 'sandbox_editor' %}" class="btn-hero-secondary"><i class="bi-code"></i> Code Editor</a>
+    </div>
+  </div>
+</section>
 
-<span class="function">print</span>(<span class="function">greet</span>(<span class="string">"CipherScan"</span>))
-<span class="function">fib</span>(<span class="number">10</span>)</div></div><div class="demo-output"><div class="output-header"><span class="out-dot"></span> Output</div><div class="output-body" id="demoOutput"><span class="prompt">$</span> python demo.py
-Hello, CipherScan! Welcome to the sandbox.
-<span class="prompt">$</span> 0 1 1 2 3 5 8 13 21 34
+<!-- ══════════════ SEARCH & FILTERS ══════════════ -->
+<div class="sandbox-tools-header" id="tools-section">
+  <div class="sandbox-search-wrap" id="sandbox-search-wrap">
+    <i class="bi-search"></i>
+    <input type="text" id="sandbox-search" placeholder="Search sandbox tools..." autocomplete="off">
+    <div class="search-history-dropdown" id="search-history-dropdown"></div>
+  </div>
+  <div class="filter-chips" id="filter-chips">
+    <button class="filter-chip active" data-filter="all">All</button>
+    <button class="filter-chip" data-filter="favorites"><i class="bi-star-fill" style="font-size:0.7rem"></i> Favorites</button>
+    <button class="filter-chip" data-filter="recent"><i class="bi-clock-history" style="font-size:0.7rem"></i> Recently Used</button>
+    <button class="filter-chip" data-filter="networking">Networking</button>
+    <button class="filter-chip" data-filter="cryptography">Cryptography</button>
+    <button class="filter-chip" data-filter="encoding">Encoding</button>
+    <button class="filter-chip" data-filter="web">Web Security</button>
+    <button class="filter-chip" data-filter="utilities">Utilities</button>
+    <button class="filter-chip" data-filter="python">Python</button>
+    <button class="filter-chip" data-filter="bash">Bash</button>
+  </div>
+</div>
 
-<span class="prompt">$</span> Exit code: 0
-<span class="prompt">$</span> Duration: 0.042s
-<span class="prompt">$</span> Memory: 3.2 MB</div></div></div><div class="demo-lang-switcher"><button class="active" data-lang="python" data-code='<span class="comment"># A simple Python script</span>\n<span class="keyword">def</span> <span class="function">greet</span>(name):\n    <span class="keyword">return</span> <span class="string">f"Hello, {name}! Welcome to the sandbox."</span>\n\n<span class="keyword">def</span> <span class="function">fib</span>(n):\n    a, b = <span class="number">0</span>, <span class="number">1</span>\n    <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="function">range</span>(n):\n        <span class="function">print</span>(a, end=<span class="string">" "</span>)\n        a, b = b, a + b\n\n<span class="function">print</span>(<span class="function">greet</span>(<span class="string">"CipherScan"</span>))\n<span class="function">fib</span>(<span class="number">10</span>)' data-output='<span class="prompt">$</span> python demo.py\nHello, CipherScan! Welcome to the sandbox.\n<span class="prompt">$</span> 0 1 1 2 3 5 8 13 21 34\n\n<span class="prompt">$</span> Exit code: 0\n<span class="prompt">$</span> Duration: 0.042s\n<span class="prompt">$</span> Memory: 3.2 MB' data-label="Python 3.11">Python</button><button data-lang="js" data-code='<span class="comment">// Node.js example</span>\n<span class="keyword">const</span> <span class="function">greet</span> = (name) => {\n  <span class="keyword">return</span> <span class="string">`Hello, ${name}! Welcome to the sandbox.`</span>;\n};\n\n<span class="keyword">const</span> <span class="function">fib</span> = (n) => {\n  <span class="keyword">let</span> [a, b] = [<span class="number">0</span>, <span class="number">1</span>];\n  <span class="keyword">const</span> result = [];\n  <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i < n; i++) {\n    result.push(a);\n    [a, b] = [b, a + b];\n  }\n  <span class="keyword">return</span> result.join(<span class="string">" "</span>);\n};\n\n<span class="function">console</span>.log(<span class="function">greet</span>(<span class="string">"CipherScan"</span>));\n<span class="function">console</span>.log(<span class="function">fib</span>(<span class="number">10</span>));' data-output='<span class="prompt">$</span> node demo.js\nHello, CipherScan! Welcome to the sandbox.\n<span class="prompt">$</span> 0 1 1 2 3 5 8 13 21 34\n\n<span class="prompt">$</span> Exit code: 0\n<span class="prompt">$</span> Duration: 0.038s\n<span class="prompt">$</span> Memory: 5.1 MB' data-label="Node.js 20">JavaScript</button><button data-lang="bash" data-code='<span class="comment">#!/bin/bash</span>\n<span class="comment"># A quick system check</span>\n\n<span class="function">greet</span>() {\n  <span class="keyword">echo</span> <span class="string">"Hello, CipherScan! Welcome to the sandbox."</span>\n}\n\n<span class="function">fib</span>() {\n  a=<span class="number">0</span>; b=<span class="number">1</span>\n  <span class="keyword">for</span> ((i=<span class="number">0</span>; i<$1; i++)); <span class="keyword">do</span>\n    <span class="function">printf</span> <span class="string">"%d "</span> $a\n    <span class="keyword">local</span> temp=$a\n    a=$b\n    b=$((temp + b))\n  <span class="keyword">done</span>\n  <span class="keyword">echo</span>\n}\n\n<span class="function">greet</span>\n<span class="function">fib</span> <span class="number">10</span>' data-output='<span class="prompt">$</span> bash demo.sh\nHello, CipherScan! Welcome to the sandbox.\n<span class="prompt">$</span> 0 1 1 2 3 5 8 13 21 34\n\n<span class="prompt">$</span> Exit code: 0\n<span class="prompt">$</span> Duration: 0.021s\n<span class="prompt">$</span> Memory: 1.8 MB' data-label="Bash 5.2">Bash</button></div><div class="demo-cta"><a href="#" class="btn-matrix"><i class="fas fa-pen"></i> Try It Yourself <i class="fas fa-arrow-right" style="font-size:.75rem"></i></a></div></div></section><div class="matrix-divider"></div><section class="sandbox-section sandbox-theme"><div class="container-sandbox"><h2><i class="fas fa-bolt me-2"></i>Popular Snippets</h2><p class="section-sub">Pre-built examples to fork and run instantly.</p><div class="snippets-grid"><div class="snippet-card"><div class="snippet-top"><div class="snippet-icon"><i class="fab fa-python"></i></div><span class="snippet-lang">Python</span></div><h4>Port Scanner</h4><p>Scan common ports on a target IP address using raw sockets.</p><a href="#" class="btn-snippet"><i class="fas fa-code-branch me-1"></i> Open</a></div><div class="snippet-card"><div class="snippet-top"><div class="snippet-icon"><i class="fab fa-python"></i></div><span class="snippet-lang">Python</span></div><h4>Hash Calculator</h4><p>Compute MD5, SHA-1, SHA-256, and SHA-512 hashes of any string.</p><a href="#" class="btn-snippet"><i class="fas fa-code-branch me-1"></i> Open</a></div><div class="snippet-card"><div class="snippet-top"><div class="snippet-icon"><i class="fab fa-python"></i></div><span class="snippet-lang">Python</span></div><h4>Base64 Decoder</h4><p>Encode and decode Base64 data with padding validation.</p><a href="#" class="btn-snippet"><i class="fas fa-code-branch me-1"></i> Open</a></div><div class="snippet-card"><div class="snippet-top"><div class="snippet-icon"><i class="fas fa-code"></i></div><span class="snippet-lang">Bash</span></div><h4>Regex Tester</h4><p>Test regular expressions against sample input strings.</p><a href="#" class="btn-snippet"><i class="fas fa-code-branch me-1"></i> Open</a></div></div></div></section><div class="matrix-divider"></div><section class="sandbox-section sandbox-theme"><div class="container-sandbox"><h2><i class="fas fa-clock-rotate me-2"></i>Recent Public Executions</h2><p class="section-sub">Anonymous execution feed. All code is scanned and sanitized.</p><div class="card-cs"><div class="table-responsive"><table class="feed-table"><thead><tr><th>Time</th><th>Language</th><th>Snippet Preview</th><th>Duration</th></tr></thead><tbody><tr><td>2 min ago</td><td>Python</td><td style="font-family:var(--font-mono);font-size:.75rem;color:rgba(0,255,65,.6)">print("hello world")</td><td>0.04s</td></tr><tr><td>5 min ago</td><td>Bash</td><td style="font-family:var(--font-mono);font-size:.75rem;color:rgba(0,255,65,.6)">ping -c 4 127.0.0.1</td><td>0.02s</td></tr><tr><td>12 min ago</td><td>Node.js</td><td style="font-family:var(--font-mono);font-size:.75rem;color:rgba(0,255,65,.6)">console.log("hello")</td><td>0.05s</td></tr><tr><td>18 min ago</td><td>Python</td><td style="font-family:var(--font-mono);font-size:.75rem;color:rgba(0,255,65,.6)">import hashlib; ...</td><td>0.12s</td></tr><tr><td>27 min ago</td><td>Ruby</td><td style="font-family:var(--font-mono);font-size:.75rem;color:rgba(0,255,65,.6)">puts "hello world"</td><td>0.07s</td></tr><tr><td>35 min ago</td><td>C</td><td style="font-family:var(--font-mono);font-size:.75rem;color:rgba(0,255,65,.6)">printf("hello\n");</td><td>0.15s</td></tr></tbody></table></div></div></div></section><script>(function(){var c=document.getElementById('matrixCanvas');if(!c)return;var ctx=c.getContext('2d');function resize(){c.width=window.innerWidth;c.height=c.parentElement.offsetHeight||window.innerHeight}resize();window.addEventListener('resize',resize);var chars='アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789ABCDEF<>/{}[]|&^%$#@!';var fontSize=14;var columns=Math.floor(c.width/fontSize);var drops=[];for(var i=0;i<columns;i++){drops[i]=Math.floor(Math.random()*-100)}function draw(){ctx.fillStyle='rgba(10,18,10,0.05)';ctx.fillRect(0,0,c.width,c.height);ctx.fillStyle='#00ff41';ctx.font=fontSize+'px monospace';for(var i=0;i<drops.length;i++){var text=chars.charAt(Math.floor(Math.random()*chars.length));var x=i*fontSize;var y=drops[i]*fontSize;ctx.fillStyle='rgba(0,255,65,'+(0.3+Math.random()*0.7)+')';ctx.fillText(text,x,y);if(y>c.height&&Math.random()>0.975){drops[i]=0}drops[i]++}}setInterval(draw,50)})();document.addEventListener('DOMContentLoaded',function(){var langSwitch=document.querySelectorAll('.demo-lang-switcher button');var editor=document.getElementById('demoEditor');var output=document.getElementById('demoOutput');var label=document.getElementById('demoLangLabel');langSwitch.forEach(function(btn){btn.addEventListener('click',function(){langSwitch.forEach(function(b){b.classList.remove('active')});this.classList.add('active');editor.innerHTML=this.getAttribute('data-code');output.innerHTML=this.getAttribute('data-output');label.textContent=this.getAttribute('data-label')})})})</script>{% endblock %}
+<!-- ══════════════ TOOL CARDS ══════════════ -->
+<div class="sandbox-tools-grid" id="tools-grid"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════════
+// CIPHERSCAN SANDBOX — TOOL DATA & CONTROLLER
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const TOOLS = [
+  { id:'code-editor', title:'Code Editor', icon:'bi-code', cat:'utilities', lang:'multi', diff:'beginner',
+    desc:'Write, run and test code in 12+ languages with syntax highlighting, stdin support, and real-time output.',
+    features:['12+ Languages','Syntax Highlighting','Real-time Output','Stdin Support'],
+    runtime:'Real-time', backend:'Server', api:'Yes', status:'Online', updated:'2026-07',
+    url:"{% url 'sandbox_editor' %}" },
+  { id:'port-scanner', title:'Port Scanner', icon:'bi-plug', cat:'networking', lang:'python', diff:'medium',
+    desc:'Scan hosts for open TCP ports. Supports hostnames, IPv4, IPv6, custom port ranges and timeout control.',
+    features:['TCP Connect Scan','Port Range','Service Detection','Timeout Control'],
+    runtime:'~5-30s', backend:'Threading', api:'Yes', status:'Online', updated:'2026-07',
+    url:"{% url 'sandbox_port_scanner' %}" },
+  { id:'hash-calculator', title:'Hash Calculator', icon:'bi-hash', cat:'cryptography', lang:'python', diff:'beginner',
+    desc:'Compute cryptographic hashes: MD5, SHA-1, SHA-224, SHA-256, SHA-384, SHA-512. Copy results instantly.',
+    features:['MD5 / SHA-1 / SHA-2 Family','Copy Hash','Char Count','Fast Computation'],
+    runtime:'<1s', backend:'Python', api:'Yes', status:'Online', updated:'2026-07',
+    url:"{% url 'sandbox_hash_calculator' %}" },
+  { id:'base64', title:'Base64 Encoder / Decoder', icon:'bi-arrow-left-right', cat:'encoding', lang:'bash', diff:'beginner',
+    desc:'Encode text to Base64 or decode Base64 back to plain text. Supports UTF-8 with copy and download.',
+    features:['Encode & Decode','UTF-8 Support','Copy Result','Download Result'],
+    runtime:'<1s', backend:'Python', api:'Yes', status:'Online', updated:'2026-07',
+    url:"{% url 'sandbox_base64' %}" },
+  { id:'regex-tester', title:'Regex Tester', icon:'bi-code-slash', cat:'utilities', lang:'python', diff:'medium',
+    desc:'Test regular expressions against any text. Supports flags (g, i, m, s, u, y) with live match highlighting.',
+    features:['Pattern Testing','Flags Support','Match Count','Error Handling'],
+    runtime:'<1s', backend:'Python re', api:'Yes', status:'Online', updated:'2026-07',
+    url:"{% url 'sandbox_regex' %}" },
+  { id:'url-scanner', title:'URL Scanner', icon:'bi-globe2', cat:'web', lang:'python', diff:'beginner',
+    desc:'Scan URLs for malicious content, phishing attempts, and security threats with detailed reports.',
+    features:['Threat Detection','Verdict Report','Screenshot','Community DB'],
+    runtime:'~2-10s', backend:'API', api:'Yes', status:'Online', updated:'2026-07',
+    url:"{% url 'browser_isolation' %}" },
+  { id:'file-scanner', title:'File Scanner', icon:'bi-file-earmark', cat:'web', lang:'bash', diff:'medium',
+    desc:'Upload and scan files for malware, viruses, and suspicious patterns using multiple engines.',
+    features:['Multi-Engine Scan','Hash Lookup','YARA Rules','Detailed Report'],
+    runtime:'~5-30s', backend:'Engine', api:'Yes', status:'Online', updated:'2026-07',
+    url:"{% url 'file_scan' %}" },
+  { id:'ip-scanner', title:'IP Scanner', icon:'bi-diagram-2', cat:'networking', lang:'python', diff:'medium',
+    desc:'Analyze IP addresses for reputation, geolocation, open ports, and associated threat intelligence.',
+    features:['Geo Lookup','Threat Intel','Port Check','WHOIS Data'],
+    runtime:'~2-10s', backend:'API', api:'Yes', status:'Online', updated:'2026-07',
+    url:"{% url 'ip_scan' %}" },
+  { id:'dns-lookup', title:'DNS Lookup', icon:'bi-diagram-3', cat:'networking', lang:'bash', diff:'beginner',
+    desc:'Perform DNS lookups: A, AAAA, MX, CNAME, NS, TXT records. Debug domain resolution issues.',
+    features:['All Record Types','DNSSEC Check','Reverse Lookup','TTL Display'],
+    runtime:'<2s', backend:'DNS', api:'Yes', status:'Online', updated:'2026-07',
+    url:"{% url 'dns_lookup' %}" },
+  { id:'ssl-checker', title:'SSL/TLS Checker', icon:'bi-lock', cat:'web', lang:'python', diff:'medium',
+    desc:'Inspect SSL/TLS certificates for expiry, issuer, ciphers, and security vulnerabilities.',
+    features:['Certificate Details','Expiry Check','Cipher Audit','Chain Validation'],
+    runtime:'~3-15s', backend:'Python', api:'Yes', status:'Online', updated:'2026-07',
+    url:"{% url 'ssl_checker' %}" },
+  { id:'whois-lookup', title:'WHOIS Lookup', icon:'bi-search', cat:'networking', lang:'python', diff:'beginner',
+    desc:'Query WHOIS databases for domain registration details, expiry dates, and registrar information.',
+    features:['Domain Registration','Registrar Info','Expiry Dates','Name Servers'],
+    runtime:'<3s', backend:'WHOIS', api:'Yes', status:'Online', updated:'2026-07',
+    url:"{% url 'whois_lookup' %}" },
+  { id:'email-analyzer', title:'Email Analyzer', icon:'bi-envelope', cat:'web', lang:'python', diff:'hard',
+    desc:'Analyze email headers and content for phishing indicators, SPF/DKIM/DMARC auth results.',
+    features:['Header Parse','SPF/DKIM/DMARC','Phishing Detection','Risk Score'],
+    runtime:'<5s', backend:'Python', api:'Yes', status:'Online', updated:'2026-07',
+    url:"{% url 'phishing_analysis' %}" },
+];
+
+// ─── localStorage Keys ───
+const RECENT_KEY = 'sandbox_recent_tools';
+const FAV_KEY = 'sandbox_favorite_tools';
+const SEARCH_KEY = 'sandbox_search_history';
+const MAX_SEARCH = 10;
+
+function getRecent() { try { return JSON.parse(localStorage.getItem(RECENT_KEY)) || []; } catch(e) { return []; } }
+function getFavorites() { try { return JSON.parse(localStorage.getItem(FAV_KEY)) || []; } catch(e) { return []; } }
+function setFavorites(arr) { localStorage.setItem(FAV_KEY, JSON.stringify(arr)); }
+function getSearchHistory() { try { return JSON.parse(localStorage.getItem(SEARCH_KEY)) || []; } catch(e) { return []; } }
+function setSearchHistory(arr) { localStorage.setItem(SEARCH_KEY, JSON.stringify(arr.slice(0, MAX_SEARCH))); }
+
+function toggleFavorite(toolId) {
+  var favs = getFavorites();
+  var idx = favs.indexOf(toolId);
+  if (idx === -1) { favs.push(toolId); } else { favs.splice(idx, 1); }
+  setFavorites(favs);
+  renderTools(getActiveFilter(), getActiveSearch());
+}
+
+function isFavorite(toolId) { return getFavorites().indexOf(toolId) !== -1; }
+
+function saveSearchQuery(query) {
+  if (!query || query.length < 2) return;
+  var history = getSearchHistory();
+  history = history.filter(function(q) { return q !== query; });
+  history.unshift(query);
+  setSearchHistory(history);
+}
+
+// ══════════════ SEARCH HISTORY ══════════════
+function renderSearchHistory() {
+  var dropdown = document.getElementById('search-history-dropdown');
+  var input = document.getElementById('sandbox-search');
+  var query = input.value.toLowerCase().trim();
+  var history = getSearchHistory();
+  if (query !== '' || history.length === 0) { dropdown.classList.remove('show'); return; }
+  var html = '';
+  history.forEach(function(q) {
+    html += '<div class="search-history-item" onclick="setSearch(\'' + esc(q.replace(/'/g, "\\'")) + '\')"><i class="bi-clock"></i> ' + esc(q) + '</div>';
+  });
+  if (history.length > 0) {
+    html += '<div class="search-history-clear" onclick="clearSearchHistory()">Clear search history</div>';
+  }
+  dropdown.innerHTML = html;
+  dropdown.classList.add('show');
+}
+
+function setSearch(query) {
+  document.getElementById('sandbox-search').value = query;
+  document.getElementById('search-history-dropdown').classList.remove('show');
+  renderTools(getActiveFilter(), query.toLowerCase().trim());
+}
+
+function clearSearchHistory() {
+  localStorage.removeItem(SEARCH_KEY);
+  document.getElementById('search-history-dropdown').classList.remove('show');
+}
+
+// ══════════════ RENDER TOOL CARDS ══════════════
+function cardStyle(cat) {
+  var m = { networking:{c:'#00d4ff',b:'rgba(0,212,255,0.1)'}, cryptography:{c:'#b388ff',b:'rgba(179,136,255,0.1)'}, encoding:{c:'#ffd93d',b:'rgba(255,217,61,0.1)'}, web:{c:'#00ff88',b:'rgba(0,255,136,0.1)'} };
+  return m[cat] || {c:'#858585',b:'rgba(133,133,133,0.1)'};
+}
+
+function getActiveFilter() {
+  var active = document.querySelector('.filter-chip.active');
+  return active ? active.dataset.filter : 'all';
+}
+
+function getActiveSearch() {
+  return document.getElementById('sandbox-search').value.toLowerCase().trim();
+}
+
+function diffClass(d) {
+  if (d === 'hard') return 'hard';
+  if (d === 'medium') return 'medium';
+  return '';
+}
+
+function statusClass(s) {
+  return s === 'Online' ? 'online' : 'offline';
+}
+
+function renderTools(filter, search) {
+  var grid = document.getElementById('tools-grid');
+  var html = '';
+  var count = 0;
+  var favs = getFavorites();
+  var recent = getRecent();
+
+  TOOLS.forEach(function(t) {
+    if (filter === 'favorites' && favs.indexOf(t.id) === -1) return;
+    if (filter === 'recent' && recent.indexOf(t.id) === -1) return;
+    if (filter !== 'all' && filter !== 'favorites' && filter !== 'recent' && t.cat !== filter && t.lang !== filter) return;
+    if (search && !t.title.toLowerCase().includes(search) && !t.desc.toLowerCase().includes(search)) return;
+    count++;
+    var cs = cardStyle(t.cat);
+    var isFav = favs.indexOf(t.id) !== -1;
+
+    html += '<a href="' + t.url + '" class="tool-card" aria-label="' + esc(t.title) + '">';
+    html += '<div class="tool-card-fav" onclick="event.stopPropagation();event.preventDefault();toggleFavorite(\'' + t.id + '\')" title="' + (isFav ? 'Remove from favorites' : 'Add to favorites') + '"><i class="bi ' + (isFav ? 'bi-star-fill' : 'bi-star') + '"></i></div>';
+    html += '<div class="tool-card-icon" style="color:' + cs.c + ';background:' + cs.b + '"><i class="bi ' + t.icon + '"></i></div>';
+    html += '<div class="tool-card-title">' + esc(t.title) + '</div>';
+    html += '<div class="tool-card-badges">';
+    html += '<span class="tool-badge cat">' + t.cat + '</span>';
+    html += '<span class="tool-badge diff ' + diffClass(t.diff) + '">' + t.diff + '</span>';
+    html += '<span class="tool-badge status ' + statusClass(t.status) + '">' + t.status + '</span>';
+    html += '<span class="tool-badge runtime"><i class="bi-clock"></i> ' + t.runtime + '</span>';
+    html += '<span class="tool-badge api">API: ' + t.api + '</span>';
+    html += '</div>';
+    html += '<div class="tool-card-desc">' + esc(t.desc) + '</div>';
+    html += '<ul class="tool-card-features">';
+    t.features.forEach(function(f) { html += '<li><i class="bi-circle"></i> ' + esc(f) + '</li>'; });
+    html += '</ul>';
+    html += '<div class="tool-card-btn"><i class="bi-rocket"></i> Launch Tool</div>';
+    html += '</a>';
+  });
+  if (count === 0) {
+    html = '<div class="sandbox-empty"><i class="bi-search"></i><h3>No tools found</h3><p>Try a different search or category filter.</p></div>';
+  }
+  grid.innerHTML = html;
+}
+
+// ══════════════ FILTERS ══════════════
+document.getElementById('filter-chips').addEventListener('click', function(e) {
+  var chip = e.target.closest('.filter-chip');
+  if (!chip) return;
+  document.querySelectorAll('.filter-chip').forEach(function(c) { c.classList.remove('active'); });
+  chip.classList.add('active');
+  renderTools(chip.dataset.filter, getActiveSearch());
+});
+
+document.getElementById('sandbox-search').addEventListener('input', function() {
+  renderTools(getActiveFilter(), this.value.toLowerCase().trim());
+  if (this.value.toLowerCase().trim() === '') {
+    renderSearchHistory();
+  } else {
+    document.getElementById('search-history-dropdown').classList.remove('show');
+  }
+});
+
+document.getElementById('sandbox-search').addEventListener('focus', function() {
+  if (this.value.toLowerCase().trim() === '') renderSearchHistory();
+});
+
+document.getElementById('sandbox-search').addEventListener('blur', function() {
+  setTimeout(function() { document.getElementById('search-history-dropdown').classList.remove('show'); }, 200);
+});
+
+document.getElementById('sandbox-search').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    var query = this.value.trim();
+    if (query) { saveSearchQuery(query); document.getElementById('search-history-dropdown').classList.remove('show'); }
+  }
+});
+
+// ══════════════ MODALS (deprecated — kept for backward compat) ══════════════
+function openModal(id) {}
+function closeModal(id) {}
+
+// ══════════════ UTILITIES ══════════════
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ══════════════ INIT ══════════════
+document.addEventListener('DOMContentLoaded', function() {
+  renderTools('all', '');
+});
+</script>
+{% endblock %}

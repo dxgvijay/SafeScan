@@ -70,15 +70,18 @@ class CustomUser(AbstractUser):
 
 class ScanHistory(models.Model):
     SCAN_TYPES = [
-        ('url', 'URL Scan'),
-        ('file', 'File Scan'),
-        ('phishing', 'Phishing Scan'),
+        ('URL', 'URL Scan'),
+        ('FILE', 'File Scan'),
+        ('EMAIL', 'Email Scan'),
+        ('IP', 'IP Scan'),
+        ('HASH', 'Hash Lookup'),
+        ('PORT', 'Port Scan'),
     ]
 
-    THREAT_LEVELS = [
-        ('safe', 'Safe'),
-        ('suspicious', 'Suspicious'),
-        ('malicious', 'Malicious'),
+    VERDICT_CHOICES = [
+        ('SAFE', 'Safe'),
+        ('SUSPICIOUS', 'Suspicious'),
+        ('MALICIOUS', 'Malicious'),
     ]
 
     user = models.ForeignKey(
@@ -89,11 +92,14 @@ class ScanHistory(models.Model):
     )
     scan_type = models.CharField(_('scan type'), max_length=20, choices=SCAN_TYPES)
     target = models.CharField(_('target'), max_length=2048)
-    result_json = models.JSONField(_('result'), default=dict, blank=True)
-    threat_level = models.CharField(
-        _('threat level'), max_length=20, choices=THREAT_LEVELS, default='safe'
+    verdict = models.CharField(
+        _('verdict'), max_length=20, choices=VERDICT_CHOICES, default='SAFE'
     )
+    threat_score = models.IntegerField(_('threat score'), default=0)
     created_at = models.DateTimeField(_('created at'), default=timezone.now)
+    duration = models.IntegerField(_('duration (ms)'), null=True, blank=True)
+    engine = models.CharField(_('engine'), max_length=100, default='cipherscan')
+    metadata = models.JSONField(_('metadata'), default=dict, blank=True)
 
     class Meta:
         verbose_name = _('scan history')
@@ -101,7 +107,7 @@ class ScanHistory(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f'{self.get_scan_type_display()} - {self.target[:50]}'
+        return f'{self.scan_type} - {self.target[:50]}'
 
 
 class APIKey(models.Model):

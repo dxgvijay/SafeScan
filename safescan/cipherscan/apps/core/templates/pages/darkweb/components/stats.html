@@ -1,0 +1,44 @@
+<div class="dw-stats-section">
+  <div class="dw-stats-grid">
+    <div class="dw-stat-card">
+      <div class="dw-stat-icon" aria-hidden="true">
+        <i class="fas fa-database"></i>
+      </div>
+      <div class="dw-stat-body">
+        <span class="dw-stat-number" data-target="{{ stats.total_assets }}" id="stat-assets">0</span>
+        <span class="dw-stat-label">Assets Monitored</span>
+      </div>
+    </div>
+    <div class="dw-stat-card">
+      <div class="dw-stat-icon" aria-hidden="true">
+        <i class="fas fa-bug"></i>
+      </div>
+      <div class="dw-stat-body">
+        <span class="dw-stat-number" data-target="{{ stats.total_breaches }}" id="stat-breaches">0</span>
+        <span class="dw-stat-label">Breaches Detected</span>
+      </div>
+    </div>
+    <div class="dw-stat-card">
+      <div class="dw-stat-icon" aria-hidden="true">
+        <i class="fas fa-chart-line"></i>
+      </div>
+      <div class="dw-stat-body">
+        <span class="dw-stat-number" data-target="{{ stats.average_risk }}" data-suffix="%" id="stat-risk">0</span>
+        <span class="dw-stat-label">Average Risk Score</span>
+      </div>
+    </div>
+    <div class="dw-stat-card">
+      <div class="dw-stat-icon" aria-hidden="true">
+        <i class="fas fa-shield-check"></i>
+      </div>
+      <div class="dw-stat-body">
+        <span class="dw-status-badge" id="stat-status" data-online="{{ stats.monitoring_online|yesno:'true,false' }}">
+          <span class="dw-status-dot dw-status-dot--{{ stats.monitoring_online|yesno:'online,offline' }}"></span>
+          {{ stats.monitoring_online|yesno:'Online,Offline' }}
+        </span>
+        <span class="dw-stat-label">Monitoring Status</span>
+      </div>
+    </div>
+  </div>
+  <div class="dw-divider-glow"></div>
+</div>

@@ -1,7 +1,7 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Phishing Detection & Email Security — CipherScan{% endblock %}
+{% block title %}Phishing Detection & Email Security â€” CipherScan{% endblock %}
 
 {% block body_class %}full-width{% endblock %}
 
@@ -147,7 +147,7 @@
 }
 
 /* ============================================================
-   TOOL CARDS — Big, Prominent
+   TOOL CARDS â€” Big, Prominent
    ============================================================ */
 .ph-tools {
     padding: 4rem 24px 2rem;
@@ -158,14 +158,13 @@
 }
 .ph-tools .tools-grid {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 24px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0;
+    padding: 0 20px;
     box-sizing: border-box;
-    overflow: hidden;
 }
 .ph-tools .tools-grid > * {
     min-width: 0;
@@ -289,13 +288,17 @@
 }
 .tc-quick .tcq-row {
     display: flex;
-    gap: 0.5rem;
+    gap: 8px;
+    width: 100%;
     align-items: center;
 }
 .tc-quick .tcq-row textarea,
 .tc-quick .tcq-row input {
     flex: 1;
     min-width: 0;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
     background: rgba(255,255,255,0.03);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-sm);
@@ -478,12 +481,12 @@
      ============================================================ -->
 <section class="ph-hero">
     <div class="floating-emails">
-        <i class="fas fa-envelope fe-icon"></i>
-        <i class="fas fa-envelope-open-text fe-icon"></i>
-        <i class="fas fa-envelope fe-icon"></i>
-        <i class="fas fa-envelope-circle-check fe-icon"></i>
-        <i class="fas fa-envelope fe-icon"></i>
-        <i class="fas fa-envelope-open-text fe-icon"></i>
+        <i class="bi-envelope fe-icon"></i>
+        <i class="bi-envelope-open fe-icon"></i>
+        <i class="bi-envelope fe-icon"></i>
+        <i class="bi-envelope-circle-check fe-icon"></i>
+        <i class="bi-envelope fe-icon"></i>
+        <i class="bi-envelope-open fe-icon"></i>
     </div>
 
     <div class="hero-inner">
@@ -504,17 +507,17 @@
 
         <div class="ph-stats">
             <div class="phs-item">
-                <div class="phs-val"><span class="counter" data-target="0" data-stat-key="headers_analyzed">—</span><span class="phs-sfx">+</span></div>
+                <div class="phs-val"><span class="counter" data-target="0" data-stat-key="headers_analyzed">â€”</span><span class="phs-sfx">+</span></div>
                 <div class="phs-label">Headers Analyzed</div>
             </div>
             <div class="phs-div"></div>
             <div class="phs-item">
-                <div class="phs-val"><span class="counter" data-target="0" data-stat-key="emails_blocked">—</span><span class="phs-sfx">+</span></div>
+                <div class="phs-val"><span class="counter" data-target="0" data-stat-key="emails_blocked">â€”</span><span class="phs-sfx">+</span></div>
                 <div class="phs-label">Emails Blocked</div>
             </div>
             <div class="phs-div"></div>
             <div class="phs-item">
-                <div class="phs-val"><span class="counter" data-target="0" data-stat-key="domains_checked">—</span><span class="phs-sfx">+</span></div>
+                <div class="phs-val"><span class="counter" data-target="0" data-stat-key="domains_checked">â€”</span><span class="phs-sfx">+</span></div>
                 <div class="phs-label">Domains Checked</div>
             </div>
         </div>
@@ -534,88 +537,88 @@
         </div>
 
         <div class="tools-grid">
-            <!-- Card A — Email Header Analyzer -->
+            <!-- Card A â€” Email Header Analyzer -->
             <div>
                 <div class="ph-tool-card tc-red fade-in-up">
-                    <div class="tc-icon ic-orange"><i class="fas fa-envelope-open-text"></i></div>
+                    <div class="tc-icon ic-orange"><i class="bi-envelope-open"></i></div>
                     <h3>Email Header Analyzer</h3>
                     <p class="tc-desc">
                         Paste raw email headers and trace the full sending path.
                         Detect spoofing, check SPF/DKIM/DMARC authentication.
                     </p>
                     <ul class="tc-features">
-                        <li><i class="fas fa-check-circle fi-ok"></i> Full routing hop visualization</li>
-                        <li><i class="fas fa-check-circle fi-ok"></i> IP reputation per hop</li>
-                        <li><i class="fas fa-check-circle fi-ok"></i> Spoofing detection</li>
-                        <li><i class="fas fa-check-circle fi-ok"></i> Threat score 0–100</li>
+                        <li><i class="bi-check-circle fi-ok"></i> Full routing hop visualization</li>
+                        <li><i class="bi-check-circle fi-ok"></i> IP reputation per hop</li>
+                        <li><i class="bi-check-circle fi-ok"></i> Spoofing detection</li>
+                        <li><i class="bi-check-circle fi-ok"></i> Threat score 0â€“100</li>
                     </ul>
                     <div class="tc-quick">
                         <div class="tcq-row">
                             <textarea id="quickHeaders" rows="2" placeholder="Paste raw email headers here&hellip;"></textarea>
-                            <button class="tcq-btn" id="quickHeadersBtn"><i class="fas fa-magnifying-glass"></i> Analyze</button>
+                            <button class="tcq-btn" id="quickHeadersBtn"><i class="bi-search"></i> Analyze</button>
                         </div>
                     </div>
                     <div class="tc-footer">
                         <a href="{% url 'email_header_analyzer' %}" class="tc-full-link orange">
-                            Full Analyzer <i class="fas fa-arrow-right"></i>
+                            Full Analyzer <i class="bi-arrow-right"></i>
                         </a>
                     </div>
                 </div>
             </div>
 
-            <!-- Card B — Email Health Checker -->
+            <!-- Card B â€” Email Health Checker -->
             <div>
                 <div class="ph-tool-card tc-green fade-in-up">
-                    <div class="tc-icon ic-green"><i class="fas fa-heart-pulse"></i></div>
+                    <div class="tc-icon ic-green"><i class="bi-heart-pulse"></i></div>
                     <h3>Email Health Checker</h3>
                     <p class="tc-desc">
                         Check any domain's email security configuration and
                         blacklist status across 30+ real-time blacklists.
                     </p>
                     <ul class="tc-features">
-                        <li><i class="fas fa-check-circle fi-ok"></i> MX, SPF, DKIM, DMARC records</li>
-                        <li><i class="fas fa-check-circle fi-ok"></i> 30+ blacklist checks</li>
-                        <li><i class="fas fa-check-circle fi-ok"></i> SMTP banner grab</li>
-                        <li><i class="fas fa-check-circle fi-ok"></i> Health score grade A–F</li>
+                        <li><i class="bi-check-circle fi-ok"></i> MX, SPF, DKIM, DMARC records</li>
+                        <li><i class="bi-check-circle fi-ok"></i> 30+ blacklist checks</li>
+                        <li><i class="bi-check-circle fi-ok"></i> SMTP banner grab</li>
+                        <li><i class="bi-check-circle fi-ok"></i> Health score grade Aâ€“F</li>
                     </ul>
                     <div class="tc-quick">
                         <div class="tcq-row">
                             <input type="text" id="quickHealthDomain" placeholder="example.com" autocomplete="off">
-                            <button class="tcq-btn green" id="quickHealthBtn"><i class="fas fa-stethoscope"></i> Check</button>
+                            <button class="tcq-btn green" id="quickHealthBtn"><i class="bi-stethoscope"></i> Check</button>
                         </div>
                     </div>
                     <div class="tc-footer">
                         <a href="{% url 'email_health_checker' %}" class="tc-full-link green">
-                            Full Health Check <i class="fas fa-arrow-right"></i>
+                            Full Health Check <i class="bi-arrow-right"></i>
                         </a>
                     </div>
                 </div>
             </div>
 
-            <!-- Card C — Suspicious Email Blocker -->
+            <!-- Card C â€” Suspicious Email Blocker -->
             <div>
                 <div class="ph-tool-card tc-red fade-in-up">
-                    <div class="tc-icon ic-red"><i class="fas fa-shield"></i></div>
+                    <div class="tc-icon ic-red"><i class="bi-shield"></i></div>
                     <h3>Suspicious Email Blocker</h3>
                     <p class="tc-desc">
                         Analyze any suspicious email for phishing indicators,
                         malicious links, and social engineering tactics.
                     </p>
                     <ul class="tc-features">
-                        <li><i class="fas fa-check-circle fi-ok"></i> 100+ phishing keyword detection</li>
-                        <li><i class="fas fa-check-circle fi-ok"></i> Link reputation check</li>
-                        <li><i class="fas fa-check-circle fi-ok"></i> Homograph attack detection</li>
-                        <li><i class="fas fa-check-circle fi-ok"></i> HTML obfuscation detection</li>
+                        <li><i class="bi-check-circle fi-ok"></i> 100+ phishing keyword detection</li>
+                        <li><i class="bi-check-circle fi-ok"></i> Link reputation check</li>
+                        <li><i class="bi-check-circle fi-ok"></i> Homograph attack detection</li>
+                        <li><i class="bi-check-circle fi-ok"></i> HTML obfuscation detection</li>
                     </ul>
                     <div class="tc-quick">
                         <div class="tcq-row">
                             <textarea id="quickEmailText" rows="2" placeholder="Paste email body or forward suspicious email to analyze@cipherscan.io&hellip;"></textarea>
-                            <button class="tcq-btn red" id="quickEmailBtn"><i class="fas fa-shield"></i> Analyze</button>
+                            <button class="tcq-btn red" id="quickEmailBtn"><i class="bi-shield"></i> Analyze</button>
                         </div>
                     </div>
                     <div class="tc-footer">
                         <a href="{% url 'suspicious_email_blocker' %}" class="tc-full-link red">
-                            Full Analyzer <i class="fas fa-arrow-right"></i>
+                            Full Analyzer <i class="bi-arrow-right"></i>
                         </a>
                     </div>
                 </div>
@@ -640,35 +643,35 @@
         </div>
         <div class="edu-grid fade-in-up">
             <div class="edu-card">
-                <div class="edu-icon ei-red"><i class="fas fa-user-check"></i></div>
+                <div class="edu-icon ei-red"><i class="bi-person-check"></i></div>
                 <div class="edu-text">
                     <h4>Check the sender address</h4>
                     <p>Hover over the display name. If the email address looks suspicious or doesn't match the domain, it's a red flag.</p>
                 </div>
             </div>
             <div class="edu-card">
-                <div class="edu-icon ei-orange"><i class="fas fa-link"></i></div>
+                <div class="edu-icon ei-orange"><i class="bi-link-45deg"></i></div>
                 <div class="edu-text">
                     <h4>Hover before you click</h4>
                     <p>Always hover over links to preview the actual URL before clicking. Look for misspellings like "rnicrosoft" vs "microsoft".</p>
                 </div>
             </div>
             <div class="edu-card">
-                <div class="edu-icon ei-yellow"><i class="fas fa-triangle-exclamation"></i></div>
+                <div class="edu-icon ei-yellow"><i class="bi-exclamation-triangle"></i></div>
                 <div class="edu-text">
                     <h4>Watch for urgency &amp; threats</h4>
-                    <p>Phishing emails often demand immediate action — "Your account will be suspended!" Legitimate companies don't do this.</p>
+                    <p>Phishing emails often demand immediate action â€” "Your account will be suspended!" Legitimate companies don't do this.</p>
                 </div>
             </div>
             <div class="edu-card">
-                <div class="edu-icon ei-cyan"><i class="fas fa-paperclip"></i></div>
+                <div class="edu-icon ei-cyan"><i class="bi-paperclip"></i></div>
                 <div class="edu-text">
                     <h4>Don't open unexpected attachments</h4>
                     <p>Invoices, voicemails, and shipping notices you didn't expect are common phishing lures. Verify with the sender first.</p>
                 </div>
             </div>
             <div class="edu-card">
-                <div class="edu-icon ei-purple"><i class="fas fa-spell-check"></i></div>
+                <div class="edu-icon ei-purple"><i class="bi-spellcheck"></i></div>
                 <div class="edu-text">
                     <h4>Look for poor grammar &amp; design</h4>
                     <p>Typos, awkward phrasing, mismatched logos, and low-quality graphics are strong indicators of a phishing attempt.</p>
@@ -795,7 +798,7 @@ document.addEventListener('DOMContentLoaded', function () {
         animEls.forEach(function (el) { obs.observe(el); });
     }
 
-    console.log('%cCipherScan%c Phishing Section — Loaded',
+    console.log('%cCipherScan%c Phishing Section â€” Loaded',
         'color:#ff4757;font-weight:700;font-size:1.2em;',
         'color:#8892b0;font-size:0.9em;');
 });

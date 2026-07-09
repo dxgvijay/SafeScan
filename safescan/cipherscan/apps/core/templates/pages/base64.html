@@ -1,0 +1,1532 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Base64 Encoder / Decoder — CipherScan{% endblock %}
+
+{% block body_class %}full-width{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {
+    --b64-green: #00FF9D;
+    --b64-green-dim: rgba(0, 255, 157, 0.08);
+    --b64-green-glow: rgba(0, 255, 157, 0.25);
+    --b64-orange: #FF6B35;
+    --b64-orange-dim: rgba(255, 107, 53, 0.08);
+    --b64-purple: #7C5CFF;
+    --b64-purple-dim: rgba(124, 92, 255, 0.08);
+    --b64-cyan: #00D4FF;
+    --b64-cyan-dim: rgba(0, 212, 255, 0.08);
+    --b64-bg: linear-gradient(135deg, #0a0e1a 0%, #0d1a12 35%, #0f1628 70%, #0a0e1a 100%);
+}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.b64-hero {
+    position: relative;
+    padding: 4rem 2rem 3rem;
+    overflow: hidden;
+    background: var(--b64-bg);
+    min-height: 480px;
+    display: flex;
+    align-items: center;
+}
+.b64-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse at 20% 40%, rgba(0, 255, 157, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 60%, rgba(124, 92, 255, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+}
+.b64-hero .hero-inner {
+    position: relative;
+    z-index: 2;
+    max-width: 720px;
+    margin: 0 auto;
+    text-align: center;
+}
+.b64-hero .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--b64-green-dim);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--b64-green-glow);
+    border-radius: 100px;
+    padding: 6px 18px 6px 10px;
+    font-size: 0.8rem;
+    color: var(--b64-green);
+    margin-bottom: 1.5rem;
+}
+.b64-hero .badge-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--b64-green);
+    animation: b64-pulse 2s ease-in-out infinite;
+}
+@keyframes b64-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+.b64-hero h1 {
+    font-size: clamp(2rem, 4.5vw, 3rem);
+    font-weight: 800;
+    margin-bottom: 0.75rem;
+    line-height: 1.15;
+}
+.b64-hero h1 .hl-green { color: var(--b64-green); }
+.b64-hero h1 .hl-purple { color: var(--b64-purple); }
+.b64-hero .hero-sub {
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+    margin-bottom: 0;
+    line-height: 1.6;
+}
+
+/* ============================================================
+   TOOLBAR — Mode Tabs & Actions
+   ============================================================ */
+.b64-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+.b64-mode-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: 4px;
+}
+.b64-mode-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0.5rem 1rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: transparent;
+    color: var(--text-secondary);
+    transition: all var(--transition-fast);
+    font-family: var(--font-ui);
+}
+.b64-mode-tab:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.04);
+}
+.b64-mode-tab.active-encode {
+    background: var(--b64-green);
+    color: #0a0e1a;
+}
+.b64-mode-tab.active-decode {
+    background: var(--b64-orange);
+    color: #0a0e1a;
+}
+.b64-mode-tab i { font-size: 0.875rem; }
+
+.b64-input-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: 4px;
+}
+.b64-input-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0.5rem 1rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: transparent;
+    color: var(--text-secondary);
+    transition: all var(--transition-fast);
+    font-family: var(--font-ui);
+}
+.b64-input-tab:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.04);
+}
+.b64-input-tab.active {
+    background: var(--b64-purple);
+    color: #fff;
+}
+.b64-input-tab i { font-size: 0.875rem; }
+
+.b64-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+/* ============================================================
+   INPUT PANELS
+   ============================================================ */
+.b64-panel { display: none; }
+.b64-panel.active { display: block; }
+
+.b64-textarea-wrap {
+    position: relative;
+}
+.b64-textarea-wrap textarea {
+    width: 100%;
+    min-height: 180px;
+    padding: 1rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.6;
+    resize: vertical;
+    transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
+    outline: none;
+}
+.b64-textarea-wrap textarea:focus {
+    border-color: var(--b64-green-glow);
+    box-shadow: 0 0 20px var(--b64-green-dim);
+}
+.b64-textarea-wrap textarea.b64-mode-decode:focus {
+    border-color: var(--b64-orange);
+    box-shadow: 0 0 20px var(--b64-orange-dim);
+}
+.b64-textarea-wrap textarea::placeholder {
+    color: var(--text-muted);
+    font-family: var(--font-ui);
+}
+.b64-textarea-wrap .textarea-clear {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: none;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+    font-size: 0.75rem;
+}
+.b64-textarea-wrap .textarea-clear:hover {
+    background: var(--accent-danger-dim);
+    color: var(--accent-danger);
+}
+
+/* ============================================================
+   DROP ZONE
+   ============================================================ */
+.b64-dropzone {
+    position: relative;
+    border: 2px dashed rgba(124, 92, 255, 0.25);
+    border-radius: var(--radius-lg);
+    padding: 3rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    background: var(--bg-secondary);
+}
+.b64-dropzone:hover {
+    border-color: var(--b64-purple);
+    background: var(--b64-purple-dim);
+}
+.b64-dropzone.dragover {
+    border-color: var(--b64-purple);
+    background: var(--b64-purple-dim);
+    box-shadow: 0 0 30px rgba(124, 92, 255, 0.2);
+}
+.b64-dropzone .dz-icon {
+    font-size: 2.5rem;
+    color: var(--b64-purple);
+    margin-bottom: 0.75rem;
+}
+.b64-dropzone .dz-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+.b64-dropzone .dz-sub {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+}
+.b64-dropzone .dz-sub span {
+    color: var(--b64-purple);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+.b64-dropzone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.b64-file-info {
+    display: none;
+    align-items: center;
+    gap: 1rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: 0.875rem 1.25rem;
+    margin-top: 1rem;
+}
+.b64-file-info.visible { display: flex; }
+.b64-file-info .fi-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-sm);
+    background: var(--b64-purple-dim);
+    color: var(--b64-purple);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.125rem;
+    flex-shrink: 0;
+}
+.b64-file-info .fi-details {
+    flex: 1;
+    min-width: 0;
+}
+.b64-file-info .fi-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    word-break: break-all;
+}
+.b64-file-info .fi-meta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 2px;
+}
+.b64-file-info .fi-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.b64-file-info .fi-remove {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+}
+.b64-file-info .fi-remove:hover {
+    background: var(--accent-danger-dim);
+    color: var(--accent-danger);
+}
+
+/* ============================================================
+   INPUT STATS
+   ============================================================ */
+.b64-input-stats {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 0.75rem;
+    padding: 0.5rem 0;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+.b64-input-stats span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.b64-input-stats .stat-val {
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    font-size: 0.71875rem;
+}
+
+/* ============================================================
+   LOADING
+   ============================================================ */
+.b64-loading {
+    display: none;
+    text-align: center;
+    padding: 3rem 0;
+}
+.b64-loading.visible { display: block; }
+.b64-loading .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--glass-border);
+    border-top-color: var(--b64-green);
+    border-radius: 50%;
+    animation: b64-spin 0.8s linear infinite;
+    margin: 0 auto 1rem;
+}
+@keyframes b64-spin {
+    to { transform: rotate(360deg); }
+}
+.b64-loading .txt {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* ============================================================
+   ERROR
+   ============================================================ */
+.b64-error {
+    display: none;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1.25rem;
+    background: var(--accent-danger-dim);
+    border: 1px solid rgba(255, 77, 109, 0.2);
+    border-radius: var(--radius-md);
+    color: var(--accent-danger);
+    font-size: 0.875rem;
+    margin-bottom: 1.5rem;
+}
+.b64-error.visible { display: flex; }
+.b64-error i { font-size: 1.125rem; flex-shrink: 0; }
+
+/* ============================================================
+   RESULT CARD
+   ============================================================ */
+.b64-result {
+    display: none;
+    margin-top: 1.5rem;
+}
+.b64-result.visible { display: block; }
+
+.b64-result .b64r-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--glass-border);
+}
+.b64-result .b64r-header h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.b64-result .b64r-header .b64r-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 50px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    letter-spacing: 0.03em;
+}
+.b64-result .b64r-header .b64r-badge.enc {
+    background: var(--b64-green-dim);
+    color: var(--b64-green);
+    border: 1px solid rgba(0, 255, 157, 0.15);
+}
+.b64-result .b64r-header .b64r-badge.dec {
+    background: var(--b64-orange-dim);
+    color: var(--b64-orange);
+    border: 1px solid rgba(255, 107, 53, 0.15);
+}
+
+.b64r-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--glass-shadow);
+    overflow: hidden;
+    transition: all var(--transition-normal);
+    animation: b64r-in 0.35s ease forwards;
+}
+@keyframes b64r-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.b64r-card:hover {
+    border-color: var(--glass-border-hover);
+    box-shadow: var(--glass-shadow), var(--accent-cyan-glow);
+}
+
+.b64r-card .b64r-body {
+    padding: 1.25rem;
+}
+.b64r-card .b64r-body .b64r-output {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    color: var(--text-primary);
+    word-break: break-all;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-sm);
+    padding: 1rem;
+    max-height: 300px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    margin-bottom: 1rem;
+}
+.b64r-card .b64r-body .b64r-output.binary-msg {
+    color: var(--accent-warning);
+    font-family: var(--font-ui);
+    text-align: center;
+    font-size: 0.875rem;
+}
+
+.b64r-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.b64r-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.01);
+    border-top: 1px solid var(--glass-border);
+}
+.b64r-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.b64r-meta .meta-val {
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+}
+
+/* ============================================================
+   RECENT CONVERSIONS
+   ============================================================ */
+.b64-recent {
+    margin-top: 2rem;
+    display: none;
+}
+.b64-recent.visible { display: block; }
+.b64-recent .recent-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+.b64-recent .recent-header h4 {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.b64-recent .recent-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.b64-recent .recent-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    padding: 0.625rem 0.875rem;
+    transition: all var(--transition-fast);
+    cursor: pointer;
+}
+.b64-recent .recent-item:hover {
+    border-color: var(--glass-border-hover);
+    background: var(--b64-cyan-dim);
+}
+.b64-recent .recent-item .ri-badge {
+    font-size: 0.625rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+.b64-recent .recent-item .ri-badge.enc {
+    background: var(--b64-green-dim);
+    color: var(--b64-green);
+}
+.b64-recent .recent-item .ri-badge.dec {
+    background: var(--b64-orange-dim);
+    color: var(--b64-orange);
+}
+.b64-recent .recent-item .ri-preview {
+    flex: 1;
+    min-width: 0;
+    font-family: var(--font-mono);
+    font-size: 0.71875rem;
+    color: var(--text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.b64-recent .recent-item .ri-time {
+    font-size: 0.625rem;
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+.b64-recent .recent-empty {
+    text-align: center;
+    padding: 1.5rem;
+    color: var(--text-muted);
+    font-size: 0.8125rem;
+}
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+.b64-empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-muted);
+}
+.b64-empty i {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 0.75rem;
+    color: var(--glass-border);
+}
+.b64-empty p {
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 768px) {
+    .b64-hero { padding: 3rem 1.25rem 2rem; min-height: auto; }
+    .b64-toolbar { flex-direction: column; align-items: stretch; }
+    .b64-mode-tabs, .b64-input-tabs { width: 100%; justify-content: stretch; }
+    .b64-mode-tab, .b64-input-tab { flex: 1; justify-content: center; }
+    .b64-actions { width: 100%; justify-content: flex-start; }
+    .b64-file-info.visible { flex-wrap: wrap; }
+    .b64r-card .b64r-body .b64r-output { max-height: 200px; }
+}
+
+@media (max-width: 480px) {
+    .b64-mode-tab, .b64-input-tab { font-size: 0.75rem; padding: 0.375rem 0.5rem; }
+    .b64-textarea-wrap textarea { min-height: 120px; font-size: 0.8125rem; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- ============================================================
+     HERO
+     ============================================================ -->
+<section class="b64-hero">
+    <div class="hero-inner">
+        <div class="hero-badge">
+            <span class="badge-dot"></span>
+            Encoding Tool
+        </div>
+        <h1>Base64 <span class="hl-green">Encoder</span> / <span class="hl-purple">Decoder</span></h1>
+        <p class="hero-sub">
+            Encode text or files to Base64, or decode Base64 back to their original form.
+            All processing is done server-side using Python's base64 module.
+        </p>
+    </div>
+</section>
+
+<!-- ============================================================
+     MAIN SECTION
+     ============================================================ -->
+<section style="padding: 0 2rem 4rem; max-width: 960px; margin: 0 auto;">
+
+    <!-- Toolbar -->
+    <div class="b64-toolbar">
+        <div style="display:flex;flex-wrap:wrap;gap:0.75rem;">
+            <!-- Encode/Decode Mode Tabs -->
+            <div class="b64-mode-tabs" role="tablist">
+                <button class="b64-mode-tab active-encode" data-mode="encode" role="tab" aria-selected="true" id="b64ModeEncode">
+                    <i class="bi bi-lock"></i> Encode
+                </button>
+                <button class="b64-mode-tab" data-mode="decode" role="tab" aria-selected="false" id="b64ModeDecode">
+                    <i class="bi bi-unlock"></i> Decode
+                </button>
+            </div>
+            <!-- Text/File Input Tabs -->
+            <div class="b64-input-tabs" role="tablist">
+                <button class="b64-input-tab active" data-input="text" role="tab" aria-selected="true" id="b64InputText">
+                    <i class="bi bi-pencil"></i> Text
+                </button>
+                <button class="b64-input-tab" data-input="file" role="tab" aria-selected="false" id="b64InputFile">
+                    <i class="bi bi-file-earmark-arrow-up"></i> File
+                </button>
+            </div>
+        </div>
+
+        <div class="b64-actions">
+            <button class="btn-cs btn-cs-ghost btn-cs-sm" id="b64Clear" title="Clear input">
+                <i class="bi bi-trash3"></i> Clear
+            </button>
+        </div>
+    </div>
+
+    <!-- Error -->
+    <div class="b64-error" id="b64Error" role="alert">
+        <i class="bi bi-exclamation-circle"></i>
+        <span id="b64ErrorText"></span>
+    </div>
+
+    <!-- Text Input Panel -->
+    <div class="b64-panel active" id="b64TextPanel" role="tabpanel" aria-labelledby="b64InputText">
+        <div class="b64-textarea-wrap">
+            <textarea id="b64TextInput" placeholder="Enter text to encode..." spellcheck="false" aria-label="Text input"></textarea>
+            <button class="textarea-clear" id="b64TextClear" title="Clear text" aria-label="Clear text input">
+                <i class="bi bi-x"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- File Input Panel -->
+    <div class="b64-panel" id="b64FilePanel" role="tabpanel" aria-labelledby="b64InputFile">
+        <div class="b64-dropzone" id="b64Dropzone">
+            <div class="dz-icon"><i class="bi bi-file-earmark-binary"></i></div>
+            <div class="dz-title">Drop a file here or click to browse</div>
+            <div class="dz-sub">Supports any file type up to <span>100 MB</span></div>
+            <input type="file" id="b64FileInput" aria-label="Choose file">
+        </div>
+        <div class="b64-file-info" id="b64FileInfo">
+            <div class="fi-icon"><i class="bi bi-file-earmark"></i></div>
+            <div class="fi-details">
+                <div class="fi-name" id="b64FileName"></div>
+                <div class="fi-meta">
+                    <span><i class="bi bi-hdd"></i> <span id="b64FileSize"></span></span>
+                    <span><i class="bi bi-file-type"></i> <span id="b64FileMime"></span></span>
+                </div>
+            </div>
+            <button class="fi-remove" id="b64FileRemove" title="Remove file" aria-label="Remove file">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Input Stats -->
+    <div class="b64-input-stats" id="b64InputStats" style="display:none;">
+        <span><i class="bi bi-text-paragraph"></i> Characters: <span class="stat-val" id="b64StatChars">0</span></span>
+        <span><i class="bi bi-hdd"></i> Size: <span class="stat-val" id="b64StatSize">0 B</span></span>
+    </div>
+
+    <!-- Loading -->
+    <div class="b64-loading" id="b64Loading">
+        <div class="spinner"></div>
+        <div class="txt">Processing...</div>
+    </div>
+
+    <!-- Result -->
+    <div class="b64-result" id="b64Result">
+        <div class="b64r-header">
+            <div style="display:flex;align-items:center;gap:0.75rem;">
+                <h3><i class="bi bi-check-circle" style="color:var(--b64-green);margin-right:4px;"></i> Result</h3>
+                <span class="b64r-badge enc" id="b64ResultBadge">Encode</span>
+            </div>
+        </div>
+        <div class="b64r-card">
+            <div class="b64r-body">
+                <div class="b64r-output" id="b64ResultOutput"></div>
+                <div class="b64r-toolbar" id="b64ResultActions">
+                    <button class="btn-cs btn-cs-primary btn-cs-sm" id="b64CopyBtn" title="Copy result">
+                        <i class="bi bi-clipboard"></i> Copy
+                    </button>
+                    <button class="btn-cs btn-cs-success btn-cs-sm" id="b64DownloadBtn" title="Download result">
+                        <i class="bi bi-download"></i> Download
+                    </button>
+                    <button class="btn-cs btn-cs-ghost btn-cs-sm" id="b64SwapBtn" title="Swap — send result to input">
+                        <i class="bi bi-arrow-left-right"></i> Send to Input
+                    </button>
+                </div>
+            </div>
+            <div class="b64r-meta" id="b64ResultMeta">
+                <span><i class="bi bi-text-paragraph"></i> Chars: <span class="meta-val" id="b64ResultChars">0</span></span>
+                <span><i class="bi bi-hdd"></i> Bytes: <span class="meta-val" id="b64ResultBytes">0</span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Conversions -->
+    <div class="b64-recent" id="b64Recent">
+        <div class="recent-header">
+            <h4><i class="bi bi-clock-history" style="color:var(--b64-purple)"></i> Recent Conversions</h4>
+            <button class="btn-cs btn-cs-ghost btn-cs-sm" id="b64ClearRecent" title="Clear history">
+                <i class="bi bi-trash3"></i> Clear History
+            </button>
+        </div>
+        <div class="recent-list" id="b64RecentList">
+            <div class="recent-empty">No recent conversions yet</div>
+        </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="b64-empty" id="b64Empty">
+        <i class="bi bi-arrow-left-right"></i>
+        <p>Enter text or upload a file to begin</p>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    'use strict';
+
+    // -------------------------------------------------------
+    // DOM refs
+    // -------------------------------------------------------
+    var textInput = document.getElementById('b64TextInput');
+    var fileInput = document.getElementById('b64FileInput');
+    var dropzone = document.getElementById('b64Dropzone');
+    var fileInfo = document.getElementById('b64FileInfo');
+    var fileName = document.getElementById('b64FileName');
+    var fileSize = document.getElementById('b64FileSize');
+    var fileMime = document.getElementById('b64FileMime');
+    var fileRemove = document.getElementById('b64FileRemove');
+    var textClear = document.getElementById('b64TextClear');
+    var modeTabs = document.querySelectorAll('.b64-mode-tab');
+    var inputTabs = document.querySelectorAll('.b64-input-tab');
+    var textPanel = document.getElementById('b64TextPanel');
+    var filePanel = document.getElementById('b64FilePanel');
+    var errorEl = document.getElementById('b64Error');
+    var errorText = document.getElementById('b64ErrorText');
+    var loadingEl = document.getElementById('b64Loading');
+    var resultEl = document.getElementById('b64Result');
+    var resultOutput = document.getElementById('b64ResultOutput');
+    var resultBadge = document.getElementById('b64ResultBadge');
+    var resultActions = document.getElementById('b64ResultActions');
+    var resultMeta = document.getElementById('b64ResultMeta');
+    var resultChars = document.getElementById('b64ResultChars');
+    var resultBytes = document.getElementById('b64ResultBytes');
+    var copyBtn = document.getElementById('b64CopyBtn');
+    var downloadBtn = document.getElementById('b64DownloadBtn');
+    var swapBtn = document.getElementById('b64SwapBtn');
+    var inputStats = document.getElementById('b64InputStats');
+    var statChars = document.getElementById('b64StatChars');
+    var statSize = document.getElementById('b64StatSize');
+    var emptyEl = document.getElementById('b64Empty');
+    var recentEl = document.getElementById('b64Recent');
+    var recentList = document.getElementById('b64RecentList');
+    var clearRecentBtn = document.getElementById('b64ClearRecent');
+    var clearBtn = document.getElementById('b64Clear');
+
+    // -------------------------------------------------------
+    // State
+    // -------------------------------------------------------
+    var currentMode = 'encode';
+    var currentInputMode = 'text';
+    var selectedFile = null;
+    var currentResultData = null;
+    var debounceTimer = null;
+    var recentItems = [];
+
+    // Load recent from localStorage
+    try {
+        var saved = localStorage.getItem('cs_b64_recent');
+        if (saved) recentItems = JSON.parse(saved);
+    } catch (e) {}
+
+    // -------------------------------------------------------
+    // Utility
+    // -------------------------------------------------------
+    function getCSRF() {
+        var meta = document.querySelector('meta[name="csrf-token"]');
+        return meta ? meta.getAttribute('content') : '';
+    }
+
+    function formatBytes(bytes) {
+        if (bytes === 0) return '0 B';
+        var units = ['B', 'KB', 'MB', 'GB'];
+        var i = 0;
+        var size = bytes;
+        while (size >= 1024 && i < units.length - 1) {
+            size /= 1024;
+            i++;
+        }
+        return size.toFixed(i > 0 ? 2 : 0) + ' ' + units[i];
+    }
+
+    function escapeHtml(str) {
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+    }
+
+    function showError(msg) {
+        errorText.textContent = msg;
+        errorEl.classList.add('visible');
+    }
+
+    function hideError() {
+        errorEl.classList.remove('visible');
+        errorText.textContent = '';
+    }
+
+    function showLoading() {
+        loadingEl.classList.add('visible');
+        resultEl.classList.remove('visible');
+    }
+
+    function hideLoading() {
+        loadingEl.classList.remove('visible');
+    }
+
+    // -------------------------------------------------------
+    // Toast
+    // -------------------------------------------------------
+    function toastSuccess(msg) {
+        if (window.CipherScan && window.CipherScan.toast) {
+            window.CipherScan.toast.success('Done', msg);
+        }
+    }
+
+    function toastError(msg) {
+        if (window.CipherScan && window.CipherScan.toast) {
+            window.CipherScan.toast.error('Error', msg);
+        }
+    }
+
+    // -------------------------------------------------------
+    // Copy to clipboard
+    // -------------------------------------------------------
+    function copyToClipboard(text, btnEl) {
+        if (!text) return;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(function () {
+                if (btnEl) {
+                    btnEl.innerHTML = '<i class="bi bi-check-lg"></i> Copied!';
+                    setTimeout(function () {
+                        btnEl.innerHTML = '<i class="bi bi-clipboard"></i> Copy';
+                    }, 1800);
+                }
+                toastSuccess('Copied to clipboard');
+            }).catch(function () {
+                fallbackCopy(text, btnEl);
+            });
+        } else {
+            fallbackCopy(text, btnEl);
+        }
+    }
+
+    function fallbackCopy(text, btnEl) {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+            document.execCommand('copy');
+            if (btnEl) {
+                btnEl.innerHTML = '<i class="bi bi-check-lg"></i> Copied!';
+                setTimeout(function () {
+                    btnEl.innerHTML = '<i class="bi bi-clipboard"></i> Copy';
+                }, 1800);
+            }
+            toastSuccess('Copied to clipboard');
+        } catch (e) {
+            toastError('Could not copy');
+        }
+        document.body.removeChild(ta);
+    }
+
+    // -------------------------------------------------------
+    // Recent conversions
+    // -------------------------------------------------------
+    function saveRecent() {
+        try { localStorage.setItem('cs_b64_recent', JSON.stringify(recentItems)); } catch (e) {}
+    }
+
+    function addRecent(mode, inputPreview, resultPreview) {
+        recentItems.unshift({
+            mode: mode,
+            input: inputPreview,
+            result: resultPreview,
+            time: Date.now()
+        });
+        if (recentItems.length > 20) recentItems.pop();
+        saveRecent();
+        renderRecent();
+    }
+
+    function renderRecent() {
+        if (recentItems.length === 0) {
+            recentEl.classList.remove('visible');
+            return;
+        }
+        recentEl.classList.add('visible');
+        var html = '';
+        recentItems.forEach(function (item, idx) {
+            var badge = item.mode === 'encode' ? 'enc' : 'dec';
+            var label = item.mode === 'encode' ? 'ENC' : 'DEC';
+            var timeAgo = '';
+            var diff = Date.now() - item.time;
+            if (diff < 60000) timeAgo = 'Just now';
+            else if (diff < 3600000) timeAgo = Math.floor(diff / 60000) + 'm ago';
+            else if (diff < 86400000) timeAgo = Math.floor(diff / 3600000) + 'h ago';
+            else timeAgo = Math.floor(diff / 86400000) + 'd ago';
+            html += '<div class="recent-item" data-idx="' + idx + '">';
+            html += '<span class="ri-badge ' + badge + '">' + label + '</span>';
+            html += '<span class="ri-preview">' + escapeHtml(item.input) + ' → ' + escapeHtml(item.result) + '</span>';
+            html += '<span class="ri-time">' + timeAgo + '</span>';
+            html += '</div>';
+        });
+        recentList.innerHTML = html;
+
+        // Click to re-fill input
+        recentList.querySelectorAll('.recent-item').forEach(function (item) {
+            item.addEventListener('click', function () {
+                var idx = parseInt(this.dataset.idx, 10);
+                var entry = recentItems[idx];
+                if (!entry) return;
+                setMode(entry.mode);
+                setInputMode('text');
+                textInput.value = entry.input;
+                processText();
+            });
+        });
+    }
+
+    function clearRecent() {
+        recentItems = [];
+        saveRecent();
+        renderRecent();
+    }
+
+    // -------------------------------------------------------
+    // Display result
+    // -------------------------------------------------------
+    function showResult(data) {
+        hideLoading();
+        hideError();
+        resultEl.classList.add('visible');
+        emptyEl.style.display = 'none';
+
+        currentResultData = data;
+
+        var isEncode = data.mode === 'encode';
+        resultBadge.textContent = isEncode ? 'Encoded' : 'Decoded';
+        resultBadge.className = 'b64r-badge ' + (isEncode ? 'enc' : 'dec');
+
+        var outputText = data.result || '';
+        if (data.is_binary) {
+            resultOutput.className = 'b64r-output binary-msg';
+            resultOutput.textContent = outputText;
+            downloadBtn.style.display = 'inline-flex';
+            copyBtn.style.display = 'none';
+            swapBtn.style.display = 'none';
+        } else {
+            resultOutput.className = 'b64r-output';
+            resultOutput.textContent = outputText;
+            downloadBtn.style.display = 'inline-flex';
+            copyBtn.style.display = 'inline-flex';
+            swapBtn.style.display = 'inline-flex';
+        }
+
+        resultChars.textContent = (data.char_count || data.byte_count || data.result_bytes || 0).toLocaleString();
+        resultBytes.textContent = formatBytes(data.byte_count || data.result_bytes || 0);
+        resultMeta.style.display = 'flex';
+
+        // Input stats
+        inputStats.style.display = 'flex';
+        statChars.textContent = (data.char_count || 0).toLocaleString();
+        statSize.textContent = formatBytes(data.byte_count || 0);
+
+        // Add to recent
+        var inputPreview = textInput.value.trim() || selectedFile ? (selectedFile ? selectedFile.name : 'file') : '';
+        var resultPreview = outputText.substring(0, 40) + (outputText.length > 40 ? '...' : '');
+        if (inputPreview) {
+            addRecent(data.mode, inputPreview, resultPreview);
+        }
+    }
+
+    // -------------------------------------------------------
+    // API call
+    // -------------------------------------------------------
+    function processRequest(payload) {
+        hideError();
+        if (!payload) return;
+
+        showLoading();
+        resultEl.classList.remove('visible');
+
+        var url = '{% url "base64_process_api" %}';
+        var options = {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCSRF() }
+        };
+
+        if (payload instanceof FormData) {
+            options.body = payload;
+        } else {
+            options.headers['Content-Type'] = 'application/json';
+            options.body = JSON.stringify(payload);
+        }
+
+        fetch(url, options)
+            .then(function (res) {
+                return res.json().then(function (json) {
+                    if (!res.ok) {
+                        throw new Error(json.error || 'Request failed');
+                    }
+                    return json;
+                });
+            })
+            .then(function (json) {
+                if (json.error) {
+                    hideLoading();
+                    showError(json.error);
+                    return;
+                }
+                showResult(json);
+            })
+            .catch(function (err) {
+                hideLoading();
+                showError(err.message || 'An unexpected error occurred.');
+            });
+    }
+
+    // -------------------------------------------------------
+    // Process text (debounced)
+    // -------------------------------------------------------
+    function processText() {
+        hideError();
+        var text = textInput.value;
+
+        if (!text.trim()) {
+            currentResultData = null;
+            resultEl.classList.remove('visible');
+            emptyEl.style.display = 'block';
+            inputStats.style.display = 'none';
+            return;
+        }
+
+        processRequest({
+            mode: currentMode,
+            action: 'text',
+            text: text
+        });
+    }
+
+    function debouncedProcess() {
+        var text = textInput.value;
+        if (!text.trim()) {
+            currentResultData = null;
+            resultEl.classList.remove('visible');
+            emptyEl.style.display = 'block';
+            inputStats.style.display = 'none';
+            return;
+        }
+
+        statChars.textContent = text.length.toLocaleString();
+        statSize.textContent = new Blob([text]).size.toLocaleString() + ' B';
+        inputStats.style.display = 'flex';
+
+        if (debounceTimer) clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(function () {
+            processText();
+        }, 350);
+    }
+
+    // -------------------------------------------------------
+    // Process file
+    // -------------------------------------------------------
+    function processFile(file) {
+        if (!file) return;
+        if (file.size > 100 * 1024 * 1024) {
+            showError('File exceeds the maximum size of 100 MB.');
+            return;
+        }
+
+        var fd = new FormData();
+        fd.append('mode', currentMode);
+        fd.append('action', 'file');
+        fd.append('file', file);
+        processRequest(fd);
+    }
+
+    // -------------------------------------------------------
+    // Set mode
+    // -------------------------------------------------------
+    function setMode(mode) {
+        currentMode = mode;
+        modeTabs.forEach(function (t) {
+            var isActive = t.dataset.mode === mode;
+            t.classList.remove('active-encode', 'active-decode');
+            if (isActive) t.classList.add(mode === 'encode' ? 'active-encode' : 'active-decode');
+            t.setAttribute('aria-selected', isActive);
+        });
+
+        // Update placeholder
+        textInput.placeholder = mode === 'encode'
+            ? 'Enter text to encode...'
+            : 'Enter Base64 to decode...';
+
+        textInput.className = mode === 'decode' ? 'b64-mode-decode' : '';
+
+        // Re-process if there's text
+        if (textInput.value.trim()) {
+            debouncedProcess();
+        }
+    }
+
+    function setInputMode(mode) {
+        currentInputMode = mode;
+        inputTabs.forEach(function (t) {
+            var isActive = t.dataset.input === mode;
+            t.classList.toggle('active', isActive);
+            t.setAttribute('aria-selected', isActive);
+        });
+        textPanel.classList.toggle('active', mode === 'text');
+        filePanel.classList.toggle('active', mode === 'file');
+        hideError();
+    }
+
+    // -------------------------------------------------------
+    // File handling
+    // -------------------------------------------------------
+    function handleFile(file) {
+        if (!file) return;
+        if (file.size > 100 * 1024 * 1024) {
+            showError('File exceeds the maximum size of 100 MB. Selected file is ' + formatBytes(file.size) + '.');
+            return;
+        }
+
+        selectedFile = file;
+        fileName.textContent = file.name;
+        fileSize.textContent = formatBytes(file.size);
+        fileMime.textContent = file.type || 'application/octet-stream';
+        fileInfo.classList.add('visible');
+
+        // Show input stats for file
+        statChars.textContent = '—';
+        statSize.textContent = formatBytes(file.size);
+        inputStats.style.display = 'flex';
+
+        processFile(file);
+    }
+
+    function removeFile() {
+        selectedFile = null;
+        fileInput.value = '';
+        fileInfo.classList.remove('visible');
+        currentResultData = null;
+        resultEl.classList.remove('visible');
+        emptyEl.style.display = 'block';
+        inputStats.style.display = 'none';
+        hideError();
+        hideLoading();
+    }
+
+    // -------------------------------------------------------
+    // Download
+    // -------------------------------------------------------
+    function downloadResult() {
+        if (!currentResultData) return;
+
+        var text = currentResultData.result || '';
+        var isEnc = currentResultData.mode === 'encode';
+        var filename;
+
+        if (currentResultData.action === 'file') {
+            if (isEnc) {
+                // Encoded file output
+                filename = currentResultData.filename || 'encoded.b64';
+                var blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                toastSuccess('Downloaded ' + filename);
+            } else {
+                // Decoded file — binary data needs to be fetched from server
+                // We have the data as base64 in currentResultData
+                // We need to send it back to server to get as proper download
+                if (currentResultData.is_binary) {
+                    downloadDecodedFile();
+                } else {
+                    filename = currentResultData.filename || 'decoded.txt';
+                    var blob2 = new Blob([text], { type: 'text/plain;charset=utf-8' });
+                    var url2 = URL.createObjectURL(blob2);
+                    var a2 = document.createElement('a');
+                    a2.href = url2;
+                    a2.download = filename;
+                    document.body.appendChild(a2);
+                    a2.click();
+                    document.body.removeChild(a2);
+                    URL.revokeObjectURL(url2);
+                    toastSuccess('Downloaded ' + filename);
+                }
+            }
+        } else {
+            // Text mode - always download as text file
+            filename = isEnc ? 'encoded.txt' : 'decoded.txt';
+            var blob3 = new Blob([text], { type: 'text/plain;charset=utf-8' });
+            var url3 = URL.createObjectURL(blob3);
+            var a3 = document.createElement('a');
+            a3.href = url3;
+            a3.download = filename;
+            document.body.appendChild(a3);
+            a3.click();
+            document.body.removeChild(a3);
+            URL.revokeObjectURL(url3);
+            toastSuccess('Downloaded ' + filename);
+        }
+    }
+
+    function downloadDecodedFile() {
+        // For binary decoded data, we need to get the original data from our result
+        // The result contains base64-encoded binary data in a hidden field
+        // We'll send it to the download API
+        var downloadUrl = '{% url "base64_download_api" %}';
+        fetch(downloadUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRF()
+            },
+            body: JSON.stringify({
+                data: '', // We can't get the original base64 back from the decoded text for binary
+                filename: currentResultData.filename || 'decoded.bin',
+                is_binary: true
+            })
+        })
+        .then(function (res) {
+            if (!res.ok) {
+                toastError('Download failed');
+                return;
+            }
+            // Get the content-type and blob
+            return res.blob().then(function (blob) {
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = currentResultData.filename || 'decoded.bin';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                toastSuccess('Downloaded ' + (currentResultData.filename || 'decoded.bin'));
+            });
+        })
+        .catch(function () {
+            toastError('Download failed');
+        });
+    }
+
+    // -------------------------------------------------------
+    // Copy
+    // -------------------------------------------------------
+    function copyResult() {
+        if (!currentResultData || !currentResultData.result) return;
+        if (currentResultData.is_binary) {
+            toastError('Cannot copy binary data');
+            return;
+        }
+        copyToClipboard(currentResultData.result, copyBtn);
+    }
+
+    // -------------------------------------------------------
+    // Swap - send result to input
+    // -------------------------------------------------------
+    function swapToInput() {
+        if (!currentResultData || !currentResultData.result) return;
+        if (currentResultData.is_binary) {
+            toastError('Cannot send binary data to input');
+            return;
+        }
+
+        // Switch to text mode
+        setInputMode('text');
+        // Flip mode
+        var newMode = currentMode === 'encode' ? 'decode' : 'encode';
+        setMode(newMode);
+        // Fill input with result
+        textInput.value = currentResultData.result;
+        // Process
+        debouncedProcess();
+    }
+
+    // -------------------------------------------------------
+    // Clear all
+    // -------------------------------------------------------
+    function clearAll() {
+        textInput.value = '';
+        removeFile();
+        currentResultData = null;
+        resultEl.classList.remove('visible');
+        emptyEl.style.display = 'block';
+        inputStats.style.display = 'none';
+        hideError();
+        hideLoading();
+        setInputMode('text');
+        textInput.focus();
+    }
+
+    // -------------------------------------------------------
+    // Drag & drop
+    // -------------------------------------------------------
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(function (evt) {
+        dropzone.addEventListener(evt, function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+    });
+
+    dropzone.addEventListener('dragenter', function () {
+        dropzone.classList.add('dragover');
+    });
+
+    dropzone.addEventListener('dragleave', function (e) {
+        if (!dropzone.contains(e.relatedTarget)) {
+            dropzone.classList.remove('dragover');
+        }
+    });
+
+    dropzone.addEventListener('drop', function (e) {
+        dropzone.classList.remove('dragover');
+        var files = e.dataTransfer.files;
+        if (files.length > 0) {
+            handleFile(files[0]);
+        }
+    });
+
+    // -------------------------------------------------------
+    // Events
+    // -------------------------------------------------------
+
+    // Text input — live
+    textInput.addEventListener('input', debouncedProcess);
+
+    // Text clear
+    textClear.addEventListener('click', function () {
+        textInput.value = '';
+        textInput.focus();
+        debouncedProcess();
+    });
+
+    // File input
+    fileInput.addEventListener('change', function () {
+        if (this.files.length > 0) {
+            handleFile(this.files[0]);
+        }
+    });
+
+    // File remove
+    fileRemove.addEventListener('click', removeFile);
+
+    // Mode tabs
+    modeTabs.forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            var mode = this.dataset.mode;
+            if (mode === currentMode) return;
+            setMode(mode);
+
+            // Clear previous file if in file mode
+            if (currentInputMode === 'file') {
+                removeFile();
+            }
+
+            // Re-process text
+            if (currentInputMode === 'text') {
+                debouncedProcess();
+            }
+        });
+    });
+
+    // Input tabs
+    inputTabs.forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            var mode = this.dataset.input;
+            if (mode === currentInputMode) return;
+            setInputMode(mode);
+            if (mode === 'text' && textInput.value.trim()) {
+                debouncedProcess();
+            }
+        });
+    });
+
+    // Copy
+    copyBtn.addEventListener('click', copyResult);
+
+    // Download
+    downloadBtn.addEventListener('click', downloadResult);
+
+    // Swap
+    swapBtn.addEventListener('click', swapToInput);
+
+    // Clear
+    clearBtn.addEventListener('click', clearAll);
+
+    // Clear recent
+    clearRecentBtn.addEventListener('click', clearRecent);
+
+    // Keyboard shortcut
+    textInput.addEventListener('keydown', function (e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            e.preventDefault();
+            if (debounceTimer) clearTimeout(debounceTimer);
+            processText();
+        }
+    });
+
+    // -------------------------------------------------------
+    // Init
+    // -------------------------------------------------------
+    emptyEl.style.display = 'block';
+    setMode('encode');
+    setInputMode('text');
+    renderRecent();
+    textInput.focus();
+
+})();
+</script>
+{% endblock %}

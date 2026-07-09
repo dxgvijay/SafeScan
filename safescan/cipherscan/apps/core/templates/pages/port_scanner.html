@@ -1,0 +1,750 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Port Scanner — CipherScan{% endblock %}
+
+{% block body_class %}full-width{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {
+    --ps-cyan: #00D4FF;
+    --ps-cyan-dim: rgba(0, 212, 255, 0.08);
+    --ps-green: #00FF9D;
+    --ps-green-dim: rgba(0, 255, 157, 0.1);
+    --ps-red: #FF4D6D;
+    --ps-red-dim: rgba(255, 77, 109, 0.1);
+    --ps-orange: #FF6B35;
+    --ps-orange-dim: rgba(255, 107, 53, 0.1);
+    --ps-yellow: #FFD93D;
+    --ps-yellow-dim: rgba(255, 217, 61, 0.1);
+    --ps-purple: #7C5CFF;
+    --ps-purple-dim: rgba(124, 92, 255, 0.08);
+    --ps-bg: linear-gradient(135deg, #0a0e1a 0%, #100a1a 35%, #0f1628 70%, #0a0e1a 100%);
+}
+
+/* Hero */
+.ps-hero {
+    position: relative;
+    padding: 3rem 2rem 2.5rem;
+    overflow: hidden;
+    background: var(--ps-bg);
+    display: flex;
+    align-items: center;
+}
+.ps-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 20% 40%, rgba(255, 107, 53, 0.06) 0%, transparent 50%), radial-gradient(ellipse at 80% 60%, rgba(124, 92, 255, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+}
+.ps-hero .hero-inner { position: relative; z-index: 2; max-width: 720px; margin: 0 auto; text-align: center; }
+.ps-hero .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--ps-orange-dim); backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 107, 53, 0.15); border-radius: 100px;
+    padding: 6px 18px 6px 10px; font-size: 0.8rem;
+    color: var(--ps-orange); margin-bottom: 1.25rem;
+}
+.ps-hero .badge-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ps-orange); animation: ps-pulse 2s ease-in-out infinite; }
+@keyframes ps-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+.ps-hero h1 { font-size: clamp(1.75rem, 4vw, 2.75rem); font-weight: 800; margin-bottom: 0.5rem; }
+.ps-hero h1 .hl-orange { color: var(--ps-orange); }
+.ps-hero h1 .hl-cyan { color: var(--ps-cyan); }
+.ps-hero .hero-sub { color: var(--text-secondary); font-size: 1rem; margin-bottom: 0; line-height: 1.6; }
+
+/* Layout */
+.ps-section { padding: 0 2rem 4rem; max-width: 1100px; margin: 0 auto; }
+
+/* Input card */
+.ps-input-card {
+    background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border); border-radius: var(--radius-lg);
+    box-shadow: var(--glass-shadow); padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+.ps-input-row {
+    display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: flex-end;
+}
+.ps-field {
+    display: flex; flex-direction: column; gap: 0.375rem; flex: 1; min-width: 200px;
+}
+.ps-field label { font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; }
+.ps-input-wrap {
+    display: flex; align-items: center;
+    background: var(--bg-secondary); border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm); transition: border-color var(--transition-normal);
+}
+.ps-input-wrap:focus-within { border-color: var(--ps-orange); box-shadow: 0 0 16px var(--ps-orange-dim); }
+.ps-input-wrap input, .ps-input-wrap select {
+    flex: 1; background: transparent; border: none; outline: none;
+    color: var(--text-primary); font-family: var(--font-mono); font-size: 0.875rem;
+    padding: 0.625rem 0.75rem;
+}
+.ps-input-wrap input::placeholder { color: var(--text-muted); font-family: var(--font-ui); }
+.ps-input-wrap select { cursor: pointer; -webkit-appearance: none; -moz-appearance: none; appearance: none; }
+.ps-input-wrap .ps-icon {
+    padding: 0 0 0 0.75rem; color: var(--text-muted); font-size: 0.875rem;
+}
+
+/* Port chips */
+.ps-port-chips {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-top: 0.75rem;
+}
+.ps-port-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 0.3125rem 0.625rem; border-radius: 6px; font-size: 0.71875rem;
+    font-weight: 600; cursor: pointer; border: 1px solid var(--glass-border);
+    background: transparent; color: var(--text-secondary); font-family: var(--font-ui);
+    transition: all var(--transition-fast);
+}
+.ps-port-chip:hover { border-color: var(--ps-orange); color: var(--ps-orange); background: var(--ps-orange-dim); }
+.ps-port-chip.active { background: var(--ps-orange); color: #0a0e1a; border-color: var(--ps-orange); }
+
+/* Progress */
+.ps-progress {
+    display: none; margin-bottom: 1.5rem;
+}
+.ps-progress.visible { display: block; animation: ps-fade 0.3s ease; }
+@keyframes ps-fade { from { opacity: 0; } to { opacity: 1; } }
+.ps-progress .ps-prog-header {
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;
+    margin-bottom: 0.625rem;
+}
+.ps-progress .ps-prog-header span { font-size: 0.8125rem; color: var(--text-secondary); }
+.ps-progress .ps-prog-header .ps-prog-pct { font-family: var(--font-mono); color: var(--ps-cyan); font-weight: 700; }
+.ps-progress .ps-prog-track {
+    height: 6px; background: var(--bg-tertiary); border-radius: 4px; overflow: hidden;
+}
+.ps-progress .ps-prog-track .ps-prog-fill {
+    height: 100%; width: 0%; background: linear-gradient(90deg, var(--ps-orange), var(--ps-cyan));
+    border-radius: 4px; transition: width 0.5s ease;
+}
+.ps-progress .ps-prog-detail {
+    display: flex; flex-wrap: wrap; gap: 1.25rem; margin-top: 0.625rem;
+    font-size: 0.75rem; color: var(--text-muted);
+}
+.ps-progress .ps-prog-detail span { display: flex; align-items: center; gap: 4px; }
+.ps-progress .ps-prog-detail .ps-prog-val { color: var(--text-secondary); font-family: var(--font-mono); font-size: 0.6875rem; }
+
+/* Error */
+.ps-error {
+    display: none; align-items: center; gap: 0.75rem;
+    padding: 0.75rem 1rem; background: var(--ps-red-dim);
+    border: 1px solid rgba(255, 77, 109, 0.2); border-radius: var(--radius-md);
+    color: var(--ps-red); font-size: 0.8125rem; margin-bottom: 1rem;
+}
+.ps-error.visible { display: flex; }
+.ps-error i { font-size: 1rem; flex-shrink: 0; }
+
+/* Results */
+.ps-results { display: none; }
+.ps-results.visible { display: block; animation: ps-fade 0.3s ease; }
+.ps-results-header {
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;
+    margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--glass-border);
+}
+.ps-results-header .rh-left { display: flex; align-items: center; gap: 0.75rem; }
+.ps-results-header .rh-left h3 { font-size: 1rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 8px; }
+
+/* Summary cards */
+.ps-summary {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+.ps-stat {
+    background: var(--bg-secondary); border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md); padding: 1rem; text-align: center;
+}
+.ps-stat .ps-stat-val { font-size: 1.5rem; font-weight: 700; line-height: 1.2; font-family: var(--font-mono); }
+.ps-stat .ps-stat-label { font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); margin-top: 4px; }
+.ps-stat.open .ps-stat-val { color: var(--ps-green); }
+.ps-stat.closed .ps-stat-val { color: var(--text-muted); }
+.ps-stat.filtered .ps-stat-val { color: var(--ps-yellow); }
+.ps-stat.total .ps-stat-val { color: var(--ps-cyan); }
+.ps-stat.time .ps-stat-val { color: var(--ps-purple); font-size: 1rem; }
+
+/* Filter tabs */
+.ps-filter-bar {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;
+}
+.ps-filter-bar .ps-filter-label { font-size: 0.75rem; color: var(--text-muted); }
+.ps-filter-btn {
+    padding: 0.25rem 0.625rem; border-radius: 6px; font-size: 0.71875rem; font-weight: 600;
+    border: 1px solid var(--glass-border); background: transparent; color: var(--text-secondary);
+    cursor: pointer; transition: all var(--transition-fast); font-family: var(--font-ui);
+}
+.ps-filter-btn:hover { border-color: var(--ps-cyan); color: var(--ps-cyan); }
+.ps-filter-btn.active { background: var(--ps-cyan); color: #0a0e1a; border-color: var(--ps-cyan); }
+.ps-filter-btn .count { font-family: var(--font-mono); font-size: 0.625rem; opacity: 0.7; }
+
+/* Port list */
+.ps-port-list { display: flex; flex-direction: column; gap: 3px; }
+
+.ps-port-item {
+    background: var(--bg-secondary); border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm); overflow: hidden; transition: all var(--transition-fast);
+}
+.ps-port-item:hover { border-color: var(--glass-border-hover); }
+.ps-port-item .ps-pi-header {
+    display: flex; align-items: center; gap: 0.625rem;
+    padding: 0.5rem 0.75rem; cursor: pointer;
+}
+.ps-port-item .ps-pi-state {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+.ps-port-item .ps-pi-state.open { background: var(--ps-green); box-shadow: 0 0 8px rgba(0, 255, 157, 0.4); }
+.ps-port-item .ps-pi-state.closed { background: var(--text-muted); }
+.ps-port-item .ps-pi-state.filtered { background: var(--ps-yellow); box-shadow: 0 0 8px rgba(255, 217, 61, 0.3); }
+.ps-port-item .ps-pi-port {
+    font-family: var(--font-mono); font-size: 0.8125rem; font-weight: 600; color: var(--text-primary); min-width: 50px;
+}
+.ps-port-item .ps-pi-service {
+    flex: 1; min-width: 0; font-size: 0.78125rem; color: var(--text-secondary);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.ps-port-item .ps-pi-service .unknown { color: var(--text-muted); font-style: italic; }
+.ps-port-item .ps-pi-risk {
+    font-size: 0.625rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;
+    text-transform: uppercase; letter-spacing: 0.03em;
+}
+.ps-port-item .ps-pi-risk.critical { background: var(--ps-red-dim); color: var(--ps-red); }
+.ps-port-item .ps-pi-risk.high { background: var(--ps-orange-dim); color: var(--ps-orange); }
+.ps-port-item .ps-pi-risk.medium { background: var(--ps-yellow-dim); color: var(--ps-yellow); }
+.ps-port-item .ps-pi-risk.low { background: var(--ps-green-dim); color: var(--ps-green); }
+.ps-port-item .ps-pi-risk.info { background: var(--ps-cyan-dim); color: var(--ps-cyan); }
+.ps-port-item .ps-pi-latency {
+    font-size: 0.65625rem; color: var(--text-muted); font-family: var(--font-mono); flex-shrink: 0;
+}
+
+.ps-port-item .ps-pi-body {
+    display: none; padding: 0 0.75rem 0.75rem; border-top: 1px solid var(--glass-border);
+}
+.ps-port-item.open .ps-pi-body { display: block; animation: ps-body-in 0.2s ease; }
+@keyframes ps-body-in { from { opacity: 0; max-height: 0; } to { opacity: 1; max-height: 300px; } }
+
+.ps-pi-body .ps-pi-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; margin-top: 0.625rem;
+}
+.ps-pi-body .ps-pi-detail {
+    background: rgba(255,255,255,0.02); border-radius: 6px; padding: 0.5rem 0.625rem;
+}
+.ps-pi-body .ps-pi-detail .ps-pi-dl { font-size: 0.625rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); }
+.ps-pi-body .ps-pi-detail .ps-pi-dv { font-size: 0.75rem; color: var(--text-primary); font-family: var(--font-mono); margin-top: 2px; word-break: break-all; }
+
+.ps-pi-body .ps-risk-box {
+    margin-top: 0.625rem; padding: 0.625rem; border-radius: 6px;
+    font-size: 0.75rem; line-height: 1.5;
+}
+.ps-pi-body .ps-risk-box.risk-critical { background: var(--ps-red-dim); border: 1px solid rgba(255, 77, 109, 0.15); color: var(--ps-red); }
+.ps-pi-body .ps-risk-box.risk-high { background: var(--ps-orange-dim); border: 1px solid rgba(255, 107, 53, 0.15); color: var(--ps-orange); }
+.ps-pi-body .ps-risk-box.risk-medium { background: var(--ps-yellow-dim); border: 1px solid rgba(255, 217, 61, 0.15); color: var(--ps-yellow); }
+.ps-pi-body .ps-risk-box.risk-low { background: var(--ps-green-dim); border: 1px solid rgba(0, 255, 157, 0.15); color: var(--ps-green); }
+.ps-pi-body .ps-risk-box.risk-info { background: var(--ps-cyan-dim); border: 1px solid rgba(0, 212, 255, 0.15); color: var(--ps-cyan); }
+.ps-pi-body .ps-risk-box .rb-icon { margin-right: 6px; }
+.ps-pi-body .ps-risk-box .rb-title { font-weight: 700; }
+
+.ps-pi-body .ps-banner-box {
+    margin-top: 0.5rem; padding: 0.5rem 0.625rem; background: rgba(0,0,0,0.15);
+    border-radius: 6px; font-family: var(--font-mono); font-size: 0.6875rem;
+    color: var(--text-secondary); word-break: break-all; line-height: 1.5;
+}
+.ps-pi-body .ps-banner-box .bb-label { font-family: var(--font-ui); font-size: 0.625rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); margin-bottom: 4px; }
+
+/* Empty */
+.ps-empty {
+    text-align: center; padding: 3rem 1rem; color: var(--text-muted);
+}
+.ps-empty i { font-size: 2.5rem; display: block; margin-bottom: 0.75rem; color: var(--glass-border); }
+.ps-empty p { font-size: 0.875rem; margin: 0; }
+
+/* Export */
+.ps-export-bar {
+    display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; padding-top: 1rem;
+    border-top: 1px solid var(--glass-border);
+}
+.ps-export-bar .export-label { font-size: 0.75rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+
+/* Responsive */
+@media (max-width: 768px) {
+    .ps-hero { padding: 2rem 1.25rem 1.5rem; }
+    .ps-section { padding: 0 1.25rem 3rem; }
+    .ps-input-card { padding: 1rem; }
+    .ps-field { min-width: 150px; }
+    .ps-summary { grid-template-columns: repeat(3, 1fr); }
+    .ps-stat .ps-stat-val { font-size: 1.125rem; }
+}
+
+@media (max-width: 480px) {
+    .ps-summary { grid-template-columns: repeat(2, 1fr); }
+    .ps-port-item .ps-pi-service { display: none; }
+    .ps-port-item .ps-pi-latency { display: none; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="ps-hero">
+    <div class="hero-inner">
+        <div class="hero-badge"><span class="badge-dot"></span> Network Tool</div>
+        <h1>Port <span class="hl-orange">Scanner</span></h1>
+        <p class="hero-sub">Scan remote hosts for open ports using TCP connect scanning. Identify running services, assess risk, and export results.</p>
+    </div>
+</section>
+
+<section class="ps-section">
+
+    <!-- Input Card -->
+    <div class="ps-input-card">
+        <div class="ps-input-row">
+            <div class="ps-field">
+                <label><i class="bi bi-globe2" style="color:var(--ps-cyan);"></i> Target</label>
+                <div class="ps-input-wrap">
+                    <span class="ps-icon"><i class="bi bi-search"></i></span>
+                    <input type="text" id="psTarget" placeholder="IP address or hostname" spellcheck="false" autocomplete="off">
+                </div>
+            </div>
+            <div class="ps-field" style="flex:0 0 auto;min-width:140px;">
+                <label><i class="bi bi-hdd-stack" style="color:var(--ps-orange);"></i> Ports</label>
+                <div class="ps-input-wrap">
+                    <input type="text" id="psPortInput" placeholder="e.g. 80,443 or 1-1000" spellcheck="false">
+                </div>
+            </div>
+            <div style="display:flex;gap:0.5rem;align-items:flex-end;padding-bottom:2px;">
+                <button class="btn-cs btn-cs-primary" id="psScanBtn"><i class="bi bi-radioactive"></i> Scan</button>
+            </div>
+        </div>
+
+        <div class="ps-port-chips" id="psPortChips">
+            <button class="ps-port-chip active" data-ports="common">Common Ports</button>
+            <button class="ps-port-chip" data-ports="top100">Top 100</button>
+            <button class="ps-port-chip" data-ports="22">SSH (22)</button>
+            <button class="ps-port-chip" data-ports="80">HTTP (80)</button>
+            <button class="ps-port-chip" data-ports="443">HTTPS (443)</button>
+            <button class="ps-port-chip" data-ports="3389">RDP (3389)</button>
+            <button class="ps-port-chip" data-ports="3306">MySQL (3306)</button>
+            <button class="ps-port-chip" data-ports="5432">PostgreSQL (5432)</button>
+            <button class="ps-port-chip" data-ports="6379">Redis (6379)</button>
+            <button class="ps-port-chip" data-ports="27017">MongoDB (27017)</button>
+            <button class="ps-port-chip" data-ports="22,80,443,3389,3306,5432,6379,27017">Web Stack</button>
+            <button class="ps-port-chip" data-ports="1-1024">1-1024</button>
+        </div>
+    </div>
+
+    <!-- Error -->
+    <div class="ps-error" id="psError" role="alert">
+        <i class="bi bi-exclamation-circle"></i>
+        <span id="psErrorText"></span>
+    </div>
+
+    <!-- Progress -->
+    <div class="ps-progress" id="psProgress">
+        <div class="ps-prog-header">
+            <span><i class="bi bi-arrow-repeat"></i> Scanning...</span>
+            <span class="ps-prog-pct" id="psProgPct">0%</span>
+        </div>
+        <div class="ps-prog-track"><div class="ps-prog-fill" id="psProgFill"></div></div>
+        <div class="ps-prog-detail">
+            <span><i class="bi bi-hdd-network"></i> Port: <span class="ps-prog-val" id="psProgPort">—</span></span>
+            <span><i class="bi bi-list-ol"></i> Progress: <span class="ps-prog-val"><span id="psProgDone">0</span>/<span id="psProgTotal">0</span></span></span>
+            <span><i class="bi bi-clock"></i> Elapsed: <span class="ps-prog-val" id="psProgElapsed">0s</span></span>
+            <span><i class="bi bi-hourglass-split"></i> Est. remaining: <span class="ps-prog-val" id="psProgRemaining">—</span></span>
+        </div>
+    </div>
+
+    <!-- Results -->
+    <div class="ps-results" id="psResults">
+        <div class="ps-results-header">
+            <div class="rh-left">
+                <h3><i class="bi bi-shield-check" style="color:var(--ps-green);"></i> Scan Results</h3>
+                <span style="font-size:0.75rem;color:var(--text-muted);font-family:var(--font-mono);" id="psResultTarget"></span>
+            </div>
+            <div style="display:flex;gap:0.5rem;">
+                <button class="btn-cs btn-cs-ghost btn-cs-sm" id="psClearBtn"><i class="bi bi-trash3"></i> Clear</button>
+            </div>
+        </div>
+
+        <div class="ps-summary" id="psSummary"></div>
+
+        <div class="ps-filter-bar" id="psFilterBar">
+            <span class="ps-filter-label">Filter:</span>
+            <button class="ps-filter-btn active" data-filter="all">All</button>
+            <button class="ps-filter-btn" data-filter="open">Open</button>
+            <button class="ps-filter-btn" data-filter="closed">Closed</button>
+            <button class="ps-filter-btn" data-filter="filtered">Filtered</button>
+        </div>
+
+        <div class="ps-port-list" id="psPortList">
+            <div class="ps-empty" style="display:block;">No ports to display</div>
+        </div>
+
+        <!-- Export -->
+        <div class="ps-export-bar">
+            <span class="export-label"><i class="bi bi-download"></i> Export:</span>
+            <button class="btn-cs btn-cs-outline btn-cs-sm" data-format="json"><i class="bi bi-filetype-json"></i> JSON</button>
+            <button class="btn-cs btn-cs-outline btn-cs-sm" data-format="csv"><i class="bi bi-filetype-csv"></i> CSV</button>
+            <button class="btn-cs btn-cs-outline btn-cs-sm" data-format="txt"><i class="bi bi-filetype-txt"></i> TXT</button>
+        </div>
+    </div>
+
+    <!-- Empty -->
+    <div class="ps-empty" id="psEmpty">
+        <i class="bi bi-hdd-network"></i>
+        <p>Enter a target and select ports, then click Scan</p>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    'use strict';
+
+    var targetInput = document.getElementById('psTarget');
+    var portInput = document.getElementById('psPortInput');
+    var portChips = document.querySelectorAll('.ps-port-chip');
+    var scanBtn = document.getElementById('psScanBtn');
+    var errorEl = document.getElementById('psError');
+    var errorText = document.getElementById('psErrorText');
+    var progressEl = document.getElementById('psProgress');
+    var progPct = document.getElementById('psProgPct');
+    var progFill = document.getElementById('psProgFill');
+    var progPort = document.getElementById('psProgPort');
+    var progDone = document.getElementById('psProgDone');
+    var progTotal = document.getElementById('psProgTotal');
+    var progElapsed = document.getElementById('psProgElapsed');
+    var progRemaining = document.getElementById('psProgRemaining');
+    var resultsEl = document.getElementById('psResults');
+    var summaryEl = document.getElementById('psSummary');
+    var filterBar = document.getElementById('psFilterBar');
+    var portList = document.getElementById('psPortList');
+    var resultTarget = document.getElementById('psResultTarget');
+    var emptyEl = document.getElementById('psEmpty');
+    var clearBtn = document.getElementById('psClearBtn');
+    var exportBtns = document.querySelectorAll('[data-format]');
+
+    var currentScanId = null;
+    var currentResults = null;
+    var pollTimer = null;
+    var scanStartTime = null;
+    var currentFilter = 'all';
+
+    function getCSRF() {
+        var meta = document.querySelector('meta[name="csrf-token"]');
+        return meta ? meta.getAttribute('content') : '';
+    }
+
+    function escapeHtml(str) {
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+    }
+
+    function toastSuccess(msg) {
+        if (window.CipherScan && window.CipherScan.toast) {
+            window.CipherScan.toast.success('Done', msg);
+        }
+    }
+    function toastError(msg) {
+        if (window.CipherScan && window.CipherScan.toast) {
+            window.CipherScan.toast.error('Error', msg);
+        }
+    }
+
+    function showError(msg) {
+        errorText.textContent = msg;
+        errorEl.classList.add('visible');
+    }
+    function hideError() { errorEl.classList.remove('visible'); errorText.textContent = ''; }
+
+    function showProgress() { progressEl.classList.add('visible'); }
+    function hideProgress() { progressEl.classList.remove('visible'); }
+
+    function getSelectedPorts() {
+        var active = document.querySelector('.ps-port-chip.active');
+        if (active) return active.dataset.ports;
+        var val = portInput.value.trim();
+        return val || 'common';
+    }
+
+    function setPortSpec(spec) {
+        portChips.forEach(function (c) { c.classList.toggle('active', c.dataset.ports === spec); });
+        if (!document.querySelector('.ps-port-chip.active')) {
+            portInput.value = spec;
+        } else {
+            portInput.value = '';
+        }
+    }
+
+    // Port chips
+    portChips.forEach(function (chip) {
+        chip.addEventListener('click', function () {
+            portChips.forEach(function (c) { c.classList.remove('active'); });
+            this.classList.add('active');
+            portInput.value = '';
+        });
+    });
+
+    portInput.addEventListener('input', function () {
+        if (this.value.trim()) {
+            portChips.forEach(function (c) { c.classList.remove('active'); });
+        }
+    });
+
+    // Start scan
+    function startScan() {
+        hideError();
+        var target = targetInput.value.trim();
+        if (!target) { showError('Please enter an IP address or hostname'); return; }
+        var ports = getSelectedPorts();
+
+        scanBtn.disabled = true;
+        scanBtn.innerHTML = '<i class="bi bi-arrow-repeat"></i> Scanning...';
+        emptyEl.style.display = 'none';
+        resultsEl.classList.remove('visible');
+        showProgress();
+        scanStartTime = Date.now();
+        progPct.textContent = '0%';
+        progFill.style.width = '0%';
+        progPort.textContent = 'Initializing...';
+        progDone.textContent = '0';
+        progTotal.textContent = '—';
+        progElapsed.textContent = '0s';
+        progRemaining.textContent = '—';
+
+        fetch('{% url "port_scan_start_api" %}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCSRF() },
+            body: JSON.stringify({ target: target, ports: ports, timeout: 2 })
+        })
+        .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Request failed'); return j; }); })
+        .then(function (data) {
+            currentScanId = data.scan_id;
+            progTotal.textContent = data.total_ports;
+            pollProgress();
+        })
+        .catch(function (err) {
+            scanBtn.disabled = false;
+            scanBtn.innerHTML = '<i class="bi bi-radioactive"></i> Scan';
+            hideProgress();
+            showError(err.message || 'Failed to start scan');
+        });
+    }
+
+    function pollProgress() {
+        if (!currentScanId) return;
+        fetch('/api/port/scan/' + currentScanId + '/status/')
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                var total = data.total_ports || 1;
+                var done = data.progress || 0;
+                var pct = Math.round((done / total) * 100);
+                progPct.textContent = pct + '%';
+                progFill.style.width = pct + '%';
+                progDone.textContent = done;
+                progTotal.textContent = total;
+                progPort.textContent = data.current_port || '—';
+
+                var elapsed = (Date.now() - scanStartTime) / 1000;
+                progElapsed.textContent = elapsed < 60 ? Math.round(elapsed) + 's' : (elapsed / 60).toFixed(1) + 'm';
+
+                if (done > 0) {
+                    var rate = done / elapsed;
+                    var remaining = (total - done) / rate;
+                    progRemaining.textContent = remaining < 60 ? Math.round(remaining) + 's' : (remaining / 60).toFixed(1) + 'm';
+                }
+
+                if (data.status === 'completed') {
+                    hideProgress();
+                    displayResults(data);
+                } else {
+                    pollTimer = setTimeout(pollProgress, 800);
+                }
+            })
+            .catch(function () {
+                pollTimer = setTimeout(pollProgress, 1000);
+            });
+    }
+
+    function displayResults(data) {
+        currentResults = data;
+        scanBtn.disabled = false;
+        scanBtn.innerHTML = '<i class="bi bi-radioactive"></i> Scan';
+
+        resultsEl.classList.add('visible');
+        resultTarget.textContent = data.target + ' (' + data.resolved_ip + ')';
+
+        // Summary
+        var total = data.total_scanned;
+        var open = data.open_count;
+        var closed = data.closed_count;
+        var filtered = data.filtered_count;
+        var dur = (data.duration_ms / 1000).toFixed(1);
+
+        summaryEl.innerHTML =
+            '<div class="ps-stat open"><div class="ps-stat-val">' + open + '</div><div class="ps-stat-label">Open</div></div>' +
+            '<div class="ps-stat closed"><div class="ps-stat-val">' + closed + '</div><div class="ps-stat-label">Closed</div></div>' +
+            '<div class="ps-stat filtered"><div class="ps-stat-val">' + filtered + '</div><div class="ps-stat-label">Filtered</div></div>' +
+            '<div class="ps-stat total"><div class="ps-stat-val">' + total + '</div><div class="ps-stat-label">Scanned</div></div>' +
+            '<div class="ps-stat time"><div class="ps-stat-val">' + dur + 's</div><div class="ps-stat-label">Duration</div></div>';
+
+        // Port list
+        renderPortList(data.results);
+    }
+
+    function renderPortList(results) {
+        var filtered = results;
+        if (currentFilter === 'open') filtered = results.filter(function (r) { return r.state === 'open'; });
+        else if (currentFilter === 'closed') filtered = results.filter(function (r) { return r.state === 'closed'; });
+        else if (currentFilter === 'filtered') filtered = results.filter(function (r) { return r.state === 'filtered'; });
+
+        if (filtered.length === 0) {
+            portList.innerHTML = '<div class="ps-empty" style="display:block;">No ' + currentFilter + ' ports found</div>';
+            return;
+        }
+
+        var html = '';
+        filtered.forEach(function (r) {
+            var riskLabel = r.risk || 'info';
+            var stateDot = r.state;
+            var serviceName = r.service_name || 'unknown';
+            var serviceClass = r.service_name ? '' : 'unknown';
+            var latency = r.latency_ms !== null && r.latency_ms !== undefined ? r.latency_ms.toFixed(1) + 'ms' : '—';
+
+            html += '<div class="ps-port-item" data-port="' + r.port + '" data-state="' + r.state + '">';
+            html += '<div class="ps-pi-header">';
+            html += '<span class="ps-pi-state ' + stateDot + '"></span>';
+            html += '<span class="ps-pi-port">' + r.port + '</span>';
+            html += '<span class="ps-pi-service"><span class="' + serviceClass + '">' + escapeHtml(serviceName) + '</span></span>';
+            html += '<span class="ps-pi-risk ' + riskLabel + '">' + riskLabel + '</span>';
+            html += '<span class="ps-pi-latency">' + latency + '</span>';
+            html += '</div>';
+            html += '<div class="ps-pi-body">';
+            html += '<div class="ps-pi-grid">';
+            html += '<div class="ps-pi-detail"><div class="ps-pi-dl">Port</div><div class="ps-pi-dv">' + r.port + '/tcp</div></div>';
+            html += '<div class="ps-pi-detail"><div class="ps-pi-dl">State</div><div class="ps-pi-dv" style="color:' + (r.state === 'open' ? 'var(--ps-green)' : r.state === 'filtered' ? 'var(--ps-yellow)' : 'var(--text-muted)') + '">' + r.state.charAt(0).toUpperCase() + r.state.slice(1) + '</div></div>';
+            html += '<div class="ps-pi-detail"><div class="ps-pi-dl">Service</div><div class="ps-pi-dv">' + escapeHtml(r.service_desc || 'Unknown') + '</div></div>';
+            html += '<div class="ps-pi-detail"><div class="ps-pi-dl">Protocol</div><div class="ps-pi-dv">' + (r.protocol || 'TCP') + '</div></div>';
+            html += '<div class="ps-pi-detail"><div class="ps-pi-dl">Latency</div><div class="ps-pi-dv">' + latency + '</div></div>';
+            html += '</div>';
+
+            if (r.banner) {
+                html += '<div class="ps-banner-box"><div class="bb-label">Banner</div>' + escapeHtml(r.banner) + '</div>';
+            }
+
+            if (r.risk_desc) {
+                var riskClass = r.risk || 'info';
+                var riskIcon = riskClass === 'critical' || riskClass === 'high' ? 'bi-exclamation-triangle-fill' : 'bi-info-circle-fill';
+                html += '<div class="ps-risk-box risk-' + riskClass + '"><span class="rb-title"><i class="bi ' + riskIcon + ' rb-icon"></i>' + riskClass.charAt(0).toUpperCase() + riskClass.slice(1) + ' Risk</span><br>' + escapeHtml(r.risk_desc) + '</div>';
+            }
+
+            html += '</div>';
+            html += '</div>';
+        });
+        portList.innerHTML = html;
+
+        // Toggle details
+        portList.querySelectorAll('.ps-pi-header').forEach(function (hdr) {
+            hdr.addEventListener('click', function () {
+                this.parentElement.classList.toggle('open');
+            });
+        });
+
+        // Update filter counts
+        updateFilterCounts(results);
+    }
+
+    function updateFilterCounts(all) {
+        var open = all.filter(function (r) { return r.state === 'open'; }).length;
+        var closed = all.filter(function (r) { return r.state === 'closed'; }).length;
+        var filtered = all.filter(function (r) { return r.state === 'filtered'; }).length;
+
+        filterBar.querySelectorAll('.ps-filter-btn').forEach(function (btn) {
+            var f = btn.dataset.filter;
+            var count = f === 'all' ? all.length : f === 'open' ? open : f === 'closed' ? closed : filtered;
+            var label = f.charAt(0).toUpperCase() + f.slice(1);
+            btn.innerHTML = label + ' <span class="count">(' + count + ')</span>';
+        });
+    }
+
+    // Filter buttons
+    filterBar.querySelectorAll('.ps-filter-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            filterBar.querySelectorAll('.ps-filter-btn').forEach(function (b) { b.classList.remove('active'); });
+            this.classList.add('active');
+            currentFilter = this.dataset.filter;
+            if (currentResults && currentResults.results) {
+                renderPortList(currentResults.results);
+            }
+        });
+    });
+
+    // Export
+    exportBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            if (!currentScanId) return;
+            var format = this.dataset.format;
+            var url = '/api/port/scan/' + currentScanId + '/export/';
+            fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCSRF() },
+                body: JSON.stringify({ format: format })
+            })
+            .then(function (r) {
+                if (!r.ok) throw new Error('Export failed');
+                return r.blob();
+            })
+            .then(function (blob) {
+                var dlUrl = URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = dlUrl;
+                a.download = 'port-scan.' + format;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(dlUrl);
+                toastSuccess('Exported as ' + format.toUpperCase());
+            })
+            .catch(function (err) {
+                toastError(err.message);
+            });
+        });
+    });
+
+    // Clear
+    function clearAll() {
+        if (pollTimer) { clearTimeout(pollTimer); pollTimer = null; }
+        currentScanId = null;
+        currentResults = null;
+        resultsEl.classList.remove('visible');
+        hideProgress();
+        hideError();
+        emptyEl.style.display = 'block';
+        scanBtn.disabled = false;
+        scanBtn.innerHTML = '<i class="bi bi-radioactive"></i> Scan';
+    }
+
+    clearBtn.addEventListener('click', clearAll);
+
+    // Scan button
+    scanBtn.addEventListener('click', startScan);
+
+    // Enter key in target
+    targetInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); startScan(); }
+    });
+
+    // Init
+    emptyEl.style.display = 'block';
+    resultsEl.classList.remove('visible');
+    targetInput.focus();
+
+    // Helper for poll cleanup
+    window.addEventListener('beforeunload', function () {
+        if (pollTimer) clearTimeout(pollTimer);
+    });
+
+})();
+</script>
+{% endblock %}

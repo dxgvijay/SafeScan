@@ -17,7 +17,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     {% block extra_css %}{% endblock %}
 
@@ -26,42 +26,44 @@
    CIPHERSCAN DESIGN SYSTEM — CSS Variables
    ============================================================ */
 :root {
-    --bg-primary: #0a0e1a;
-    --bg-secondary: #0f1628;
-    --bg-tertiary: #151d35;
-    --bg-card: rgba(15, 22, 40, 0.8);
-    --bg-card-solid: #121a30;
+    --bg-primary: #070B16;
+    --bg-secondary: #10172B;
+    --bg-tertiary: #1A243E;
+    --bg-card: rgba(16, 23, 43, 0.8);
+    --bg-card-solid: #121E3A;
 
-    --accent-cyan: #00d4ff;
-    --accent-cyan-dim: rgba(0, 212, 255, 0.15);
+    --accent-cyan: #00D4FF;
+    --accent-cyan-dim: rgba(0, 212, 255, 0.1);
     --accent-cyan-glow: 0 0 24px rgba(0, 212, 255, 0.25);
-    --accent-orange: #ff6b35;
-    --accent-orange-dim: rgba(255, 107, 53, 0.15);
-    --accent-success: #00ff88;
-    --accent-success-dim: rgba(0, 255, 136, 0.15);
-    --accent-danger: #ff4757;
-    --accent-danger-dim: rgba(255, 71, 87, 0.15);
-    --accent-warning: #ffd93d;
-    --accent-warning-dim: rgba(255, 217, 61, 0.15);
-    --accent-purple: #7c5bfe;
-    --accent-purple-dim: rgba(124, 91, 254, 0.15);
+    --accent-orange: #FF6B35;
+    --accent-orange-dim: rgba(255, 107, 53, 0.12);
+    --accent-success: #00FF9D;
+    --accent-success-dim: rgba(0, 255, 157, 0.12);
+    --accent-danger: #FF4D6D;
+    --accent-danger-dim: rgba(255, 77, 109, 0.12);
+    --accent-warning: #FFD93D;
+    --accent-warning-dim: rgba(255, 217, 61, 0.12);
+    --accent-purple: #7C5CFF;
+    --accent-purple-dim: rgba(124, 92, 255, 0.12);
 
-    --text-primary: #e8edf5;
-    --text-secondary: #8892b0;
-    --text-muted: #5a6380;
+    --text-primary: #E8EDF5;
+    --text-secondary: #8892B0;
+    --text-muted: #5A6380;
 
     --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
 
-    --glass-bg: rgba(15, 22, 40, 0.72);
-    --glass-border: rgba(0, 212, 255, 0.08);
-    --glass-border-hover: rgba(0, 212, 255, 0.2);
-    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    --glass-bg: rgba(16, 23, 43, 0.72);
+    --glass-border: rgba(255, 255, 255, 0.06);
+    --glass-border-hover: rgba(0, 212, 255, 0.18);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
     --glass-blur: 20px;
 
-    --navbar-height: 64px;
-    --sidebar-width: 260px;
-    --sidebar-collapsed: 68px;
+    --gradient-cyan-purple: linear-gradient(135deg, #00D4FF, #7C5CFF);
+    --gradient-green-cyan: linear-gradient(135deg, #00FF9D, #00D4FF);
+    --gradient-orange-pink: linear-gradient(135deg, #FF6B35, #FF4D6D);
+
+    --navbar-height: 72px;
 
     --radius-sm: 6px;
     --radius-md: 10px;
@@ -147,132 +149,152 @@ code, pre, .font-mono {
 .text-muted { color: var(--text-secondary); }
 
 /* ============================================================
-   NAVBAR — Glassmorphism, Sticky
+   NAVBAR — Minimal, Glassmorphism, 72px
    ============================================================ */
 .navbar-cs {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    height: var(--navbar-height);
+    height: 72px;
     z-index: 1030;
-    background: rgba(10, 14, 26, 0.6);
-    backdrop-filter: blur(var(--glass-blur));
-    -webkit-backdrop-filter: blur(var(--glass-blur));
-    border-bottom: 1px solid var(--glass-border);
-    transition: all var(--transition-normal);
+    background: linear-gradient(180deg, rgba(7, 11, 22, 0.98), rgba(7, 11, 22, 0.92));
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
     padding: 0 1.5rem;
 }
-.navbar-cs.scrolled {
-    background: rgba(10, 14, 26, 0.92);
-    border-bottom-color: var(--accent-cyan-dim);
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+.navbar-cs .navbar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+}
+.navbar-cs .navbar-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+.navbar-cs .navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 .navbar-cs .navbar-brand {
     display: flex;
     align-items: center;
     gap: 10px;
     font-weight: 700;
-    font-size: 1.25rem;
+    font-size: 1.125rem;
     color: var(--text-primary);
     padding: 0;
+    text-decoration: none;
 }
 .navbar-cs .navbar-brand img {
-    height: 32px;
+    height: 28px;
     width: auto;
 }
 .navbar-cs .navbar-brand .brand-highlight {
     color: var(--accent-cyan);
 }
-.navbar-cs .nav-link {
+.navbar-cs .hamburger-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: none;
+    border: none;
     color: var(--text-secondary);
-    font-weight: 500;
-    font-size: 0.875rem;
-    padding: 0.5rem 1rem;
-    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
     transition: all var(--transition-fast);
+    font-size: 1.25rem;
+}
+.navbar-cs .hamburger-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+}
+.navbar-cs .hamburger-btn:focus-visible {
+    outline: 2px solid var(--accent-cyan);
+    outline-offset: 2px;
+}
+.navbar-cs .nav-icon-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-size: 1.125rem;
     position: relative;
 }
-.navbar-cs .nav-link:hover,
-.navbar-cs .nav-link.active {
+.navbar-cs .nav-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
     color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.04);
 }
-.navbar-cs .nav-link.active::after {
-    content: '';
+.navbar-cs .nav-icon-btn:focus-visible {
+    outline: 2px solid var(--accent-cyan);
+    outline-offset: 2px;
+}
+.navbar-cs .nav-icon-btn .notification-dot {
     position: absolute;
-    bottom: 2px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 20px;
-    height: 2px;
-    background: var(--accent-cyan);
-    border-radius: 2px;
-}
-.navbar-cs .navbar-toggler {
-    border: none;
-    color: var(--text-primary);
-    font-size: 1.25rem;
-    padding: 0.25rem;
-}
-.navbar-cs .navbar-toggler:focus {
-    box-shadow: none;
-}
-.navbar-cs .navbar-toggler .toggler-icon {
-    display: block;
-    width: 24px;
-    height: 2px;
-    background: var(--text-primary);
-    margin: 5px 0;
-    border-radius: 2px;
-    transition: all var(--transition-normal);
-}
-.navbar-cs .navbar-toggler[aria-expanded="true"] .toggler-icon:nth-child(1) {
-    transform: rotate(45deg) translate(4px, 6px);
-}
-.navbar-cs .navbar-toggler[aria-expanded="true"] .toggler-icon:nth-child(2) {
-    opacity: 0;
-}
-.navbar-cs .navbar-toggler[aria-expanded="true"] .toggler-icon:nth-child(3) {
-    transform: rotate(-45deg) translate(4px, -6px);
-}
-
-/* Auth buttons in navbar */
-.navbar-cs .btn-auth {
-    padding: 0.4rem 1.25rem;
-    font-size: 0.8125rem;
-    font-weight: 600;
-    border-radius: var(--radius-sm);
-    transition: all var(--transition-fast);
+    top: 6px;
+    right: 6px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent-danger);
+    border: 2px solid var(--bg-primary);
 }
 .navbar-cs .btn-login {
+    padding: 0.375rem 1rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    border-radius: 8px;
     color: var(--text-secondary);
     background: transparent;
-    border: 1px solid var(--glass-border);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    text-decoration: none;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
 }
 .navbar-cs .btn-login:hover {
     color: var(--text-primary);
-    border-color: var(--text-muted);
+    border-color: rgba(255, 255, 255, 0.15);
     background: rgba(255, 255, 255, 0.03);
 }
 .navbar-cs .btn-signup {
-    color: #0a0e1a;
+    padding: 0.375rem 1.125rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    border-radius: 8px;
     background: var(--accent-cyan);
+    color: #fff;
     border: 1px solid var(--accent-cyan);
+    text-decoration: none;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
 }
 .navbar-cs .btn-signup:hover {
     background: #33ddff;
     border-color: #33ddff;
     box-shadow: var(--accent-cyan-glow);
 }
-
-/* User dropdown in navbar */
-.navbar-cs .user-avatar {
+.navbar-cs .user-avatar-btn {
     width: 32px;
     height: 32px;
     border-radius: 50%;
     background: var(--accent-cyan-dim);
-    border: 1px solid var(--glass-border);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -281,7 +303,7 @@ code, pre, .font-mono {
     cursor: pointer;
     transition: all var(--transition-fast);
 }
-.navbar-cs .user-avatar:hover {
+.navbar-cs .user-avatar-btn:hover {
     border-color: var(--accent-cyan);
     box-shadow: var(--accent-cyan-glow);
 }
@@ -289,16 +311,17 @@ code, pre, .font-mono {
     background: var(--bg-card-solid);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-md);
-    box-shadow: var(--glass-shadow);
-    backdrop-filter: blur(var(--glass-blur));
-    padding: 0.5rem;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(20px);
+    padding: 0.375rem;
     min-width: 200px;
+    margin-top: 0.5rem !important;
 }
 .navbar-cs .dropdown-menu .dropdown-item {
     color: var(--text-secondary);
-    border-radius: var(--radius-sm);
+    border-radius: 6px;
     padding: 0.5rem 0.75rem;
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
     transition: all var(--transition-fast);
     display: flex;
     align-items: center;
@@ -322,159 +345,13 @@ code, pre, .font-mono {
 }
 
 /* ============================================================
-   SIDEBAR — Collapsible Dashboard
-   ============================================================ */
-.sidebar {
-    position: fixed;
-    top: var(--navbar-height);
-    left: 0;
-    bottom: 0;
-    width: var(--sidebar-width);
-    z-index: 1020;
-    background: rgba(10, 14, 26, 0.85);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-right: 1px solid var(--glass-border);
-    overflow-y: auto;
-    overflow-x: hidden;
-    transition: width var(--transition-normal), transform var(--transition-normal);
-    display: flex;
-    flex-direction: column;
-    padding: 0;
-}
-.sidebar::-webkit-scrollbar {
-    width: 3px;
-}
-.sidebar .sidebar-header {
-    padding: 1rem 1rem 0.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    min-height: 48px;
-}
-.sidebar .sidebar-header .sidebar-toggle {
-    background: none;
-    border: none;
-    color: var(--text-secondary);
-    font-size: 1rem;
-    cursor: pointer;
-    padding: 0.25rem;
-    border-radius: var(--radius-sm);
-    transition: all var(--transition-fast);
-}
-.sidebar .sidebar-header .sidebar-toggle:hover {
-    color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.05);
-}
-.sidebar .sidebar-section-title {
-    padding: 1rem 1rem 0.375rem;
-    font-size: 0.6875rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--text-muted);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.sidebar .nav-item {
-    list-style: none;
-}
-.sidebar .nav-link-sidebar {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.55rem 1rem;
-    margin: 1px 0.5rem;
-    border-radius: var(--radius-sm);
-    color: var(--text-secondary);
-    font-size: 0.875rem;
-    font-weight: 500;
-    white-space: nowrap;
-    transition: all var(--transition-fast);
-    position: relative;
-}
-.sidebar .nav-link-sidebar i {
-    width: 20px;
-    text-align: center;
-    font-size: 1rem;
-    flex-shrink: 0;
-}
-.sidebar .nav-link-sidebar .link-label {
-    opacity: 1;
-    transition: opacity var(--transition-fast);
-}
-.sidebar .nav-link-sidebar:hover {
-    color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.04);
-}
-.sidebar .nav-link-sidebar.active {
-    color: var(--accent-cyan);
-    background: var(--accent-cyan-dim);
-}
-.sidebar .nav-link-sidebar.active::before {
-    content: '';
-    position: absolute;
-    left: -0.5rem;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 3px;
-    height: 20px;
-    background: var(--accent-cyan);
-    border-radius: 0 3px 3px 0;
-}
-.sidebar .nav-link-sidebar .badge-sidebar {
-    margin-left: auto;
-    font-size: 0.6875rem;
-    padding: 0.125rem 0.5rem;
-    border-radius: 10px;
-    font-weight: 600;
-}
-
-/* Sidebar collapsed state */
-body.sidebar-collapsed .sidebar {
-    width: var(--sidebar-collapsed);
-}
-body.sidebar-collapsed .sidebar .sidebar-section-title {
-    text-align: center;
-    font-size: 0;
-}
-body.sidebar-collapsed .sidebar .sidebar-section-title::after {
-    content: '—';
-    font-size: 0.75rem;
-    color: var(--text-muted);
-}
-body.sidebar-collapsed .sidebar .nav-link-sidebar {
-    justify-content: center;
-    padding: 0.55rem 0;
-    margin: 1px 0.375rem;
-}
-body.sidebar-collapsed .sidebar .nav-link-sidebar .link-label {
-    display: none;
-}
-body.sidebar-collapsed .sidebar .nav-link-sidebar .badge-sidebar {
-    display: none;
-}
-body.sidebar-collapsed .sidebar .sidebar-header .sidebar-toggle {
-    margin: 0 auto;
-}
-body.sidebar-collapsed .sidebar .sidebar-header .sidebar-brand-text {
-    display: none;
-}
-
-/* ============================================================
-   LAYOUT — Main Content Area
+   LAYOUT — Full-width Main Content
    ============================================================ */
 .main-wrapper {
-    margin-top: var(--navbar-height);
-    margin-left: var(--sidebar-width);
-    min-height: calc(100vh - var(--navbar-height));
-    transition: margin-left var(--transition-normal);
+    margin-top: 72px;
+    min-height: calc(100vh - 72px);
     display: flex;
     flex-direction: column;
-}
-body.sidebar-collapsed .main-wrapper {
-    margin-left: var(--sidebar-collapsed);
 }
 .main-wrapper .content-area {
     flex: 1;
@@ -501,14 +378,6 @@ body.sidebar-collapsed .main-wrapper {
 }
 .main-wrapper .page-header .breadcrumb-item.active {
     color: var(--text-primary);
-}
-
-/* Full-width mode (landing pages, no sidebar) */
-body.full-width .sidebar {
-    transform: translateX(-100%);
-}
-body.full-width .main-wrapper {
-    margin-left: 0;
 }
 
 /* ============================================================
@@ -1263,18 +1132,18 @@ body.full-width .main-wrapper {
 }
 
 /* ============================================================
-   MOBILE SIDEBAR OVERLAY
+   HAMBURGER OVERLAY
    ============================================================ */
-.sidebar-overlay {
+.hamburger-overlay {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.6);
-    z-index: 1019;
+    z-index: 1040;
     opacity: 0;
     pointer-events: none;
-    transition: opacity var(--transition-normal);
+    transition: opacity 0.3s ease;
 }
-.sidebar-overlay.active {
+.hamburger-overlay.active {
     opacity: 1;
     pointer-events: auto;
 }
@@ -1394,35 +1263,6 @@ body.full-width .main-wrapper {
 /* ============================================================
    RESPONSIVE
    ============================================================ */
-@media (max-width: 991.98px) {
-    .navbar-cs .navbar-collapse {
-        background: rgba(10, 14, 26, 0.98);
-        border: 1px solid var(--glass-border);
-        border-radius: var(--radius-md);
-        padding: 1rem;
-        margin-top: 0.5rem;
-        backdrop-filter: blur(20px);
-    }
-    .sidebar {
-        transform: translateX(-100%);
-        width: var(--sidebar-width);
-    }
-    body.sidebar-open .sidebar {
-        transform: translateX(0);
-    }
-    body.sidebar-collapsed .sidebar {
-        width: var(--sidebar-width);
-    }
-    body.sidebar-collapsed.sidebar-open .sidebar {
-        transform: translateX(0);
-    }
-    .main-wrapper {
-        margin-left: 0 !important;
-    }
-    .main-wrapper .content-area {
-        padding: 1rem;
-    }
-}
 @media (max-width: 575.98px) {
     .navbar-cs {
         padding: 0 0.75rem;
@@ -1449,263 +1289,590 @@ body.full-width .main-wrapper {
         text-align: center;
     }
 }
+
+/* ============================================================
+   PREMIUM ANIMATIONS
+   ============================================================ */
+.fade-up {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.fade-up.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+.fade-in {
+    opacity: 0;
+    transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.fade-in.visible {
+    opacity: 1;
+}
+.scale-in {
+    opacity: 0;
+    transform: scale(0.92);
+    transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.scale-in.visible {
+    opacity: 1;
+    transform: scale(1);
+}
+.slide-left {
+    opacity: 0;
+    transform: translateX(-20px);
+    transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.slide-left.visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+.stagger-children > *:nth-child(1) { transition-delay: 0s; }
+.stagger-children > *:nth-child(2) { transition-delay: 0.08s; }
+.stagger-children > *:nth-child(3) { transition-delay: 0.16s; }
+.stagger-children > *:nth-child(4) { transition-delay: 0.24s; }
+.stagger-children > *:nth-child(5) { transition-delay: 0.32s; }
+.stagger-children > *:nth-child(6) { transition-delay: 0.4s; }
+.stagger-children > *:nth-child(7) { transition-delay: 0.48s; }
+.stagger-children > *:nth-child(8) { transition-delay: 0.56s; }
+
+@keyframes icon-glow {
+    0%, 100% { filter: drop-shadow(0 0 4px rgba(0, 212, 255, 0.3)); }
+    50% { filter: drop-shadow(0 0 12px rgba(0, 212, 255, 0.6)); }
+}
+@keyframes badge-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255, 77, 109, 0.3); }
+    50% { box-shadow: 0 0 0 8px rgba(255, 77, 109, 0); }
+}
+
+/* Cyber grid background */
+.cyber-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+}
+.cyber-grid::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(0, 212, 255, 0.08) 0%, transparent 60%);
+    pointer-events: none;
+}
+
+/* Glow border card */
+.glow-card {
+    position: relative;
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--glass-border);
+    transition: all var(--transition-normal);
+}
+.glow-card::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: var(--radius-lg);
+    background: linear-gradient(135deg, var(--accent-cyan), transparent, var(--accent-purple));
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+    z-index: -1;
+}
+.glow-card:hover::before {
+    opacity: 1;
+}
+.glow-card:hover {
+    box-shadow: var(--glass-shadow), 0 0 30px rgba(0, 212, 255, 0.1);
+    transform: translateY(-4px);
+}
+
+/* Gradient text utility */
+.text-gradient-cyan {
+    background: var(--gradient-cyan-purple);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.text-gradient-green {
+    background: var(--gradient-green-cyan);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Scan type icon circles */
+.icon-circle {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+.icon-circle.cyan { background: var(--accent-cyan-dim); color: var(--accent-cyan); }
+.icon-circle.purple { background: var(--accent-purple-dim); color: var(--accent-purple); }
+.icon-circle.green { background: var(--accent-success-dim); color: var(--accent-success); }
+.icon-circle.orange { background: var(--accent-orange-dim); color: var(--accent-orange); }
+.icon-circle.danger { background: var(--accent-danger-dim); color: var(--accent-danger); }
+.icon-circle.glow-cyan { box-shadow: 0 0 20px rgba(0, 212, 255, 0.15); }
+.icon-circle.glow-purple { box-shadow: 0 0 20px rgba(124, 92, 255, 0.15); }
+
+/* Security status dots */
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+.status-dot.safe { background: var(--accent-success); box-shadow: 0 0 8px rgba(0, 255, 157, 0.5); }
+.status-dot.danger { background: var(--accent-danger); box-shadow: 0 0 8px rgba(255, 77, 109, 0.5); }
+.status-dot.warning { background: var(--accent-orange); box-shadow: 0 0 8px rgba(255, 107, 53, 0.5); }
+.status-dot.cyan { background: var(--accent-cyan); box-shadow: 0 0 8px rgba(0, 212, 255, 0.5); }
+.status-dot.pulse { animation: status-pulse 2s infinite; }
+@keyframes status-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* ============================================================
+   HAMBURGER SIDEBAR — Slide from Left
+   ============================================================ */
+.hamburger-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 300px;
+    z-index: 1041;
+    background: var(--bg-secondary);
+    border-right: 1px solid var(--glass-border);
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+.hamburger-sidebar.open {
+    transform: translateX(0);
+}
+.hamburger-sidebar::-webkit-scrollbar { width: 3px; }
+.hamburger-sidebar::-webkit-scrollbar-thumb { background: var(--bg-tertiary); border-radius: 4px; }
+
+.hamburger-sidebar .hs-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.25rem 0.75rem;
+    border-bottom: 1px solid var(--glass-border);
+}
+.hamburger-sidebar .hs-header .hs-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    text-decoration: none;
+}
+.hamburger-sidebar .hs-header .hs-brand img {
+    height: 28px;
+    width: auto;
+}
+.hamburger-sidebar .hs-header .hs-brand span {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+.hamburger-sidebar .hs-header .hs-brand .brand-highlight {
+    color: var(--accent-cyan);
+}
+.hamburger-sidebar .hs-header .hs-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-size: 1rem;
+}
+.hamburger-sidebar .hs-header .hs-close:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+}
+.hamburger-sidebar .hs-subtitle {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+    letter-spacing: 0.03em;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.hamburger-sidebar .hs-nav {
+    flex: 1;
+    padding: 0.5rem;
+    list-style: none;
+    margin: 0;
+}
+.hamburger-sidebar .hs-nav li {
+    list-style: none;
+}
+.hamburger-sidebar .hs-nav .hs-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem 0.75rem;
+    margin: 1px 0;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all var(--transition-fast);
+    position: relative;
+    overflow: hidden;
+}
+.hamburger-sidebar .hs-nav .hs-link i {
+    width: 20px;
+    text-align: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+.hamburger-sidebar .hs-nav .hs-link:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.04);
+}
+.hamburger-sidebar .hs-nav .hs-link.active {
+    color: var(--accent-cyan);
+    background: var(--accent-cyan-dim);
+}
+.hamburger-sidebar .hs-nav .hs-link.active i {
+    color: var(--accent-cyan);
+}
+.hamburger-sidebar .hs-nav .hs-link .hs-badge {
+    margin-left: auto;
+    font-size: 0.6875rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+    background: var(--accent-danger-dim);
+    color: var(--accent-danger);
+}
+.hamburger-sidebar .hs-footer {
+    padding: 0.75rem 1.25rem;
+    border-top: 1px solid var(--glass-border);
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Ripple effect */
+.hs-link .ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(0, 212, 255, 0.15);
+    transform: scale(0);
+    animation: ripple-anim 0.5s ease-out;
+    pointer-events: none;
+}
+@keyframes ripple-anim {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* ============================================================
+   SEARCH MODAL — Floating Command Palette
+   ============================================================ */
+.search-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1050;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+}
+.search-modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+.search-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.96);
+    width: 560px;
+    max-width: calc(100vw - 2rem);
+    max-height: 70vh;
+    background: var(--bg-secondary);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
+    z-index: 1051;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.search-modal.active {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(-50%, -50%) scale(1);
+}
+.search-modal .sm-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--glass-border);
+}
+.search-modal .sm-input-wrap i {
+    font-size: 1.125rem;
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+.search-modal .sm-input-wrap input {
+    flex: 1;
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-family: var(--font-ui);
+    font-size: 1rem;
+    outline: none;
+    min-width: 0;
+}
+.search-modal .sm-input-wrap input::placeholder {
+    color: var(--text-muted);
+}
+.search-modal .sm-input-wrap .sm-kbd {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.625rem;
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+.search-modal .sm-input-wrap .sm-kbd kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 4px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    font-family: var(--font-ui);
+    font-size: 0.625rem;
+    color: var(--text-secondary);
+}
+.search-modal .sm-results {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.5rem;
+}
+.search-modal .sm-results .sm-empty {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--text-muted);
+    font-size: 0.8125rem;
+}
+.search-modal .sm-results .sm-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem 0.75rem;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+.search-modal .sm-results .sm-item:hover,
+.search-modal .sm-results .sm-item.highlighted {
+    background: var(--accent-cyan-dim);
+    color: var(--text-primary);
+}
+.search-modal .sm-results .sm-item i {
+    width: 20px;
+    text-align: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+    color: var(--accent-cyan);
+}
+.search-modal .sm-results .sm-item .sm-item-label {
+    flex: 1;
+}
+.search-modal .sm-results .sm-item .sm-item-hint {
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+.search-modal .sm-footer {
+    padding: 0.625rem 1.25rem;
+    border-top: 1px solid var(--glass-border);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+}
+.search-modal .sm-footer span {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+.search-modal .sm-footer kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 3px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    font-family: var(--font-ui);
+    font-size: 0.625rem;
+    color: var(--text-secondary);
+}
+
+/* Mobile sidebar full-width */
+@media (max-width: 575.98px) {
+    .hamburger-sidebar {
+        width: 100%;
+    }
+    .search-modal {
+        width: calc(100vw - 1rem);
+        top: 50%;
+    }
+}
 </style>
 </head>
 
-<body class="{% block body_class %}{% if not show_sidebar %}{% endif %}{% endblock %}">
+<body class="{% block body_class %}{% endblock %}">
 
 <!-- ============================================================
-     NAVBAR
+     NAVBAR — Minimal (GitHub/Vercel style)
      ============================================================ -->
-<nav class="navbar-cs navbar navbar-expand-lg" id="mainNavbar">
-    <div class="container-fluid">
-        <!-- Sidebar toggle (dashboard) -->
-        <button class="btn btn-cs-ghost btn-cs-sm d-none d-lg-flex me-2" id="sidebarToggle" type="button" aria-label="Toggle sidebar">
-            <i class="fas fa-bars"></i>
-        </button>
-        <button class="btn btn-cs-ghost btn-cs-sm d-lg-none me-2" id="sidebarMobileToggle" type="button" aria-label="Open sidebar">
-            <i class="fas fa-bars"></i>
-        </button>
+<nav class="navbar-cs" id="mainNavbar" role="navigation" aria-label="Main navigation">
+    <div class="navbar-inner container-fluid">
+        <div class="navbar-left">
+            <button class="hamburger-btn" id="hamburgerBtn" aria-label="Open navigation menu" aria-expanded="false">
+                <i class="bi bi-list"></i>
+            </button>
+            <a class="navbar-brand" href="{% url 'home' %}">
+                <img src="{% static 'images/logo-white.svg' %}" alt="CipherScan" onerror="this.style.display='none'">
+                <span>Cipher<span class="brand-highlight">Scan</span></span>
+            </a>
+        </div>
 
-        <!-- Brand -->
-        <a class="navbar-brand" href="{% url 'home' %}">
-            <img src="{% static 'images/logo-white.svg' %}" alt="CipherScan" onerror="this.style.display='none'">
-            <span>Cipher<span class="brand-highlight">Scan</span></span>
-        </a>
-
-        <!-- Mobile toggler -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbarCollapse" aria-controls="mainNavbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="toggler-icon"></span>
-            <span class="toggler-icon"></span>
-            <span class="toggler-icon"></span>
-        </button>
-
-        <!-- Nav links -->
-        <div class="collapse navbar-collapse" id="mainNavbarCollapse">
-            <ul class="navbar-nav mx-auto">
-                <li class="nav-item">
-                    <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'home' %}">Home</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if request.resolver_match.url_name == 'features' %}active{% endif %}" href="{% url 'features' %}">Features</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if request.resolver_match.url_name == 'pricing' %}active{% endif %}" href="{% url 'pricing' %}">Pricing</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}" href="{% url 'about' %}">About</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}" href="{% url 'contact' %}">Contact</a>
-                </li>
-            </ul>
-
-            <!-- Auth / User -->
-            <div class="d-flex align-items-center gap-2">
-                {% if user.is_authenticated %}
-                <div class="dropdown">
-                    <button class="btn btn-cs-ghost btn-cs-sm d-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-expanded="false">
-                        <div class="user-avatar">
-                            {% if user.profile.avatar %}
-                            <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
-                            {% else %}
-                            <i class="fas fa-user"></i>
-                            {% endif %}
-                        </div>
-                        <span class="d-none d-xl-inline">{{ user.username }}</span>
-                        <i class="fas fa-chevron-down" style="font-size:0.625rem;color:var(--text-muted)"></i>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="{% url 'dashboard' %}"><i class="fas fa-chart-pie"></i> Dashboard</a></li>
-                        <li><a class="dropdown-item" href="{% url 'scan_history' %}"><i class="fas fa-clock-rotate"></i> Scan History</a></li>
-                        <li><a class="dropdown-item" href="{% url 'api_settings' %}"><i class="fas fa-key"></i> API Settings</a></li>
-                        <li><a class="dropdown-item" href="{% url 'profile' %}"><i class="fas fa-user-gear"></i> Profile</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <form method="post" action="{% url 'logout' %}">
-                                {% csrf_token %}
-                                <button type="submit" class="dropdown-item text-danger"><i class="fas fa-right-from-bracket"></i> Sign Out</button>
-                            </form>
-                        </li>
-                    </ul>
-                </div>
-                {% else %}
-                <a href="{% url 'login' %}" class="btn btn-cs btn-cs-ghost btn-auth btn-login">Log In</a>
-                <a href="{% url 'signup' %}" class="btn btn-cs btn-auth btn-signup">Sign Up Free</a>
-                {% endif %}
+        <div class="navbar-right">
+            <button class="nav-icon-btn" id="searchToggleBtn" aria-label="Open search" title="Search (Ctrl+K)">
+                <i class="bi bi-search"></i>
+            </button>
+            {% if user.is_authenticated %}
+            <div class="dropdown">
+                <button class="user-avatar-btn" data-bs-toggle="dropdown" aria-expanded="false" aria-label="User menu">
+                    {% if user.avatar %}
+                    <img src="{{ user.avatar.url }}" alt="{{ user.username }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
+                    {% else %}
+                    <span style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:var(--accent-cyan-dim);border-radius:50%;font-size:0.75rem;font-weight:600;color:var(--accent-cyan)">{{ user.username|first|upper }}</span>
+                    {% endif %}
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><span class="dropdown-item-text" style="font-size:0.8125rem;font-weight:600;color:var(--text-primary)">{{ user.username }}</span></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{% url 'profile' %}"><i class="bi bi-person"></i> Profile</a></li>
+                    {% if user.groups.all.0.name == 'Admin' %}
+                    <li><a class="dropdown-item" href="{% url 'admin_panel' %}"><i class="bi bi-shield"></i> Admin Panel</a></li>
+                    {% endif %}
+                    {% if user.groups.all.0.name == 'Worker' %}
+                    <li><a class="dropdown-item" href="{% url 'worker_dashboard' %}"><i class="bi bi-tools"></i> Worker Panel</a></li>
+                    {% endif %}
+                    <li><a class="dropdown-item" href="{% url 'dashboard' %}"><i class="bi bi-pie-chart"></i> Dashboard</a></li>
+                    <li><a class="dropdown-item" href="{% url 'scan_history' %}"><i class="bi bi-clock-history"></i> Scan History</a></li>
+                    <li><a class="dropdown-item" href="{% url 'settings' %}"><i class="bi bi-gear"></i> Settings</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <form method="post" action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="dropdown-item text-danger"><i class="bi bi-box-arrow-right"></i> Sign Out</button>
+                        </form>
+                    </li>
+                </ul>
             </div>
+            {% else %}
+            <a href="{% url 'login' %}" class="btn-login">Log In</a>
+            <a href="{% url 'signup' %}" class="btn-signup">Get Started</a>
+            {% endif %}
         </div>
     </div>
 </nav>
 
 <!-- ============================================================
-     SIDEBAR
+     HAMBURGER SIDEBAR — Slide from Left
      ============================================================ -->
-<aside class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-        <span class="sidebar-brand-text" style="font-size:0.8125rem;font-weight:600;color:var(--text-secondary);">
-            <i class="fas fa-cube me-1" style="color:var(--accent-cyan)"></i> Navigation
-        </span>
-        <button class="sidebar-toggle d-none d-lg-flex" id="sidebarCollapseBtn" aria-label="Collapse sidebar">
-            <i class="fas fa-chevron-left"></i>
+<div class="hamburger-overlay" id="hamburgerOverlay" aria-hidden="true"></div>
+
+<aside class="hamburger-sidebar" id="hamburgerSidebar" role="dialog" aria-label="Navigation menu" aria-modal="true">
+    <div class="hs-header">
+        <a class="hs-brand" href="{% url 'home' %}">
+            <img src="{% static 'images/logo-white.svg' %}" alt="CipherScan" onerror="this.style.display='none'">
+            <span>Cipher<span class="brand-highlight">Scan</span></span>
+        </a>
+        <button class="hs-close" id="hamburgerCloseBtn" aria-label="Close navigation menu">
+            <i class="bi bi-x"></i>
         </button>
     </div>
+    <div class="hs-subtitle">Enterprise Cybersecurity Platform</div>
 
-    <div class="sidebar-section-title">Main</div>
-    <ul class="nav flex-column">
-        <li class="nav-item">
-            <a class="nav-link-sidebar {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
-                <i class="fas fa-chart-pie"></i>
-                <span class="link-label">Dashboard</span>
-            </a>
+    <ul class="hs-nav">
+        <li><a class="hs-link {% if request.resolver_match.url_name == 'home' or request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'home' %}"><i class="bi bi-pie-chart"></i> Dashboard</a></li>
+        <li><a class="hs-link {% if request.resolver_match.url_name == 'browser_isolation' %}active{% endif %}" href="{% url 'browser_isolation' %}"><i class="bi bi-link-45deg"></i> URL &amp; Link Scanner</a></li>
+        <li><a class="hs-link {% if request.resolver_match.url_name == 'file_scan' %}active{% endif %}" href="{% url 'file_scan' %}"><i class="bi bi-file-earmark"></i> File Scanner</a></li>
+        <li><a class="hs-link {% if request.resolver_match.url_name == 'phishing_analysis' %}active{% endif %}" href="{% url 'phishing_analysis' %}"><i class="bi bi-shield-exclamation"></i> Phishing Scanner</a></li>
+        <li><a class="hs-link {% if request.resolver_match.url_name == 'sandbox' %}active{% endif %}" href="{% url 'sandbox' %}"><i class="bi bi-box"></i> Sandbox</a></li>
+        <li><a class="hs-link {% if request.resolver_match.url_name == 'sandbox_editor' %}active{% endif %}" href="{% url 'sandbox_editor' %}"><i class="bi bi-code-slash"></i> Code Editor</a></li>
+        <li><a class="hs-link {% if request.resolver_match.url_name == 'browser_isolation' %}active{% endif %}" href="{% url 'browser_isolation' %}"><i class="bi bi-window"></i> Browser Isolation</a></li>
+        <li><a class="hs-link {% if request.resolver_match.url_name == 'threat_intel' %}active{% endif %}" href="{% url 'threat_intel' %}"><i class="bi bi-shield-check"></i> Threat Intelligence</a></li>
+        <li><a class="hs-link {% if request.resolver_match.namespace == 'darkweb' and request.resolver_match.url_name == 'index' %}active{% endif %}" href="{% url 'darkweb:index' %}"><i class="bi bi-shield-exclamation"></i> Dark Web Monitor</a></li>
+        <li><a class="hs-link" href="{% url 'docs' %}"><i class="bi bi-book"></i> Resources</a></li>
+        <li><a class="hs-link {% if request.resolver_match.url_name == 'settings' %}active{% endif %}" href="{% url 'settings' %}"><i class="bi bi-gear"></i> Settings</a></li>
+        {% if user.is_authenticated %}
+        <li>
+            <form method="post" action="{% url 'logout' %}" style="margin:0">
+                {% csrf_token %}
+                <button type="submit" class="hs-link" style="width:100%;background:none;border:none;cursor:pointer;font-family:inherit;font-size:0.875rem;font-weight:500;padding:0.625rem 0.75rem;margin:1px 0;border-radius:8px;color:var(--text-secondary);display:flex;align-items:center;gap:0.75rem;transition:all var(--transition-fast);">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </button>
+            </form>
         </li>
-        <li class="nav-item">
-            <a class="nav-link-sidebar {% if request.resolver_match.url_name == 'scan_history' %}active{% endif %}" href="{% url 'scan_history' %}">
-                <i class="fas fa-clock-rotate"></i>
-                <span class="link-label">Scan History</span>
-                <span class="badge-cs badge-cs-info badge-sidebar">12</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link-sidebar" href="{% url 'saved_reports' %}">
-                <i class="fas fa-folder-open"></i>
-                <span class="link-label">Saved Reports</span>
-            </a>
-        </li>
+        {% endif %}
     </ul>
 
-    <div class="sidebar-section-title">Scanners</div>
-    <ul class="nav flex-column">
-        <li class="nav-item">
-            <a class="nav-link-sidebar {% if request.resolver_match.url_name == 'url_scan' %}active{% endif %}" href="{% url 'url_scan' %}">
-                <i class="fas fa-link"></i>
-                <span class="link-label">URL Scanner</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link-sidebar" href="{% url 'ip_scan' %}">
-                <i class="fas fa-network-wired"></i>
-                <span class="link-label">IP Scanner</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link-sidebar" href="{% url 'domain_scan' %}">
-                <i class="fas fa-globe"></i>
-                <span class="link-label">Domain Scanner</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link-sidebar {% if request.resolver_match.url_name == 'file_scan' %}active{% endif %}" href="{% url 'file_scan' %}">
-                <i class="fas fa-file"></i>
-                <span class="link-label">File Scanner</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link-sidebar" href="{% url 'email_scan' %}">
-                <i class="fas fa-envelope"></i>
-                <span class="link-label">Email Scanner</span>
-            </a>
-        </li>
-    </ul>
-
-    <div class="sidebar-section-title">Analysis</div>
-    <ul class="nav flex-column">
-        <li class="nav-item">
-            <a class="nav-link-sidebar" href="{% url 'phishing_analysis' %}">
-                <i class="fas fa-fish"></i>
-                <span class="link-label">Phishing Analysis</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link-sidebar {% if request.resolver_match.url_name == 'sandbox' %}active{% endif %}" href="{% url 'sandbox' %}">
-                <i class="fas fa-cube"></i>
-                <span class="link-label">Sandbox Analysis</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link-sidebar" href="{% url 'threat_intel' %}">
-                <i class="fas fa-shield-halo"></i>
-                <span class="link-label">Threat Intelligence</span>
-                <span class="badge-cs badge-cs-danger badge-sidebar">3</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link-sidebar" href="{% url 'vuln_scan' %}">
-                <i class="fas fa-bug"></i>
-                <span class="link-label">Vulnerability Scan</span>
-            </a>
-        </li>
-    </ul>
-
-    <div class="sidebar-section-title">Network Tools</div>
-    <ul class="nav flex-column">
-        <li class="nav-item">
-            <a class="nav-link-sidebar" href="{% url 'ssl_checker' %}">
-                <i class="fas fa-lock"></i>
-                <span class="link-label">SSL/TLS Checker</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link-sidebar" href="{% url 'dns_lookup' %}">
-                <i class="fas fa-server"></i>
-                <span class="link-label">DNS Lookup</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link-sidebar" href="{% url 'whois_lookup' %}">
-                <i class="fas fa-magnifying-glass"></i>
-                <span class="link-label">WHOIS Lookup</span>
-            </a>
-        </li>
-    </ul>
-
-    <div class="sidebar-section-title">Security</div>
-    <ul class="nav flex-column">
-        <li class="nav-item">
-            <a class="nav-link-sidebar" href="{% url 'dark_web' %}">
-                <i class="fas fa-skull"></i>
-                <span class="link-label">Dark Web Monitor</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link-sidebar" href="{% url 'breach_check' %}">
-                <i class="fas fa-circle-exclamation"></i>
-                <span class="link-label">Breach Check</span>
-            </a>
-        </li>
-    </ul>
-
-    <div class="sidebar-section-title">Account</div>
-    <ul class="nav flex-column">
-        <li class="nav-item">
-            <a class="nav-link-sidebar" href="{% url 'api_settings' %}">
-                <i class="fas fa-key"></i>
-                <span class="link-label">API Integration</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link-sidebar" href="{% url 'profile' %}">
-                <i class="fas fa-user-gear"></i>
-                <span class="link-label">Profile</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link-sidebar" href="{% url 'settings' %}">
-                <i class="fas fa-gear"></i>
-                <span class="link-label">Settings</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link-sidebar" href="{% url 'help' %}">
-                <i class="fas fa-circle-question"></i>
-                <span class="link-label">Help & Support</span>
-            </a>
-        </li>
-    </ul>
+    <div class="hs-footer">
+        <span>CipherScan v2.0</span>
+        <span><span class="status-dot safe pulse"></span> Operational</span>
+    </div>
 </aside>
-
-<!-- Sidebar overlay (mobile) -->
-<div class="sidebar-overlay" id="sidebarOverlay"></div>
 
 <!-- ============================================================
      MAIN CONTENT
@@ -1754,56 +1921,77 @@ body.full-width .main-wrapper {
         <div class="container-fluid">
             <div class="row g-4">
                 <div class="col-lg-4">
-                    <div class="footer-brand">Cipher<span class="brand-highlight">Scan</span></div>
-                    <p class="footer-desc">Advanced cybersecurity analysis platform. Real-time threat detection, URL scanning, phishing analysis, and comprehensive security tools.</p>
+                    <div class="footer-brand">
+                        <img src="{% static 'images/logo-white.svg' %}" alt="CipherScan" style="height:24px;width:auto;margin-right:8px;" onerror="this.style.display='none'">
+                        Cipher<span class="brand-highlight">Scan</span>
+                    </div>
+                    <p class="footer-desc">Next-generation cybersecurity analysis platform. Real-time threat detection, URL scanning, phishing analysis, and advanced security intelligence tools trusted by security professionals worldwide.</p>
+                    <div class="footer-social mt-3">
+                        <a href="#" aria-label="GitHub"><i class="bi bi-github"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="bi bi-twitter-x"></i></a>
+                        <a href="#" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
+                        <a href="#" aria-label="Discord"><i class="bi bi-discord"></i></a>
+                    </div>
                 </div>
                 <div class="col-6 col-md-3 col-lg-2">
-                    <div class="footer-heading">Platform</div>
+                    <div class="footer-heading"><i class="bi bi-grid-1x2-fill me-1" style="color:var(--accent-cyan)"></i> Platform</div>
                     <ul class="footer-links">
-                        <li><a href="{% url 'home' %}">Home</a></li>
-                        <li><a href="{% url 'features' %}">Features</a></li>
-                        <li><a href="{% url 'pricing' %}">Pricing</a></li>
-                        <li><a href="{% url 'about' %}">About</a></li>
+                        <li><a href="{% url 'home' %}"><i class="bi bi-chevron-right me-1" style="font-size:0.625rem"></i> Home</a></li>
+                        <li><a href="{% url 'browser_isolation' %}"><i class="bi bi-chevron-right me-1" style="font-size:0.625rem"></i> URL &amp; Link Scanner</a></li>
+                        <li><a href="{% url 'file_scan' %}"><i class="bi bi-chevron-right me-1" style="font-size:0.625rem"></i> File Scanner</a></li>
+                        <li><a href="{% url 'sandbox' %}"><i class="bi bi-chevron-right me-1" style="font-size:0.625rem"></i> Sandbox</a></li>
+                        <li><a href="{% url 'browser_isolation' %}"><i class="bi bi-chevron-right me-1" style="font-size:0.625rem"></i> Browser Isolation</a></li>
+                        <li><a href="/threat-intelligence/"><i class="bi bi-chevron-right me-1" style="font-size:0.625rem"></i> Threat Intelligence</a></li>
+                        <li><a href="/dark-web-monitor/"><i class="bi bi-chevron-right me-1" style="font-size:0.625rem"></i> Dark Web Monitor</a></li>
                     </ul>
                 </div>
                 <div class="col-6 col-md-3 col-lg-2">
-                    <div class="footer-heading">Tools</div>
+                    <div class="footer-heading"><i class="bi bi-book me-1" style="color:var(--accent-purple)"></i> Resources</div>
                     <ul class="footer-links">
-                        <li><a href="{% url 'url_scan' %}">URL Scanner</a></li>
-                        <li><a href="{% url 'file_scan' %}">File Scanner</a></li>
-                        <li><a href="{% url 'email_scan' %}">Email Scanner</a></li>
-                        <li><a href="{% url 'sandbox' %}">Sandbox</a></li>
+                        <li><a href="{% url 'docs' %}"><i class="bi bi-chevron-right me-1" style="font-size:0.625rem"></i> Documentation</a></li>
+                        <li><a href="{% url 'api_docs' %}"><i class="bi bi-chevron-right me-1" style="font-size:0.625rem"></i> API Reference</a></li>
+                        <li><a href="{% url 'blog' %}"><i class="bi bi-chevron-right me-1" style="font-size:0.625rem"></i> Blog</a></li>
+                        <li><a href="{% url 'faq' %}"><i class="bi bi-chevron-right me-1" style="font-size:0.625rem"></i> FAQ</a></li>
                     </ul>
                 </div>
                 <div class="col-6 col-md-3 col-lg-2">
-                    <div class="footer-heading">Resources</div>
+                    <div class="footer-heading"><i class="bi bi-shield-check me-1" style="color:var(--accent-success)"></i> Legal</div>
                     <ul class="footer-links">
-                        <li><a href="{% url 'faq' %}">FAQ</a></li>
-                        <li><a href="{% url 'docs' %}">Documentation</a></li>
-                        <li><a href="{% url 'api_docs' %}">API</a></li>
-                        <li><a href="{% url 'blog' %}">Blog</a></li>
-                    </ul>
-                </div>
-                <div class="col-6 col-md-3 col-lg-2">
-                    <div class="footer-heading">Legal</div>
-                    <ul class="footer-links">
-                        <li><a href="{% url 'privacy' %}">Privacy Policy</a></li>
-                        <li><a href="{% url 'terms' %}">Terms of Service</a></li>
-                        <li><a href="{% url 'contact' %}">Contact</a></li>
+                        <li><a href="{% url 'privacy' %}"><i class="bi bi-chevron-right me-1" style="font-size:0.625rem"></i> Privacy Policy</a></li>
+                        <li><a href="{% url 'terms' %}"><i class="bi bi-chevron-right me-1" style="font-size:0.625rem"></i> Terms of Service</a></li>
+                        <li><a href="{% url 'about' %}"><i class="bi bi-chevron-right me-1" style="font-size:0.625rem"></i> About</a></li>
+                        <li><a href="{% url 'contact' %}"><i class="bi bi-chevron-right me-1" style="font-size:0.625rem"></i> Contact</a></li>
                     </ul>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; {% now "Y" %} CipherScan. All rights reserved.</p>
-                <div class="footer-social">
-                    <a href="#" aria-label="GitHub"><i class="fab fa-github"></i></a>
-                    <a href="#" aria-label="Twitter"><i class="fab fa-x-twitter"></i></a>
-                    <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-                    <a href="#" aria-label="Discord"><i class="fab fa-discord"></i></a>
+                <p>&copy; {% now "Y" %} CipherScan. All rights reserved. <span class="d-none d-sm-inline">— Built with <i class="bi bi-shield-fill-check" style="color:var(--accent-cyan)"></i> for security</span></p>
+                <div class="d-flex align-items-center gap-3">
+                    <span style="font-size:0.75rem;color:var(--text-muted)">Status: <span class="status-dot safe pulse"></span> All Systems Operational</span>
                 </div>
             </div>
         </div>
     </footer>
+</div>
+
+<!-- ============================================================
+     SEARCH MODAL — Command Palette
+     ============================================================ -->
+<div class="search-modal-overlay" id="searchModalOverlay" aria-hidden="true"></div>
+<div class="search-modal" id="searchModal" role="dialog" aria-label="Search tools" aria-modal="true">
+    <div class="sm-input-wrap">
+        <i class="bi bi-search"></i>
+        <input type="text" id="searchInput" placeholder="Search tools..." autocomplete="off" aria-label="Search tools">
+        <div class="sm-kbd"><kbd>ESC</kbd></div>
+    </div>
+    <div class="sm-results" id="searchResults">
+        <div class="sm-empty">Start typing to search tools...</div>
+    </div>
+    <div class="sm-footer">
+        <span><kbd>↑</kbd><kbd>↓</kbd> Navigate</span>
+        <span><kbd>↵</kbd> Open</span>
+        <span><kbd>ESC</kbd> Close</span>
+    </div>
 </div>
 
 <!-- ============================================================
@@ -1833,90 +2021,217 @@ body.full-width .main-wrapper {
 document.addEventListener('DOMContentLoaded', function () {
 
     // -------------------------------------------------------
-    // 1. SIDEBAR TOGGLE (Desktop)
+    // 1. HAMBURGER SIDEBAR TOGGLE
     // -------------------------------------------------------
-    const sidebar = document.getElementById('sidebar');
-    const sidebarToggle = document.getElementById('sidebarToggle');
-    const sidebarCollapseBtn = document.getElementById('sidebarCollapseBtn');
-    const sidebarMobileToggle = document.getElementById('sidebarMobileToggle');
-    const sidebarOverlay = document.getElementById('sidebarOverlay');
-    const mainWrapper = document.getElementById('mainWrapper');
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const hamburgerSidebar = document.getElementById('hamburgerSidebar');
+    const hamburgerOverlay = document.getElementById('hamburgerOverlay');
+    const hamburgerClose = document.getElementById('hamburgerCloseBtn');
     const body = document.body;
 
-    // Desktop collapse
-    if (sidebarCollapseBtn) {
-        sidebarCollapseBtn.addEventListener('click', function () {
-            body.classList.toggle('sidebar-collapsed');
-            const isCollapsed = body.classList.contains('sidebar-collapsed');
-            this.innerHTML = isCollapsed
-                ? '<i class="fas fa-chevron-right"></i>'
-                : '<i class="fas fa-chevron-left"></i>';
-            try { localStorage.setItem('cs_sidebar_collapsed', isCollapsed); } catch (e) {}
-        });
+    function openSidebar() {
+        hamburgerSidebar.classList.add('open');
+        hamburgerOverlay.classList.add('active');
+        hamburgerBtn.setAttribute('aria-expanded', 'true');
+        body.style.overflow = 'hidden';
+        hamburgerClose.focus();
     }
 
-    // Desktop toggle (hamburger)
-    if (sidebarToggle) {
-        sidebarToggle.addEventListener('click', function () {
-            body.classList.toggle('sidebar-collapsed');
-            if (sidebarCollapseBtn) {
-                const isCollapsed = body.classList.contains('sidebar-collapsed');
-                sidebarCollapseBtn.innerHTML = isCollapsed
-                    ? '<i class="fas fa-chevron-right"></i>'
-                    : '<i class="fas fa-chevron-left"></i>';
+    function closeSidebar() {
+        hamburgerSidebar.classList.remove('open');
+        hamburgerOverlay.classList.remove('active');
+        hamburgerBtn.setAttribute('aria-expanded', 'false');
+        body.style.overflow = '';
+        hamburgerBtn.focus();
+    }
+
+    if (hamburgerBtn) {
+        hamburgerBtn.addEventListener('click', function () {
+            if (hamburgerSidebar.classList.contains('open')) {
+                closeSidebar();
+            } else {
+                openSidebar();
             }
-            try { localStorage.setItem('cs_sidebar_collapsed', body.classList.contains('sidebar-collapsed')); } catch (e) {}
         });
     }
 
-    // Mobile sidebar toggle
-    if (sidebarMobileToggle) {
-        sidebarMobileToggle.addEventListener('click', function () {
-            body.classList.toggle('sidebar-open');
-            sidebarOverlay.classList.toggle('active');
+    if (hamburgerOverlay) {
+        hamburgerOverlay.addEventListener('click', closeSidebar);
+    }
+
+    if (hamburgerClose) {
+        hamburgerClose.addEventListener('click', closeSidebar);
+    }
+
+    // Close sidebar on menu item click
+    document.querySelectorAll('.hs-nav .hs-link').forEach(function (link) {
+        link.addEventListener('click', closeSidebar);
+    });
+
+    // Close sidebar on ESC
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && hamburgerSidebar.classList.contains('open')) {
+            closeSidebar();
+        }
+    });
+
+    // -------------------------------------------------------
+    // 2. SEARCH MODAL
+    // -------------------------------------------------------
+    const searchToggleBtn = document.getElementById('searchToggleBtn');
+    const searchModal = document.getElementById('searchModal');
+    const searchModalOverlay = document.getElementById('searchModalOverlay');
+    const searchInput = document.getElementById('searchInput');
+    const searchResults = document.getElementById('searchResults');
+    let searchHighlightIdx = -1;
+
+    var searchTools = [
+        { label: 'Dashboard', url: '{% url "home" %}', icon: 'bi-pie-chart', keywords: 'home dashboard overview' },
+        { label: 'URL & Link Scanner', url: '{% url "browser_isolation" %}', icon: 'bi-link-45deg', keywords: 'url scan link browser isolation preview' },
+        { label: 'File Scanner', url: '{% url "file_scan" %}', icon: 'bi-file-earmark', keywords: 'file scan upload malware' },
+        { label: 'Phishing Scanner', url: '{% url "phishing_analysis" %}', icon: 'bi-shield-exclamation', keywords: 'phishing email scam' },
+        { label: 'Sandbox', url: '{% url "sandbox" %}', icon: 'bi-box', keywords: 'sandbox isolate analyze' },
+        { label: 'Code Editor', url: '{% url "sandbox_editor" %}', icon: 'bi-code-slash', keywords: 'code editor python' },
+        { label: 'Browser Isolation', url: '{% url "browser_isolation" %}', icon: 'bi-window', keywords: 'browser isolation sandbox url safe browsing' },
+        { label: 'IP Scanner', url: '{% url "ip_scan" %}', icon: 'bi-hdd-network', keywords: 'ip address scan' },
+        { label: 'Domain Scanner', url: '{% url "domain_scan" %}', icon: 'bi-globe2', keywords: 'domain whois dns' },
+        { label: 'Email Analyzer', url: '{% url "phishing_analysis" %}', icon: 'bi-envelope', keywords: 'email header analyze' },
+        { label: 'SSL/TLS Checker', url: '{% url "ssl_checker" %}', icon: 'bi-lock', keywords: 'ssl tls certificate' },
+        { label: 'DNS Lookup', url: '{% url "dns_lookup" %}', icon: 'bi-server', keywords: 'dns lookup resolver' },
+        { label: 'WHOIS Lookup', url: '{% url "whois_lookup" %}', icon: 'bi-search', keywords: 'whois domain lookup' },
+        { label: 'Vulnerability Scan', url: '{% url "vuln_scan" %}', icon: 'bi-bug', keywords: 'vulnerability cve' },
+        { label: 'Threat Intelligence', url: '{% url "threat_intel" %}', icon: 'bi-shield-check', keywords: 'threat intel ioc' },
+        { label: 'Dark Web Monitor', url: '{% url "darkweb:index" %}', icon: 'bi-shield-exclamation', keywords: 'dark web monitor leak' },
+        { label: 'Breach Check', url: '{% url "breach_check" %}', icon: 'bi-exclamation-triangle', keywords: 'breach data leak' },
+        { label: 'Settings', url: '{% url "settings" %}', icon: 'bi-gear', keywords: 'settings preferences' },
+        { label: 'Documentation', url: '{% url "docs" %}', icon: 'bi-book', keywords: 'docs documentation help guide' },
+    ];
+
+    function openSearch() {
+        searchModal.classList.add('active');
+        searchModalOverlay.classList.add('active');
+        searchHighlightIdx = -1;
+        if (searchInput) {
+            searchInput.value = '';
+            searchInput.focus();
+            filterSearch('');
+        }
+    }
+
+    function closeSearch() {
+        searchModal.classList.remove('active');
+        searchModalOverlay.classList.remove('active');
+        if (searchToggleBtn) searchToggleBtn.focus();
+    }
+
+    function filterSearch(query) {
+        var q = query.toLowerCase().trim();
+        var results = q ? searchTools.filter(function (t) {
+            return t.label.toLowerCase().includes(q) || t.keywords.includes(q);
+        }) : searchTools;
+
+        if (!searchResults) return;
+
+        if (results.length === 0) {
+            searchResults.innerHTML = '<div class="sm-empty">No tools found</div>';
+            searchHighlightIdx = -1;
+            return;
+        }
+
+        searchHighlightIdx = -1;
+        var html = '';
+        results.forEach(function (r, i) {
+            html += '<a class="sm-item" href="' + r.url + '" data-index="' + i + '">' +
+                '<i class="bi ' + r.icon + '"></i>' +
+                '<span class="sm-item-label">' + r.label + '</span>' +
+                '<span class="sm-item-hint">Open</span>' +
+                '</a>';
+        });
+        searchResults.innerHTML = html;
+
+        // Click handler
+        searchResults.querySelectorAll('.sm-item').forEach(function (item) {
+            item.addEventListener('click', function (e) {
+                closeSearch();
+            });
         });
     }
 
-    // Overlay click closes sidebar
-    if (sidebarOverlay) {
-        sidebarOverlay.addEventListener('click', function () {
-            body.classList.remove('sidebar-open');
-            sidebarOverlay.classList.remove('active');
+    if (searchToggleBtn) {
+        searchToggleBtn.addEventListener('click', openSearch);
+    }
+
+    if (searchModalOverlay) {
+        searchModalOverlay.addEventListener('click', closeSearch);
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
+            filterSearch(this.value);
+        });
+
+        searchInput.addEventListener('keydown', function (e) {
+            var items = searchResults.querySelectorAll('.sm-item');
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                searchHighlightIdx = Math.min(searchHighlightIdx + 1, items.length - 1);
+                items.forEach(function (el, i) {
+                    el.classList.toggle('highlighted', i === searchHighlightIdx);
+                });
+                if (items[searchHighlightIdx]) items[searchHighlightIdx].scrollIntoView({ block: 'nearest' });
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                searchHighlightIdx = Math.max(searchHighlightIdx - 1, -1);
+                items.forEach(function (el, i) {
+                    el.classList.toggle('highlighted', i === searchHighlightIdx);
+                });
+                if (items[searchHighlightIdx]) items[searchHighlightIdx].scrollIntoView({ block: 'nearest' });
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                var idx = searchHighlightIdx >= 0 ? searchHighlightIdx : 0;
+                if (items[idx]) {
+                    items[idx].click();
+                }
+            } else if (e.key === 'Escape') {
+                closeSearch();
+            }
         });
     }
 
-    // Restore sidebar state
-    try {
-        const savedState = localStorage.getItem('cs_sidebar_collapsed');
-        if (savedState === 'true') {
-            body.classList.add('sidebar-collapsed');
-            if (sidebarCollapseBtn) {
-                sidebarCollapseBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+    // Ctrl+K to open search, ESC to close
+    document.addEventListener('keydown', function (e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            if (searchModal.classList.contains('active')) {
+                closeSearch();
+            } else {
+                openSearch();
             }
         }
-    } catch (e) {}
-
-    // -------------------------------------------------------
-    // 2. NAVBAR SCROLL EFFECT
-    // -------------------------------------------------------
-    const navbar = document.getElementById('mainNavbar');
-    let lastScroll = 0;
-
-    function handleNavbarScroll() {
-        const scrollY = window.scrollY;
-        if (scrollY > 20) {
-            navbar.classList.add('scrolled');
-        } else {
-            navbar.classList.remove('scrolled');
+        if (e.key === 'Escape' && searchModal.classList.contains('active')) {
+            closeSearch();
         }
-        lastScroll = scrollY;
-    }
-
-    window.addEventListener('scroll', handleNavbarScroll, { passive: true });
-    handleNavbarScroll();
+    });
 
     // -------------------------------------------------------
-    // 3. TOAST NOTIFICATION SYSTEM
+    // 3. RIPPLE EFFECT ON SIDEBAR LINKS
+    // -------------------------------------------------------
+    document.querySelectorAll('.hs-link').forEach(function (link) {
+        link.addEventListener('click', function (e) {
+            var ripple = document.createElement('span');
+            ripple.className = 'ripple';
+            var rect = this.getBoundingClientRect();
+            var size = Math.max(rect.width, rect.height);
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+            ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+            this.appendChild(ripple);
+            setTimeout(function () { ripple.remove(); }, 500);
+        });
+    });
+
+    // -------------------------------------------------------
+    // 4. TOAST NOTIFICATION SYSTEM
     // -------------------------------------------------------
     window.CipherScan = window.CipherScan || {};
 
@@ -1926,21 +2241,21 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!container) return;
 
         const icons = {
-            success: 'fa-circle-check',
-            error: 'fa-circle-xmark',
-            warning: 'fa-triangle-exclamation',
-            info: 'fa-circle-info'
+            success: 'bi-check-circle',
+            error: 'bi-x-circle',
+            warning: 'bi-exclamation-triangle',
+            info: 'bi-info-circle'
         };
 
         const toast = document.createElement('div');
         toast.className = 'toast-cs toast-' + type;
         toast.innerHTML =
-            '<div class="toast-icon"><i class="fas ' + (icons[type] || icons.info) + '"></i></div>' +
+            '<div class="toast-icon"><i class="bi ' + (icons[type] || icons.info) + '"></i></div>' +
             '<div class="toast-body-cs">' +
             '<div class="toast-title">' + document.createTextNode(title).textContent + '</div>' +
             '<div class="toast-message">' + document.createTextNode(message).textContent + '</div>' +
             '</div>' +
-            '<button class="toast-close" aria-label="Close"><i class="fas fa-xmark"></i></button>';
+            '<button class="toast-close" aria-label="Close"><i class="bi bi-x"></i></button>';
 
         container.appendChild(toast);
 
@@ -2002,8 +2317,8 @@ document.addEventListener('DOMContentLoaded', function () {
         try { localStorage.setItem('cs_theme', theme); } catch (e) {}
         themeToggles.forEach(function (btn) {
             btn.innerHTML = theme === 'dark'
-                ? '<i class="fas fa-sun"></i>'
-                : '<i class="fas fa-moon"></i>';
+                ? '<i class="bi bi-sun"></i>'
+                : '<i class="bi bi-moon"></i>';
         });
     }
 
@@ -2030,21 +2345,64 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // -------------------------------------------------------
-    // 6. ACTIVE NAV LINK HIGHLIGHTING
+    // 6. INTERSECTION OBSERVER — Scroll Animations
     // -------------------------------------------------------
-    // Bootstrap's collapse Navbar auto-close on mobile
-    var navLinks = document.querySelectorAll('.navbar-cs .navbar-collapse .nav-link');
-    var navbarCollapse = document.getElementById('mainNavbarCollapse');
-    navLinks.forEach(function (link) {
-        link.addEventListener('click', function () {
-            if (navbarCollapse && navbarCollapse.classList.contains('show')) {
-                var bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
-                if (bsCollapse) bsCollapse.hide();
+    const animateElements = document.querySelectorAll('.fade-up, .fade-in, .scale-in, .slide-left');
+    if (animateElements.length > 0 && 'IntersectionObserver' in window) {
+        const observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+        animateElements.forEach(function (el) {
+            observer.observe(el);
+        });
+    }
+
+    // -------------------------------------------------------
+    // 7. COUNTER ANIMATION
+    // -------------------------------------------------------
+    function animateCounters() {
+        const counters = document.querySelectorAll('[data-counter]');
+        counters.forEach(function (el) {
+            const target = parseInt(el.dataset.counter, 10);
+            if (isNaN(target)) return;
+            const duration = parseInt(el.dataset.duration, 10) || 2000;
+            const start = performance.now();
+            function update(now) {
+                const elapsed = now - start;
+                const progress = Math.min(elapsed / duration, 1);
+                const eased = 1 - Math.pow(1 - progress, 3);
+                el.textContent = Math.floor(eased * target).toLocaleString();
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                } else {
+                    el.textContent = target.toLocaleString();
+                }
+            }
+            requestAnimationFrame(update);
+        });
+    }
+    const counterObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+                animateCounters();
+                counterObserver.disconnect();
             }
         });
-    });
+    }, { threshold: 0.3 });
+    const counterElements = document.querySelector('[data-counter]');
+    if (counterElements) {
+        document.querySelectorAll('[data-counter]').forEach(function (el) {
+            counterObserver.observe(el.parentElement || el);
+        });
+    }
 
-    console.log('%cCipherScan%c v1.0 — Cybersecurity Analysis Platform',
+    console.log('%cCipherScan%c v2.0 — Premium Cybersecurity Platform',
         'color:#00d4ff;font-weight:700;font-size:1.2em;',
         'color:#8892b0;font-size:0.9em;');
 });

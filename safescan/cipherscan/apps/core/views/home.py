@@ -16,7 +16,7 @@ class HomeView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["total_scans"] = ScanHistory.objects.count()
-        context["threats_found"] = ScanHistory.objects.exclude(threat_level='safe').count()
+        context["threats_found"] = ScanHistory.objects.exclude(verdict='SAFE').count()
         context["files_scanned"] = ScanHistory.objects.filter(scan_type='file').count()
         context["urls_scanned"] = ScanHistory.objects.filter(scan_type='url').count()
         context["scan_change"] = "+12.5"
@@ -31,7 +31,7 @@ class StatsView(APIView):
         total_scans = ScanHistory.objects.count()
         files_scanned = ScanHistory.objects.filter(scan_type='file').count()
         urls_checked = ScanHistory.objects.filter(scan_type='url').count()
-        threats_detected = ScanHistory.objects.exclude(threat_level='safe').count()
+        threats_detected = ScanHistory.objects.exclude(verdict='SAFE').count()
         from django.contrib.auth import get_user_model
         User = get_user_model()
         users_protected = User.objects.count()
@@ -49,7 +49,7 @@ class ThreatHistoryView(APIView):
         queryset = (
             ScanHistory.objects
             .filter(created_at__gte=six_months_ago)
-            .exclude(threat_level='safe')
+            .exclude(verdict='SAFE')
             .annotate(month=TruncMonth('created_at'))
             .values('month')
             .annotate(count=Count('id'))

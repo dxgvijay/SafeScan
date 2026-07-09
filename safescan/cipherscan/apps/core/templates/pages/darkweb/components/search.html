@@ -1,0 +1,43 @@
+<div class="dw-search-section">
+  <div class="dw-search-card-premium">
+    <div class="dw-search-header">
+      <div class="dw-search-header-icon">
+        <i class="fas fa-fingerprint"></i>
+      </div>
+      <h2>Identity Exposure Scanner</h2>
+      <p>Enter any digital identity to check for known breach exposure.</p>
+    </div>
+
+    <div class="dw-detect-bar" id="dwDetectBar">
+      <span class="dw-detect-label">Automatically detect</span>
+      <div class="dw-detect-types" id="dwDetectTypes">
+        <span class="dw-detect-badge active" data-type="email">Email</span>
+        <span class="dw-detect-badge" data-type="username">Username</span>
+        <span class="dw-detect-badge" data-type="phone">Phone</span>
+        <span class="dw-detect-badge" data-type="domain">Domain</span>
+      </div>
+    </div>
+
+    <form id="dwSearchForm" autocomplete="off" novalidate role="search" aria-label="Identity exposure search">
+      <div class="dw-input-wrapper">
+        <i class="fas fa-search dw-input-icon" aria-hidden="true"></i>
+        <input type="text" id="dwSearchInput" class="dw-search-input" placeholder="john@example.com" autofocus aria-describedby="dwValidationMsg">
+        <div class="dw-validation-msg" id="dwValidationMsg" role="alert" aria-live="assertive"></div>
+      </div>
+    </form>
+
+    <div class="dw-examples" id="dwExamples">
+      <span class="dw-example-chip" data-value="example@gmail.com">example@gmail.com</span>
+      <span class="dw-example-chip" data-value="company.com">company.com</span>
+      <span class="dw-example-chip" data-value="admin">admin</span>
+      <span class="dw-example-chip" data-value="+919876543210">+919876543210</span>
+    </div>
+
+    <button type="submit" id="dwSearchBtn" class="dw-monitor-btn" form="dwSearchForm">
+      <span class="dw-btn-text"><i class="fas fa-shield-halved me-2"></i>Monitor</span>
+      <span class="dw-btn-loading" style="display:none">
+        <i class="fas fa-circle-notch fa-spin me-2"></i>Searching Exposure...
+      </span>
+    </button>
+  </div>
+</div>

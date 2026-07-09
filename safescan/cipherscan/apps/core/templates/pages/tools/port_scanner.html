@@ -1,0 +1,178 @@
+{% extends 'pages/tools/base_tool.html' %}{% load static %}
+
+{% block tool_id %}port-scanner{% endblock %}
+{% block tool_name %}Port Scanner{% endblock %}
+{% block tool_icon_class %}ps-icon{% endblock %}
+{% block tool_icon %}<i class="bi bi-plug"></i>{% endblock %}
+{% block tool_title %}Port Scanner{% endblock %}
+{% block tool_desc %}Scan TCP ports of any host with configurable timeout, custom ranges, service detection and detailed results.{% endblock %}
+
+{% block tool_input %}
+<div class="tool-input-row">
+  <div class="tool-input-group" style="flex:2">
+    <label for="ps-host">Host</label>
+    <input type="text" id="ps-host" placeholder="e.g. scanme.nmap.org or 192.168.1.1" value="scanme.nmap.org">
+  </div>
+  <div class="tool-input-group">
+    <label for="ps-port-start">Port Start</label>
+    <input type="number" id="ps-port-start" value="1" min="1" max="65535">
+  </div>
+  <div class="tool-input-group">
+    <label for="ps-port-end">Port End</label>
+    <input type="number" id="ps-port-end" value="100" min="1" max="65535">
+  </div>
+  <div class="tool-input-group">
+    <label for="ps-timeout">Timeout (s)</label>
+    <input type="number" id="ps-timeout" value="0.5" min="0.1" max="10" step="0.1">
+  </div>
+</div>
+<div class="tool-action-row">
+  <button class="tool-btn" onclick="scanPorts()" id="ps-run-btn"><i class="bi-play-fill"></i> Scan</button>
+  <button class="tool-btn tool-btn-outline tool-btn-sm" onclick="clearResults()"><i class="bi-eraser"></i> Clear</button>
+  <div class="tool-loading" id="ps-loading"><i class="bi-arrow-repeat"></i> Scanning...</div>
+</div>
+<div class="tool-error" id="ps-error"></div>
+{% endblock %}
+
+{% block results_actions %}
+<button class="tool-btn tool-btn-outline tool-btn-sm" onclick="copyResults()" title="Copy results"><i class="bi-clipboard"></i></button>
+<button class="tool-btn tool-btn-outline tool-btn-sm" onclick="downloadJSON()" title="Download JSON"><i class="bi-download"></i> JSON</button>
+<button class="tool-btn tool-btn-outline tool-btn-sm" onclick="downloadCSV()" title="Download CSV"><i class="bi-download"></i> CSV</button>
+{% endblock %}
+
+{% block results_extra %}{% endblock %}
+
+{% block tool_sidebar %}
+<div class="sidebar-section">
+  <div class="sidebar-section-title"><i class="bi-lightning"></i>Quick Actions</div>
+  <button class="sidebar-btn run-btn" onclick="scanPorts()"><i class="bi-play-fill"></i> Run Scan</button>
+  <button class="sidebar-btn" onclick="document.getElementById('ps-host').value='scanme.nmap.org';document.getElementById('ps-port-start').value='1';document.getElementById('ps-port-end').value='100';document.getElementById('ps-timeout').value='0.5'"><i class="bi-arrow-counterclockwise"></i> Reset Defaults</button>
+</div>
+<div class="sidebar-section">
+  <div class="sidebar-section-title"><i class="bi-info-circle"></i>Info</div>
+  <div class="sidebar-info-row"><span class="sidebar-info-label">Runtime</span><span class="sidebar-info-value">~5-30s</span></div>
+  <div class="sidebar-info-row"><span class="sidebar-info-label">Difficulty</span><span class="sidebar-info-value">Medium</span></div>
+  <div class="sidebar-info-row"><span class="sidebar-info-label">API</span><span class="sidebar-info-value">Required</span></div>
+  <div class="sidebar-info-row"><span class="sidebar-info-label">Status</span><span class="sidebar-info-value online">Online</span></div>
+</div>
+<div class="sidebar-section">
+  <div class="sidebar-section-title"><i class="bi-keyboard"></i>Shortcuts</div>
+  <div class="sidebar-shortcut"><kbd>Ctrl</kbd><kbd>Enter</kbd> <span>Run scan</span></div>
+  <div class="sidebar-shortcut"><kbd>Esc</kbd> <span>Clear results</span></div>
+</div>
+<div class="sidebar-section">
+  <div class="sidebar-section-title"><i class="bi-file-text"></i>Examples</div>
+  <button class="sidebar-btn" onclick="document.getElementById('ps-host').value='scanme.nmap.org';document.getElementById('ps-port-start').value='22';document.getElementById('ps-port-end').value='80'"><i class="bi-chevron-right"></i> SSH & HTTP (22-80)</button>
+  <button class="sidebar-btn" onclick="document.getElementById('ps-host').value='scanme.nmap.org';document.getElementById('ps-port-start').value='1';document.getElementById('ps-port-end').value='1024'"><i class="bi-chevron-right"></i> Well-known ports (1-1024)</button>
+  <button class="sidebar-btn" onclick="document.getElementById('ps-host').value='scanme.nmap.org';document.getElementById('ps-port-start').value='3306';document.getElementById('ps-port-end').value='5432'"><i class="bi-chevron-right"></i> Database ports</button>
+</div>
+{% endblock %}
+
+{% block related_tools %}
+{% include 'pages/tools/includes/related_tools.html' with current='port-scanner' %}
+{% endblock %}
+
+{% block tool_extra_js %}
+<script>
+var lastResult = null;
+
+function scanPorts() {
+  var host = document.getElementById('ps-host').value.trim();
+  var start = parseInt(document.getElementById('ps-port-start').value) || 1;
+  var end = parseInt(document.getElementById('ps-port-end').value) || 100;
+  var timeout = parseFloat(document.getElementById('ps-timeout').value) || 0.5;
+  var errEl = document.getElementById('ps-error');
+  var loadEl = document.getElementById('ps-loading');
+  var btn = document.getElementById('ps-run-btn');
+  var card = document.getElementById('resultsCard');
+
+  errEl.classList.remove('show'); errEl.textContent = '';
+  card.classList.remove('show');
+  document.getElementById('resultsBody').innerHTML = '';
+
+  if (!host) { errEl.textContent = 'Please enter a host.'; errEl.classList.add('show'); return; }
+  if (start > end) { errEl.textContent = 'Start port must be less than or equal to end port.'; errEl.classList.add('show'); return; }
+
+  loadEl.classList.add('show');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="bi-arrow-repeat"></i> Scanning...';
+
+  fetch('/api/sandbox/port-scan/', {
+    method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCSRF() },
+    body: JSON.stringify({ host: host, port_start: start, port_end: end, timeout: timeout })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    loadEl.classList.remove('show');
+    btn.disabled = false; btn.innerHTML = '<i class="bi-play-fill"></i> Scan';
+    if (data.error) { errEl.textContent = data.error; errEl.classList.add('show'); return; }
+    lastResult = data;
+
+    var html = '';
+    html += '<div class="result-line"><span class="result-label">Host</span><span class="result-value info">' + esc(data.host) + ' (' + esc(data.ip) + ')</span></div>';
+    html += '<div class="result-line"><span class="result-label">Range</span><span class="result-value">' + esc(data.port_range) + '</span></div>';
+    html += '<div class="result-line"><span class="result-label">Open Ports</span><span class="result-value ' + (data.open_count > 0 ? 'success' : '') + '">' + data.open_count + ' / ' + data.total_scanned + '</span></div>';
+    html += '<div class="result-line"><span class="result-label">Duration</span><span class="result-value">' + data.duration_ms + ' ms</span></div>';
+    if (data.open_ports && data.open_ports.length > 0) {
+      html += '<div style="margin-top:0.75rem;"><div class="result-label" style="margin-bottom:0.35rem;">Open Ports</div><div class="port-results">';
+      data.open_ports.forEach(function(p) { html += '<span class="port-chip">' + p.port + ' <span class="port-service">' + esc(p.service) + '</span></span>'; });
+      html += '</div></div>';
+    } else {
+      html += '<div style="margin-top:0.5rem;color:var(--text-muted);font-size:0.8rem;">No open ports found in range.</div>';
+    }
+
+    document.getElementById('resultsBody').innerHTML = html;
+    card.classList.add('show');
+    document.getElementById('resultsActions').style.display = '';
+  })
+  .catch(function(err) {
+    loadEl.classList.remove('show');
+    btn.disabled = false; btn.innerHTML = '<i class="bi-play-fill"></i> Scan';
+    errEl.textContent = 'Request failed: ' + err.message;
+    errEl.classList.add('show');
+  });
+}
+
+function clearResults() {
+  document.getElementById('resultsCard').classList.remove('show');
+  document.getElementById('ps-error').classList.remove('show');
+  lastResult = null;
+}
+
+function copyResults() {
+  var text = document.getElementById('resultsBody').textContent;
+  if (!text) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).catch(function(){});
+  }
+}
+
+function downloadJSON() {
+  if (!lastResult) return;
+  var blob = new Blob([JSON.stringify(lastResult, null, 2)], { type: 'application/json' });
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'port-scan.json';
+  a.click();
+}
+
+function downloadCSV() {
+  if (!lastResult || !lastResult.open_ports) return;
+  var csv = 'port,service\n';
+  lastResult.open_ports.forEach(function(p) { csv += p.port + ',' + esc(p.service) + '\n'; });
+  var blob = new Blob([csv], { type: 'text/csv' });
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'port-scan.csv';
+  a.click();
+}
+
+function getCSRF() {
+  var val = null;
+  document.cookie.split(';').forEach(function(c) { c = c.trim(); if (c.startsWith('csrftoken=')) val = decodeURIComponent(c.substring(10)); });
+  return val;
+}
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+document.addEventListener('keydown', function(e) {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); scanPorts(); }
+  if (e.key === 'Escape') { clearResults(); }
+});
+</script>
+{% endblock %}

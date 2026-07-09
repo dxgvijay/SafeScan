@@ -1,0 +1,880 @@
+{% extends 'base.html' %}{% load static %}{% block title %}Code Editor — CipherScan IDE{% endblock %}{% block body_class %}sandbox-editor-page{% endblock %}{% block content %}
+<style>
+/* ============================================================
+   IDE WORKSPACE — Full Viewport
+   ============================================================ */
+body.sandbox-editor-page .content-area { padding: 0 !important; display: flex; flex-direction: column; flex: 1; }
+body.sandbox-editor-page .main-wrapper { max-width: 100% !important; overflow: hidden; }
+body.sandbox-editor-page .footer-cs { display: none !important; }
+body.sandbox-editor-page .page-header { display: none !important; }
+
+.ide-workspace {
+  display: flex; flex-direction: column;
+  width: 100%; height: calc(100vh - 72px);
+  background: #1e1e1e; overflow: hidden;
+}
+
+.ide-main {
+  display: flex; flex: 1; min-height: 0;
+  width: 100%;
+}
+
+.ide-left {
+  display: flex; flex-direction: column;
+  width: 72%; min-width: 280px;
+  background: #1e1e1e;
+}
+
+.ide-toolbar {
+  display: flex; align-items: center; height: 40px;
+  padding: 0 10px; background: #252526;
+  border-bottom: 1px solid #3c3c3c;
+  gap: 6px; flex-shrink: 0; user-select: none;
+}
+.ide-toolbar-left { display: flex; align-items: center; gap: 8px; }
+.ide-toolbar-center {
+  flex: 1; text-align: center;
+  color: #858585; font-size: 13px;
+  font-family: var(--font-mono); white-space: nowrap; overflow: hidden;
+}
+.ide-toolbar-right { display: flex; align-items: center; gap: 2px; }
+
+#language-select {
+  background: #3c3c3c; color: #cccccc;
+  border: 1px solid #555; padding: 3px 8px;
+  border-radius: 3px; font-size: 12px;
+  font-family: var(--font-ui); cursor: pointer; outline: none;
+  max-width: 140px;
+}
+#language-select:hover { border-color: var(--accent-cyan); }
+
+.tb-btn {
+  background: transparent; color: #cccccc;
+  border: none; padding: 4px 7px; border-radius: 3px;
+  cursor: pointer; font-size: 13px;
+  font-family: var(--font-ui);
+  display: inline-flex; align-items: center; gap: 4px;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.tb-btn:hover { background: rgba(255,255,255,0.1); }
+.tb-btn:active { background: rgba(255,255,255,0.15); }
+.tb-btn.run-btn {
+  background: #0e639c; color: #fff; font-weight: 600; padding: 4px 12px;
+}
+.tb-btn.run-btn:hover { background: #1177bb; }
+.tb-btn.run-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.tb-btn.icon-only { padding: 4px 6px; font-size: 14px; }
+.tb-btn .btn-label { font-size: 12px; }
+.tb-btn.active { color: #007acc; background: rgba(0,122,204,0.15); }
+
+.ide-body { flex: 1; position: relative; overflow: hidden; }
+#code-editor { width: 100% !important; height: 100% !important; }
+
+.ide-resizer {
+  width: 5px; cursor: col-resize;
+  background: #3c3c3c; flex-shrink: 0;
+  position: relative; z-index: 10;
+  transition: background 0.15s;
+}
+.ide-resizer:hover, .ide-resizer.resizing { background: #007acc; }
+.ide-resizer::after {
+  content: ''; position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 2px; height: 30px;
+  background: rgba(255,255,255,0.12); border-radius: 1px;
+}
+.ide-resizer:hover::after, .ide-resizer.resizing::after { background: rgba(255,255,255,0.35); }
+
+.ide-right {
+  display: flex; flex-direction: column;
+  width: 28%; min-width: 200px;
+  background: #1e1e1e;
+}
+
+.ide-tabs {
+  display: flex; background: #252526;
+  border-bottom: 1px solid #3c3c3c;
+  flex-shrink: 0; min-height: 35px;
+  overflow-x: auto;
+}
+.ide-tab {
+  display: flex; align-items: center; gap: 5px;
+  padding: 0 14px; background: #2d2d2d;
+  color: #858585; border: none;
+  border-right: 1px solid #252526;
+  cursor: pointer; font-size: 12px;
+  font-family: var(--font-ui); white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+  position: relative;
+}
+.ide-tab:hover { background: rgba(255,255,255,0.06); color: #cccccc; }
+.ide-tab.active { background: #1e1e1e; color: #cccccc; }
+.ide-tab.active::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+  height: 1px; background: #007acc;
+}
+
+.ide-tab-content { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+.ide-tab-content.active { display: flex; }
+
+.ide-tab-toolbar {
+  display: flex; align-items: center; justify-content: flex-end;
+  gap: 2px; padding: 3px 8px; background: #252526;
+  border-bottom: 1px solid #3c3c3c; flex-shrink: 0;
+}
+
+#output-box {
+  flex: 1; overflow: auto; padding: 12px 16px;
+  font-family: var(--font-mono); font-size: 13px; line-height: 1.5;
+  color: #d4d4d4; white-space: pre-wrap; word-break: break-all;
+  background: #1e1e1e;
+}
+#output-box .op { color: #858585; }
+#output-box .os { color: #d4d4d4; }
+#output-box .oe { color: #f48771; }
+#output-box .osep { color: #858585; opacity: 0.5; }
+#output-box .om { color: #858585; font-size: 11px; }
+
+#stdin-input {
+  flex: 1; min-height: 60px; padding: 12px 16px;
+  background: #1e1e1e; border: none; outline: none;
+  color: #d4d4d4; font-family: var(--font-mono); font-size: 13px;
+  resize: none;
+}
+#stdin-input::placeholder { color: #858585; }
+
+#tab-problems { padding: 12px 16px; font-family: var(--font-mono); font-size: 13px; color: #858585; overflow-y: auto; }
+
+#tab-summary { padding: 16px; font-family: var(--font-mono); font-size: 13px; overflow-y: auto; }
+.summary-section { margin-bottom: 16px; }
+.summary-section:last-child { margin-bottom: 0; }
+.summary-section h4 {
+  color: #858585; font-size: 10px; text-transform: uppercase;
+  letter-spacing: 0.08em; margin: 0 0 8px 0; font-weight: 600;
+}
+.summary-row {
+  display: flex; justify-content: space-between;
+  padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.summary-row:last-child { border-bottom: none; }
+.sl { color: #858585; }
+.sv { color: #d4d4d4; }
+.sv.sready { color: #858585; }
+.sv.srunning { color: #cca700; }
+.sv.scompleted { color: #4ec9b0; }
+.sv.serror { color: #f48771; }
+
+/* ─── History Tab ─── */
+#history-box { flex: 1; overflow: auto; font-family: var(--font-mono); font-size: 12px; }
+.history-item {
+  padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.04);
+  cursor: pointer; transition: background 0.15s;
+}
+.history-item:hover { background: rgba(255,255,255,0.04); }
+.history-item:active { background: rgba(255,255,255,0.08); }
+.history-item-title {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;
+}
+.history-item-lang { font-weight: 600; }
+.history-item-lang.completed { color: #4ec9b0; }
+.history-item-lang.error { color: #f48771; }
+.history-item-time { color: #858585; font-size: 11px; }
+.history-item-preview {
+  color: #858585; font-size: 11px; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap;
+}
+.history-item-meta { color: #858585; font-size: 11px; margin-top: 2px; }
+
+/* ─── Keyboard Shortcuts Modal ─── */
+.shortcuts-overlay {
+  display: none; position: fixed; inset: 0; z-index: 10000;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+  justify-content: center; align-items: center;
+}
+.shortcuts-overlay.open { display: flex; }
+.shortcuts-modal {
+  background: #1e1e1e; border: 1px solid #3c3c3c;
+  border-radius: 8px; max-width: 520px; width: 90%;
+  max-height: 80vh; overflow-y: auto; box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+}
+.shortcuts-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 16px; border-bottom: 1px solid #3c3c3c;
+}
+.shortcuts-header h3 { margin: 0; font-size: 14px; color: #cccccc; }
+.shortcuts-header button {
+  background: none; border: none; color: #858585; font-size: 18px;
+  cursor: pointer; padding: 4px 6px; border-radius: 3px;
+}
+.shortcuts-header button:hover { background: rgba(255,255,255,0.1); color: #cccccc; }
+.shortcuts-body { padding: 8px 16px 16px; }
+.shortcut-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.shortcut-row:last-child { border-bottom: none; }
+.shortcut-keys { display: flex; align-items: center; gap: 2px; }
+.shortcut-keys kbd {
+  display: inline-block; padding: 2px 6px; font-size: 11px; line-height: 1.4;
+  background: #2d2d2d; border: 1px solid #3c3c3c; border-radius: 3px;
+  color: #cccccc; font-family: var(--font-mono); white-space: nowrap;
+}
+.shortcut-desc { color: #858585; font-size: 12px; }
+
+/* ─── Maximized Editor ─── */
+.ide-workspace.ide-maximized .ide-toolbar-center { display: none; }
+.ide-workspace.ide-maximized .ide-toolbar-left { display: none; }
+.ide-workspace.ide-maximized #language-select { display: none; }
+.ide-workspace.ide-maximized .tb-btn .btn-label { display: none; }
+
+.ide-status {
+  display: flex; justify-content: space-between; align-items: center;
+  height: 24px; padding: 0 10px;
+  background: #007acc; font-size: 12px; color: #fff;
+  font-family: var(--font-ui); flex-shrink: 0; user-select: none;
+  width: 100%;
+}
+.status-left, .status-right {
+  display: flex; align-items: center; gap: 10px;
+}
+.status-item {
+  display: flex; align-items: center; gap: 4px;
+  cursor: default; white-space: nowrap;
+}
+.status-item:hover {
+  background: rgba(255,255,255,0.12);
+  padding: 0 4px; margin: 0 -4px; border-radius: 2px;
+}
+
+/* ============================================================
+   RESPONSIVE — < 992px: Stack vertically
+   ============================================================ */
+@media (max-width: 991.98px) {
+  .ide-main { flex-direction: column; }
+  .ide-left { width: 100% !important; height: 65%; min-height: 0; }
+  .ide-right { width: 100% !important; height: 35%; min-height: 0; }
+  .ide-resizer { display: none; }
+  .ide-workspace { height: calc(100vh - 72px); }
+}
+@media (max-width: 575.98px) {
+  .tb-btn .btn-label { display: none; }
+  .ide-tab { padding: 0 8px; font-size: 11px; }
+  .ide-status { font-size: 11px; flex-wrap: wrap; height: auto; padding: 4px 8px; gap: 4px; }
+  .ide-toolbar-center { display: none; }
+  #language-select { max-width: 100px; }
+  .shortcuts-modal { max-width: 100%; margin: 8px; max-height: 90vh; }
+}
+</style>
+
+<div class="ide-workspace">
+  <div class="ide-main">
+
+    <!-- LEFT: EDITOR -->
+    <div class="ide-left" id="ide-left">
+      <div class="ide-toolbar">
+        <div class="ide-toolbar-left">
+          <select id="language-select" aria-label="Language">
+            {% for lang in languages %}
+            <option value="{{ lang.key }}"{% if lang.key == default_language %} selected{% endif %}>{{ lang.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="ide-toolbar-center"><span id="file-name">untitled.py</span></div>
+        <div class="ide-toolbar-right">
+          <button id="run-btn" class="tb-btn run-btn" onclick="runCode()"><i class="bi bi-play-fill"></i><span class="btn-label">Run</span></button>
+          <button class="tb-btn" onclick="clearCode()" title="Clear code"><i class="bi bi-x"></i><span class="btn-label">Clear</span></button>
+          <button class="tb-btn" onclick="resetCode()" title="Reset to starter"><i class="bi bi-arrow-counterclockwise"></i><span class="btn-label">Reset</span></button>
+          <button class="tb-btn" onclick="copyCode()" title="Copy code"><i class="bi bi-clipboard"></i><span class="btn-label">Copy</span></button>
+          <button class="tb-btn" onclick="downloadCode()" title="Download code"><i class="bi bi-download"></i><span class="btn-label">Download</span></button>
+          <button class="tb-btn icon-only" onclick="toggleWordWrap()" id="wrap-btn" title="Toggle word wrap" style="opacity:0.5"><i class="bi bi-code"></i></button>
+          <button class="tb-btn icon-only" onclick="toggleTheme()" id="theme-btn" title="Toggle editor theme (dark/light)"><i class="bi bi-sun-fill"></i></button>
+          <button class="tb-btn icon-only" onclick="maximizeEditor()" id="max-btn" title="Toggle maximize editor"><i class="bi bi-arrows-angle-expand"></i></button>
+          <button class="tb-btn icon-only" onclick="showShortcuts()" title="Keyboard shortcuts"><i class="bi bi-keyboard"></i></button>
+        </div>
+      </div>
+      <div class="ide-body"><div id="code-editor"></div></div>
+    </div>
+
+    <!-- RESIZER -->
+    <div class="ide-resizer" id="resizer"></div>
+
+    <!-- RIGHT: OUTPUT -->
+    <div class="ide-right" id="ide-right">
+      <div class="ide-tabs">
+        <button class="ide-tab active" data-tab="output"><i class="bi bi-terminal tab-icon"></i> Output</button>
+        <button class="ide-tab" data-tab="stdin"><i class="bi bi-keyboard tab-icon"></i> Input</button>
+        <button class="ide-tab" data-tab="problems"><i class="bi bi-exclamation-triangle tab-icon"></i> Problems</button>
+        <button class="ide-tab" data-tab="summary"><i class="bi bi-bar-chart tab-icon"></i> Summary</button>
+        <button class="ide-tab" data-tab="history"><i class="bi bi-clock-history tab-icon"></i> History</button>
+      </div>
+
+      <div class="ide-tab-content active" id="tab-output">
+        <div class="ide-tab-toolbar">
+          <button class="tb-btn icon-only" onclick="copyOutput()" title="Copy output"><i class="bi bi-clipboard"></i></button>
+          <button class="tb-btn icon-only" onclick="downloadOutput()" title="Download output"><i class="bi bi-download"></i></button>
+          <button class="tb-btn icon-only" onclick="clearOutput()" title="Clear output"><i class="bi bi-eraser"></i></button>
+        </div>
+        <div id="output-box"><span class="op">Run your code to see output here.</span></div>
+      </div>
+
+      <div class="ide-tab-content" id="tab-stdin">
+        <textarea id="stdin-input" placeholder="Optional input for your program..."></textarea>
+      </div>
+
+      <div class="ide-tab-content" id="tab-problems">
+        <div id="problems-box"><span class="op">No problems detected.</span></div>
+      </div>
+
+      <div class="ide-tab-content" id="tab-summary">
+        <div id="summary-box">
+          <div class="summary-section">
+            <h4>Execution Details</h4>
+            <div class="summary-row"><span class="sl">Language</span><span class="sv" id="summary-lang">—</span></div>
+            <div class="summary-row"><span class="sl">Status</span><span class="sv" id="summary-status">—</span></div>
+            <div class="summary-row"><span class="sl">Exit Code</span><span class="sv" id="summary-exitcode">—</span></div>
+            <div class="summary-row"><span class="sl">Duration</span><span class="sv" id="summary-duration">—</span></div>
+            <div class="summary-row"><span class="sl">Memory</span><span class="sv" id="summary-memory">—</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ide-tab-content" id="tab-history">
+        <div class="ide-tab-toolbar">
+          <button class="tb-btn" onclick="clearHistory()" title="Clear history"><i class="bi bi-eraser"></i><span class="btn-label">Clear All</span></button>
+        </div>
+        <div id="history-box"><span class="op" style="padding:12px;display:block">No run history yet.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATUS BAR (full width) -->
+  <div class="ide-status">
+    <div class="status-left">
+      <span class="status-item" id="status-lang" title="Language"><i class="bi bi-code"></i> Python</span>
+      <span class="status-item" id="status-cursor" title="Cursor position"><i class="bi bi-text-paragraph"></i> Ln 1, Col 1</span>
+      <span class="status-item" title="Indentation">Spaces: 4</span>
+      <span class="status-item" title="Encoding">UTF-8</span>
+      <span class="status-item" id="status-theme" title="Editor theme">Theme: Dark</span>
+    </div>
+    <div class="status-right">
+      <span class="status-item" id="status-info">Ready</span>
+      <span class="status-item" id="status-time" style="display:none"></span>
+    </div>
+  </div>
+</div>
+
+<!-- Keyboard Shortcuts Modal -->
+<div class="shortcuts-overlay" id="shortcuts-modal" onclick="if(event.target===this)hideShortcuts()">
+  <div class="shortcuts-modal">
+    <div class="shortcuts-header">
+      <h3><i class="bi bi-keyboard" style="margin-right:6px"></i>Keyboard Shortcuts</h3>
+      <button onclick="hideShortcuts()" title="Close"><i class="bi bi-x"></i></button>
+    </div>
+    <div class="shortcuts-body">
+      <div class="shortcut-row"><span class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>Enter</kbd></span><span class="shortcut-desc">Run code</span></div>
+      <div class="shortcut-row"><span class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>L</kbd></span><span class="shortcut-desc">Clear editor</span></div>
+      <div class="shortcut-row"><span class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>S</kbd></span><span class="shortcut-desc">Download code</span></div>
+      <div class="shortcut-row"><span class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>K</kbd></span><span class="shortcut-desc">Clear output</span></div>
+      <div class="shortcut-row"><span class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>D</kbd></span><span class="shortcut-desc">Download output</span></div>
+      <div class="shortcut-row"><span class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>H</kbd></span><span class="shortcut-desc">Toggle History tab</span></div>
+      <div class="shortcut-row"><span class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>T</kbd></span><span class="shortcut-desc">Toggle editor theme</span></div>
+      <div class="shortcut-row"><span class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>M</kbd></span><span class="shortcut-desc">Maximize editor</span></div>
+      <div class="shortcut-row"><span class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>/</kbd></span><span class="shortcut-desc">Toggle comment</span></div>
+      <div class="shortcut-row"><span class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>/</kbd></span><span class="shortcut-desc">Show shortcuts</span></div>
+      <div class="shortcut-row"><span class="shortcut-keys"><kbd>F11</kbd></span><span class="shortcut-desc">Browser fullscreen</span></div>
+      <div class="shortcut-row"><span class="shortcut-keys"><kbd>Escape</kbd></span><span class="shortcut-desc">Close modal / Exit fullscreen</span></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
+<script>
+const LANGUAGES = {{ languages_json|safe }};
+
+const STARTERS = {
+  python: '# Python 3.10\nprint("Hello, CipherScan!")\n\nfor i in range(5):\n    print(f"Line {i+1}")',
+  javascript: '// JavaScript\nconsole.log("Hello, CipherScan!");\n\n[1,2,3,4,5].forEach(n => console.log(n * 2));',
+  nodejs: '// Node.js 18\nconsole.log("Hello, CipherScan!");\n\nconst nums = [1,2,3,4,5];\nnums.forEach(n => console.log(n * 2));',
+  bash: '#!/bin/bash\necho "Hello, CipherScan!"\n\nfor i in {1..5}; do\n  echo "Line $i"\ndone',
+  c: '#include <stdio.h>\n\nint main() {\n    printf("Hello, CipherScan!\\n");\n    return 0;\n}',
+  cpp: '#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << "Hello, CipherScan!" << endl;\n    return 0;\n}',
+  java: 'public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello, CipherScan!");\n    }\n}',
+  php: '<?php\necho "Hello, CipherScan!\\n";\n\nfor ($i = 0; $i < 5; $i++) {\n    echo "Line " . ($i + 1) . "\\n";\n}\n',
+  ruby: '# Ruby 3.0\nputs "Hello, CipherScan!"\n\n(1..5).each { |i| puts "Line #{i}" }',
+  go: 'package main\n\nimport "fmt"\n\nfunc main() {\n    fmt.Println("Hello, CipherScan!")\n}',
+  rust: 'fn main() {\n    println!("Hello, CipherScan!");\n}',
+  r: '# R 4.1\ncat("Hello, CipherScan!\\n")\n\nfor (i in 1:5) {\n    cat("Line", i, "\\n")}\n'
+};
+
+let editor;
+let editorWrap = false;
+let editorTheme = 'vs-dark';
+let editorMaximized = false;
+const HISTORY_KEY = 'sandbox_run_history';
+const MAX_HISTORY = 50;
+const THEME_KEY = 'sandbox_editor_theme';
+
+function getLang() { return document.getElementById('language-select').value; }
+function langInfo(k) { return LANGUAGES[k] || LANGUAGES.python; }
+
+function updateStatus(state, timeMs) {
+  var el = document.getElementById('status-info');
+  var labels = { ready: 'Ready', running: 'Running...', completed: 'Completed', error: 'Error' };
+  el.textContent = labels[state] || state;
+  var ss = document.getElementById('summary-status');
+  if (ss) { ss.textContent = labels[state] || state; ss.className = 'sv s' + state; }
+  var te = document.getElementById('status-time');
+  if (timeMs != null) { te.textContent = timeMs + ' ms'; te.style.display = ''; }
+}
+
+function updateCursor() {
+  if (!editor) return;
+  var pos = editor.getPosition();
+  document.getElementById('status-cursor').innerHTML = '<i class="bi bi-text-paragraph"></i> Ln ' + pos.lineNumber + ', Col ' + pos.column;
+  var info = langInfo(getLang());
+  document.getElementById('status-lang').innerHTML = '<i class="bi bi-code"></i> ' + info.name;
+}
+
+function updateFileName(k) { document.getElementById('file-name').textContent = 'untitled.' + langInfo(k).ext; }
+
+function clearCode() { editor.setValue(''); editor.focus(); updateStatus('ready'); }
+function resetCode() { var k = getLang(); editor.setValue(STARTERS[k] || STARTERS.python); editor.focus(); updateStatus('ready'); }
+
+function copyCode() {
+  var code = editor ? editor.getValue() : '';
+  if (!code) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(code).catch(function() { fallbackCopy(code); });
+  } else { fallbackCopy(code); }
+}
+function fallbackCopy(t) {
+  var ta = document.createElement('textarea'); ta.value = t;
+  ta.style.position = 'fixed'; ta.style.left = '-9999px';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); } catch(e) {}
+  document.body.removeChild(ta);
+}
+
+function downloadCode() {
+  var k = getLang(); var code = editor ? editor.getValue() : '';
+  if (!code) return;
+  var blob = new Blob([code], { type: 'text/plain' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a'); a.href = url; a.download = 'code.' + langInfo(k).ext;
+  a.click(); URL.revokeObjectURL(url);
+}
+
+function toggleWordWrap() {
+  editorWrap = !editorWrap;
+  editor.updateOptions({ wordWrap: editorWrap ? 'on' : 'off' });
+  document.getElementById('wrap-btn').style.opacity = editorWrap ? '1' : '0.5';
+}
+
+function toggleTheme() {
+  editorTheme = editorTheme === 'vs-dark' ? 'vs' : 'vs-dark';
+  monaco.editor.setTheme(editorTheme);
+  var btn = document.getElementById('theme-btn');
+  btn.innerHTML = editorTheme === 'vs-dark' ? '<i class="bi bi-sun-fill"></i>' : '<i class="bi bi-moon-fill"></i>';
+  btn.title = editorTheme === 'vs-dark' ? 'Switch to light theme' : 'Switch to dark theme';
+  document.getElementById('status-theme').textContent = 'Theme: ' + (editorTheme === 'vs-dark' ? 'Dark' : 'Light');
+  localStorage.setItem(THEME_KEY, editorTheme);
+}
+
+function maximizeEditor() {
+  editorMaximized = !editorMaximized;
+  var ws = document.querySelector('.ide-workspace');
+  ws.classList.toggle('ide-maximized', editorMaximized);
+  var btn = document.getElementById('max-btn');
+  btn.innerHTML = editorMaximized ? '<i class="bi bi-arrows-angle-contract"></i>' : '<i class="bi bi-arrows-angle-expand"></i>';
+  btn.title = editorMaximized ? 'Restore editor' : 'Maximize editor';
+  setTimeout(function() { if (editor) editor.layout(); }, 50);
+}
+
+function copyOutput() {
+  var text = document.getElementById('output-box').textContent;
+  if (!text) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).catch(function(){ fallbackCopy(text); });
+  } else { fallbackCopy(text); }
+}
+
+function downloadOutput() {
+  var text = document.getElementById('output-box').textContent;
+  if (!text || text === 'Run your code to see output here.' || text === 'Output cleared.') return;
+  var blob = new Blob([text], { type: 'text/plain' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a'); a.href = url; a.download = 'output.txt';
+  a.click(); URL.revokeObjectURL(url);
+}
+
+function clearOutput() {
+  document.getElementById('output-box').innerHTML = '<span class="op">Output cleared.</span>';
+}
+
+function escapeHtml(t) { return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function switchTab(name) {
+  document.querySelectorAll('.ide-tab').forEach(function(t){ t.classList.toggle('active', t.dataset.tab === name); });
+  document.querySelectorAll('.ide-tab-content').forEach(function(t){ t.classList.toggle('active', t.id === 'tab-' + name); });
+  if (name === 'history') renderHistory();
+}
+
+document.querySelectorAll('.ide-tab').forEach(function(tab) {
+  tab.addEventListener('click', function() {
+    var name = this.dataset.tab;
+    document.querySelectorAll('.ide-tab').forEach(function(t){ t.classList.remove('active'); });
+    document.querySelectorAll('.ide-tab-content').forEach(function(t){ t.classList.remove('active'); });
+    this.classList.add('active');
+    document.getElementById('tab-' + name).classList.add('active');
+    if (name === 'history') renderHistory();
+  });
+});
+
+// ─── Run History ───
+function getHistory() {
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; } catch(e) { return []; }
+}
+
+function addHistoryEntry(entry) {
+  var history = getHistory();
+  history.unshift(entry);
+  if (history.length > MAX_HISTORY) history = history.slice(0, MAX_HISTORY);
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+}
+
+function renderHistory() {
+  var box = document.getElementById('history-box');
+  var history = getHistory();
+  if (history.length === 0) {
+    box.innerHTML = '<span class="op" style="padding:12px;display:block">No run history yet.</span>';
+    return;
+  }
+  var html = '';
+  history.forEach(function(h, i) {
+    var info = LANGUAGES[h.language] || LANGUAGES.python;
+    var statusClass = h.status === 'error' ? 'error' : 'completed';
+    html += '<div class="history-item" onclick="restoreHistory(' + i + ')">';
+    html += '<div class="history-item-title">';
+    html += '<span class="history-item-lang ' + statusClass + '">' + info.name + '</span>';
+    html += '<span class="history-item-time">' + h.timestamp + '</span>';
+    html += '</div>';
+    html += '<div class="history-item-preview">' + escapeHtml(h.code_preview || '') + '</div>';
+    html += '<div class="history-item-meta">⚡ ' + (h.duration_ms != null ? h.duration_ms + ' ms' : '—') + ' &middot; 💾 ' + (h.memory_mb != null ? h.memory_mb + ' MB' : '—') + ' &middot; Exit: ' + (h.exit_code != null ? h.exit_code : '—') + '</div>';
+    html += '</div>';
+  });
+  box.innerHTML = html;
+}
+
+function restoreHistory(index) {
+  var history = getHistory();
+  var entry = history[index];
+  if (!entry) return;
+  document.getElementById('language-select').value = entry.language;
+  var info = LANGUAGES[entry.language] || LANGUAGES.python;
+  monaco.editor.setModelLanguage(editor.getModel(), info.monaco);
+  editor.setValue(entry.code);
+  document.getElementById('stdin-input').value = entry.stdin || '';
+  updateFileName(entry.language);
+  document.getElementById('status-lang').innerHTML = '<i class="bi bi-code"></i> ' + info.name;
+  updateStatus('ready');
+  switchTab('output');
+}
+
+function clearHistory() {
+  if (getHistory().length === 0) return;
+  localStorage.removeItem(HISTORY_KEY);
+  renderHistory();
+}
+
+// ─── Shortcuts Modal ───
+function showShortcuts() {
+  document.getElementById('shortcuts-modal').classList.add('open');
+}
+function hideShortcuts() {
+  document.getElementById('shortcuts-modal').classList.remove('open');
+}
+
+// Resizer
+(function() {
+  var rz = document.getElementById('resizer');
+  var lp = document.getElementById('ide-left');
+  var rp = document.getElementById('ide-right');
+  var active = false;
+  if (!rz || !lp || !rp) return;
+  rz.addEventListener('mousedown', function(e) {
+    active = true; rz.classList.add('resizing');
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  });
+  document.addEventListener('mousemove', function(e) {
+    if (!active) return;
+    var total = lp.offsetWidth + rp.offsetWidth + rz.offsetWidth;
+    var pct = ((e.clientX - lp.getBoundingClientRect().left) / total) * 100;
+    if (pct < 25) pct = 25; if (pct > 80) pct = 80;
+    lp.style.width = pct + '%'; rp.style.width = (100 - pct) + '%';
+  });
+  document.addEventListener('mouseup', function() {
+    if (active) {
+      active = false; rz.classList.remove('resizing');
+      document.body.style.cursor = ''; document.body.style.userSelect = '';
+    }
+  });
+})();
+
+require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs' }});
+require(['vs/editor/editor.main'], function () {
+  var defLang = '{{ default_language }}' || 'python';
+  var info = LANGUAGES[defLang] || LANGUAGES.python;
+  var savedTheme = localStorage.getItem(THEME_KEY) || 'vs-dark';
+  editorTheme = savedTheme;
+
+  editor = monaco.editor.create(document.getElementById('code-editor'), {
+    value: STARTERS[defLang] || STARTERS.python,
+    language: info.monaco,
+    theme: editorTheme,
+    minimap: { enabled: false },
+    automaticLayout: true,
+    bracketPairColorization: { enabled: true },
+    autoIndent: 'full',
+    formatOnPaste: true,
+    lineNumbers: 'on',
+    scrollBeyondLastLine: false,
+    fontSize: 15,
+    fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, 'Courier New', monospace",
+    fontLigatures: true,
+    padding: { top: 16 },
+    cursorBlinking: 'smooth',
+    cursorSmoothCaretAnimation: 'on',
+    smoothScrolling: true,
+    autoClosingBrackets: 'always',
+    autoClosingQuotes: 'always',
+    autoSurround: 'languageDefined',
+    folding: true,
+    foldingStrategy: 'indentation',
+    wordWrap: 'off',
+    wordWrapColumn: 120,
+    scrollbar: {
+      verticalScrollbarSize: 10, horizontalScrollbarSize: 10,
+      useShadows: false, verticalHasArrows: false, horizontalHasArrows: false
+    },
+    overviewRulerBorder: false,
+    hideCursorInOverviewRuler: true,
+    renderLineHighlight: 'line',
+    contextmenu: true,
+    quickSuggestions: true,
+    parameterHints: { enabled: true },
+    suggestOnTriggerCharacters: true,
+    acceptSuggestionOnEnter: 'on',
+    tabCompletion: 'on',
+    snippetSuggestions: 'inline',
+    wordBasedSuggestions: 'currentDocument',
+    selectionHighlight: true,
+    matchBrackets: 'always',
+    occurrencesHighlight: 'singleFile',
+    renderControlCharacters: true,
+    renderWhitespace: 'selection',
+    colorDecorators: true,
+    lightbulb: { enabled: true }
+  });
+
+  editor.onDidChangeCursorPosition(function() { updateCursor(); });
+  editor.onDidChangeModelContent(function() { updateCursor(); updateStatus('ready'); });
+
+  updateStatus('ready');
+  updateCursor();
+  updateFileName(defLang);
+  document.getElementById('status-theme').textContent = 'Theme: ' + (editorTheme === 'vs-dark' ? 'Dark' : 'Light');
+  if (editorTheme === 'vs') {
+    document.getElementById('theme-btn').innerHTML = '<i class="bi bi-moon-fill"></i>';
+    document.getElementById('theme-btn').title = 'Switch to dark theme';
+  }
+
+  var sel = document.getElementById('language-select');
+  document.getElementById('status-lang').innerHTML = '<i class="bi bi-code"></i> ' + info.name;
+  sel.value = defLang;
+
+  sel.addEventListener('change', function() {
+    var k = this.value;
+    var i = LANGUAGES[k] || LANGUAGES.python;
+    monaco.editor.setModelLanguage(editor.getModel(), i.monaco);
+    editor.setValue(STARTERS[k] || STARTERS.python);
+    editor.focus();
+    updateFileName(k);
+    document.getElementById('status-lang').innerHTML = '<i class="bi bi-code"></i> ' + i.name;
+    updateStatus('ready');
+  });
+
+  editor.addAction({
+    id: 'clear-editor', label: 'Clear Editor',
+    keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyL],
+    run: function() { clearCode(); }
+  });
+
+  editor.addAction({
+    id: 'save-download', label: 'Save / Download',
+    keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS],
+    run: function() { downloadCode(); }
+  });
+});
+
+async function runCode() {
+  var language = getLang();
+  var code = editor ? editor.getValue() : '';
+  var stdin = document.getElementById('stdin-input').value || '';
+  var startTime = performance.now();
+
+  if (!code.trim()) {
+    document.getElementById('output-box').innerHTML = '<span style="color:#f48771">&#9888; Please enter some code first.</span>';
+    switchTab('output');
+    return;
+  }
+
+  updateStatus('running');
+  var ss = document.getElementById('summary-status');
+  ss.textContent = 'Running...'; ss.className = 'sv sr';
+
+  var btn = document.getElementById('run-btn');
+  btn.innerHTML = '<i class="bi bi-arrow-repeat"></i><span class="btn-label">Running</span>';
+  btn.disabled = true;
+
+  var outputBox = document.getElementById('output-box');
+  outputBox.innerHTML = '<span class="op">Running your code...</span>';
+  switchTab('output');
+
+  // Live timer
+  var timeEl = document.getElementById('status-time');
+  timeEl.style.display = '';
+  var timerInterval = setInterval(function() {
+    var elapsed = Math.round(performance.now() - startTime);
+    timeEl.textContent = elapsed + ' ms';
+  }, 100);
+
+  function getCookie(name) {
+    var val = null;
+    document.cookie.split(';').forEach(function(c) {
+      c = c.trim();
+      if (c.startsWith(name + '=')) val = decodeURIComponent(c.substring(name.length + 1));
+    });
+    return val;
+  }
+
+  try {
+    var res = await fetch('/api/sandbox/execute/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken')
+      },
+      body: JSON.stringify({ language: language, code: code, stdin: stdin })
+    });
+
+    var result = await res.json();
+    var elapsed = Math.round(performance.now() - startTime);
+    clearInterval(timerInterval);
+
+    // Save to history
+    var historyEntry = {
+      language: language,
+      code: code,
+      stdin: stdin,
+      code_preview: code.substring(0, 80).replace(/\n/g, ' '),
+      timestamp: new Date().toLocaleString(),
+      status: result.error ? 'error' : 'completed',
+      duration_ms: result.duration_ms || elapsed,
+      memory_mb: result.memory_mb || null,
+      exit_code: result.exit_code != null ? result.exit_code : null
+    };
+    addHistoryEntry(historyEntry);
+
+    if (result.error) {
+      updateStatus('error', elapsed);
+      outputBox.innerHTML = '<span style="color:#f48771">Error: ' + escapeHtml(result.error) + '</span>';
+      ss.textContent = 'Error'; ss.className = 'sv se';
+      return;
+    }
+
+    var html = '';
+    if (result.output) {
+      html += '<span class="os">' + escapeHtml(result.output) + '</span>\n';
+    }
+    if (result.stderr) {
+      html += '<span class="oe">' + escapeHtml(result.stderr) + '</span>\n';
+    }
+    if (!result.output && !result.stderr) {
+      html += '<span class="op">Program finished with no output.</span>\n';
+    }
+    html += '\n<span class="osep">' + '─'.repeat(50) + '</span>\n';
+    html += '<span class="om">Exit Code: ' + (result.exit_code != null ? result.exit_code : 'N/A') + '</span>\n';
+    html += '<span class="om">Duration: ' + (result.duration_ms != null ? result.duration_ms : 'N/A') + ' ms</span>\n';
+    html += '<span class="om">Memory: ' + (result.memory_mb != null ? result.memory_mb : 'N/A') + ' MB</span>';
+
+    updateStatus('completed', elapsed);
+    outputBox.innerHTML = html;
+    outputBox.scrollTop = outputBox.scrollHeight;
+
+    var info = langInfo(language);
+    document.getElementById('summary-lang').textContent = info.name;
+    ss.textContent = 'Completed'; ss.className = 'sv sc';
+    document.getElementById('summary-exitcode').textContent = result.exit_code != null ? result.exit_code : 'N/A';
+    document.getElementById('summary-duration').textContent = (result.duration_ms != null ? result.duration_ms : 'N/A') + ' ms';
+    document.getElementById('summary-memory').textContent = (result.memory_mb != null ? result.memory_mb : 'N/A') + ' MB';
+
+    if (result.stderr) {
+      document.getElementById('problems-box').innerHTML = '<span style="color:#f48771">' + escapeHtml(result.stderr) + '</span>';
+    } else {
+      document.getElementById('problems-box').innerHTML = '<span class="op">No problems detected.</span>';
+    }
+
+  } catch (err) {
+    clearInterval(timerInterval);
+    updateStatus('error', Math.round(performance.now() - startTime));
+    outputBox.innerHTML = '<span style="color:#f48771">Network error: ' + escapeHtml(err.message) + '</span>';
+    ss.textContent = 'Error'; ss.className = 'sv se';
+  } finally {
+    btn.innerHTML = '<i class="bi bi-play-fill"></i><span class="btn-label">Run</span>';
+    btn.disabled = false;
+  }
+}
+
+document.addEventListener('keydown', function(e) {
+  var ctrl = e.ctrlKey || e.metaKey;
+  var shift = e.shiftKey;
+
+  if (ctrl && e.key === 'Enter') {
+    e.preventDefault(); runCode();
+  }
+  if (ctrl && !shift && e.key === 's') {
+    e.preventDefault(); downloadCode();
+  }
+  if (ctrl && shift && e.key === 'K') {
+    e.preventDefault(); clearOutput();
+  }
+  if (ctrl && !shift && e.key === 'd') {
+    e.preventDefault(); downloadOutput();
+  }
+  if (ctrl && shift && e.key === 'H') {
+    e.preventDefault();
+    var historyTab = document.querySelector('.ide-tab[data-tab="history"]');
+    if (historyTab) historyTab.click();
+  }
+  if (ctrl && !shift && e.key === 't') {
+    e.preventDefault(); toggleTheme();
+  }
+  if (ctrl && shift && e.key === 'M') {
+    e.preventDefault(); maximizeEditor();
+  }
+  if (ctrl && shift && e.key === '/') {
+    e.preventDefault();
+    var m = document.getElementById('shortcuts-modal');
+    if (m.classList.contains('open')) hideShortcuts(); else showShortcuts();
+  }
+  if (e.key === 'Escape') {
+    hideShortcuts();
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(function(){});
+    }
+  }
+});
+</script>
+{% endblock %}

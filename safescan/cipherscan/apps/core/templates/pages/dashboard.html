@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 {% load static %}
 
 {% block title %}Dashboard — CipherScan{% endblock %}
@@ -450,6 +450,19 @@
     max-height: 260px;
 }
 
+/* Threat donut – square wrapper */
+.threat-chart-wrapper {
+    width: min(320px, 85%);
+    aspect-ratio: 1 / 1;
+    margin: 0 auto;
+    position: relative;
+}
+.threat-chart-wrapper canvas {
+    width: 100% !important;
+    height: 100% !important;
+    max-height: none !important;
+}
+
 /* Donut center text */
 .donut-center {
     position: absolute;
@@ -767,53 +780,22 @@
     <div class="header-right">
         <div style="position:relative;">
             <button class="notif-btn" id="notifToggle" aria-label="Notifications">
-                <i class="fas fa-bell"></i>
-                <span class="notif-badge">3</span>
+                <i class="bi-bell"></i>
+                <span class="notif-badge">{{ notifications_count|default:0 }}</span>
             </button>
             <div class="notif-dropdown" id="notifDropdown">
                 <div class="notif-dropdown-header">
                     <h6>Notifications</h6>
                     <a id="markAllRead">Mark all read</a>
                 </div>
-                <div class="notif-item unread">
-                    <div class="notif-icon danger"><i class="fas fa-bug"></i></div>
-                    <div class="notif-text">
-                        <div class="notif-title">Critical threat detected on <span class="notif-em">login-secure-pay.com</span></div>
-                        <div class="notif-time">2 minutes ago</div>
-                    </div>
-                </div>
-                <div class="notif-item unread">
-                    <div class="notif-icon warning"><i class="fas fa-file"></i></div>
-                    <div class="notif-text">
-                        <div class="notif-title">File scan completed — <span class="notif-em">2 threats found</span> in invoice.pdf</div>
-                        <div class="notif-time">15 minutes ago</div>
-                    </div>
-                </div>
-                <div class="notif-item unread">
-                    <div class="notif-icon success"><i class="fas fa-check-circle"></i></div>
-                    <div class="notif-text">
-                        <div class="notif-title">Daily security report is <span class="notif-em">ready</span></div>
-                        <div class="notif-time">1 hour ago</div>
-                    </div>
-                </div>
-                <div class="notif-item">
-                    <div class="notif-icon info"><i class="fas fa-shield-halo"></i></div>
-                    <div class="notif-text">
-                        <div class="notif-title">Threat intelligence feed updated with 142 new IoCs</div>
-                        <div class="notif-time">3 hours ago</div>
-                    </div>
-                </div>
-                <div class="notif-item">
-                    <div class="notif-icon info"><i class="fas fa-cloud-arrow-up"></i></div>
-                    <div class="notif-text">
-                        <div class="notif-title">System update v2.4.1 deployed successfully</div>
-                        <div class="notif-time">5 hours ago</div>
-                    </div>
+                <div class="notif-item" style="justify-content:center;padding:2rem 1rem;color:var(--text-muted);">
+                    <i class="bi-bell-slash" style="font-size:1.5rem;display:block;text-align:center;"></i>
+                    <div style="text-align:center;font-size:0.75rem;">No new notifications</div>
                 </div>
             </div>
         </div>
         <a href="{% url 'settings' %}" class="btn-cs btn-cs-ghost btn-cs-sm" aria-label="Settings">
-            <i class="fas fa-gear"></i>
+            <i class="bi-gear"></i>
         </a>
     </div>
 </div>
@@ -825,60 +807,60 @@
     <div class="col-xl-3 col-md-6">
         <div class="stat-card-dash">
             <div class="stat-top">
-                <div class="stat-icon-box cyan"><i class="fas fa-chart-bar"></i></div>
+                <div class="stat-icon-box cyan"><i class="bi-bar-chart"></i></div>
                 <div class="stat-sparkline">
                     <canvas id="sparkTotal" width="90" height="36"></canvas>
                 </div>
             </div>
-            <div class="stat-value"><span class="counter" data-target="{{ total_scans|default:18473 }}">{{ total_scans|default:0 }}</span></div>
+            <div class="stat-value"><span class="counter" data-target="{{ total_scans|default:0 }}">{{ total_scans|default:0 }}</span></div>
             <div class="stat-label">Total Scans</div>
             <div class="stat-bottom">
-                <span class="stat-change up"><i class="fas fa-arrow-up"></i> {{ scan_change|default:"+12.5" }}%</span>
+                <span class="stat-change up"><i class="bi-arrow-up"></i> {{ scan_change|default:"0" }}%</span>
             </div>
         </div>
     </div>
     <div class="col-xl-3 col-md-6">
         <div class="stat-card-dash">
             <div class="stat-top">
-                <div class="stat-icon-box danger"><i class="fas fa-shield"></i></div>
+                <div class="stat-icon-box danger"><i class="bi-shield"></i></div>
                 <div class="stat-sparkline">
                     <canvas id="sparkThreats" width="90" height="36"></canvas>
                 </div>
             </div>
-            <div class="stat-value"><span class="counter" data-target="{{ threats_found|default:521 }}">{{ threats_found|default:0 }}</span></div>
+            <div class="stat-value"><span class="counter" data-target="{{ threats_found|default:0 }}">{{ threats_found|default:0 }}</span></div>
             <div class="stat-label">Threats Found</div>
             <div class="stat-bottom">
-                <span class="stat-change up"><i class="fas fa-arrow-up"></i> {{ threat_change|default:"+8.3" }}%</span>
+                <span class="stat-change up"><i class="bi-arrow-up"></i> {{ threat_change|default:"0" }}%</span>
             </div>
         </div>
     </div>
     <div class="col-xl-3 col-md-6">
         <div class="stat-card-dash">
             <div class="stat-top">
-                <div class="stat-icon-box orange"><i class="fas fa-file"></i></div>
+                <div class="stat-icon-box orange"><i class="bi-file-earmark"></i></div>
                 <div class="stat-sparkline">
                     <canvas id="sparkFiles" width="90" height="36"></canvas>
                 </div>
             </div>
-            <div class="stat-value"><span class="counter" data-target="{{ files_scanned|default:8473 }}">{{ files_scanned|default:0 }}</span></div>
+            <div class="stat-value"><span class="counter" data-target="{{ files_scanned|default:0 }}">{{ files_scanned|default:0 }}</span></div>
             <div class="stat-label">Files Scanned</div>
             <div class="stat-bottom">
-                <span class="stat-change up"><i class="fas fa-arrow-up"></i> {{ file_change|default:"+5.2" }}%</span>
+                <span class="stat-change up"><i class="bi-arrow-up"></i> {{ file_change|default:"0" }}%</span>
             </div>
         </div>
     </div>
     <div class="col-xl-3 col-md-6">
         <div class="stat-card-dash">
             <div class="stat-top">
-                <div class="stat-icon-box success"><i class="fas fa-link"></i></div>
+                <div class="stat-icon-box success"><i class="bi-link-45deg"></i></div>
                 <div class="stat-sparkline">
                     <canvas id="sparkUrls" width="90" height="36"></canvas>
                 </div>
             </div>
-            <div class="stat-value"><span class="counter" data-target="{{ urls_scanned|default:12984 }}">{{ urls_scanned|default:0 }}</span></div>
+            <div class="stat-value"><span class="counter" data-target="{{ urls_scanned|default:0 }}">{{ urls_scanned|default:0 }}</span></div>
             <div class="stat-label">URLs Scanned</div>
             <div class="stat-bottom">
-                <span class="stat-change up"><i class="fas fa-arrow-up"></i> {{ url_change|default:"+15.7" }}%</span>
+                <span class="stat-change up"><i class="bi-arrow-up"></i> {{ url_change|default:"0" }}%</span>
             </div>
         </div>
     </div>
@@ -891,7 +873,7 @@
     <div class="col-xl-8">
         <div class="activity-card">
             <div class="activity-header">
-                <h5><i class="fas fa-clock-rotate text-cyan me-1"></i> Recent Activity</h5>
+                <h5><i class="bi-clock-history text-cyan me-1"></i> Recent Activity</h5>
                 <div class="activity-actions">
                     <select id="activityFilter">
                         <option value="all">All Types</option>
@@ -901,7 +883,7 @@
                         <option value="ip">IP</option>
                     </select>
                     <a href="{% url 'scan_history' %}" class="btn-cs btn-cs-ghost btn-cs-sm">
-                        View All <i class="fas fa-arrow-right ms-1"></i>
+                        View All <i class="bi-arrow-right ms-1"></i>
                     </a>
                 </div>
             </div>
@@ -919,13 +901,13 @@
                     </thead>
                     <tbody>
                         {% for scan in recent_scans|default:default_scans %}
-                        <tr class="{% if scan.threat_level == 'critical' or scan.threat_level == 'high' %}row-malicious{% elif scan.threat_level == 'medium' or scan.threat_level == 'suspicious' %}row-suspicious{% else %}row-clean{% endif %}">
+                         <tr class="{% if scan.verdict == 'MALICIOUS' %}row-malicious{% elif scan.verdict == 'SUSPICIOUS' %}row-suspicious{% else %}row-clean{% endif %}">
                             <td>
                                 <div class="cell-type">
-                                    <span class="type-icon {% if scan.type == 'url' %}link{% elif scan.type == 'file' %}file{% elif scan.type == 'email' %}email{% else %}ip{% endif %}">
-                                        <i class="fas fa-{% if scan.type == 'url' %}link{% elif scan.type == 'file' %}file{% elif scan.type == 'email' %}envelope{% else %}network-wired{% endif %}"></i>
+                                    <span class="type-icon" style="background:var(--accent-cyan-dim);color:var(--accent-cyan);">
+                                        <i class="bi {{ scan.icon }}"></i>
                                     </span>
-                                    <span>{{ scan.type|title }}</span>
+                                    <span>{{ scan.type|title|cut:"_" }}</span>
                                 </div>
                             </td>
                             <td><span class="cell-target">{{ scan.target }}</span></td>
@@ -936,23 +918,23 @@
                             <td>
                                 <div style="display:flex;align-items:center;gap:0.5rem;">
                                     <div class="threat-bar">
-                                        <div class="threat-bar-fill {% if scan.threat_level == 'critical' or scan.threat_level == 'high' %}critical{% elif scan.threat_level == 'medium' %}medium{% elif scan.threat_level == 'low' %}low{% else %}safe{% endif %}"></div>
+                                        <div class="threat-bar-fill {% if scan.verdict == 'MALICIOUS' %}critical{% elif scan.verdict == 'SUSPICIOUS' %}medium{% else %}safe{% endif %}"></div>
                                     </div>
-                                    <span style="font-size:0.71875rem;color:var(--text-muted);text-transform:capitalize;">{{ scan.threat_level }}</span>
+                                    <span style="font-size:0.71875rem;color:var(--text-muted);text-transform:capitalize;">{{ scan.verdict|title }}</span>
                                 </div>
                             </td>
                             <td><span class="cell-date">{{ scan.date|date:"M d, H:i" }}</span></td>
                             <td>
                                 <a href="{% url 'scan_detail' scan.id %}" class="btn-cs btn-cs-ghost btn-cs-sm" style="padding:0.25rem 0.5rem;">
-                                    <i class="fas fa-chevron-right" style="font-size:0.75rem;"></i>
+                                    <i class="bi-chevron-right" style="font-size:0.75rem;"></i>
                                 </a>
                             </td>
                         </tr>
                         {% empty %}
                         <tr>
                             <td colspan="6" style="text-align:center;padding:3rem 1rem;color:var(--text-muted);">
-                                <i class="fas fa-inbox" style="font-size:2rem;display:block;margin-bottom:0.5rem;"></i>
-                                No recent scans yet. <a href="{% url 'url_scan' %}" style="color:var(--accent-cyan);">Start your first scan</a>.
+                                <i class="bi-inbox" style="font-size:2rem;display:block;margin-bottom:0.5rem;"></i>
+                                No recent scans yet. <a href="{% url 'browser_isolation' %}" style="color:var(--accent-cyan);">Start your first scan</a>.
                             </td>
                         </tr>
                         {% endfor %}
@@ -967,17 +949,17 @@
             <div class="col-12">
                 <div class="profile-card-dash">
                     <div class="profile-avatar">
-                        {% if user.profile.avatar %}
-                        <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}">
+                        {% if user.avatar %}
+                        <img src="{{ user.avatar.url }}" alt="{{ user.username }}">
                         {% else %}
-                        <i class="fas fa-user"></i>
+                        <i class="bi-person"></i>
                         {% endif %}
                     </div>
                     <div class="profile-name">{{ user.get_full_name|default:user.username }}</div>
                     <div class="profile-email">{{ user.email|default:"user@cipherscan.io" }}</div>
-                    <div class="profile-plan {% if user.profile.plan == 'enterprise' %}enterprise{% elif user.profile.plan == 'pro' %}pro{% else %}free{% endif %}">
-                        <i class="fas fa-{% if user.profile.plan == 'enterprise' %}building{% elif user.profile.plan == 'pro' %}crown{% else %}user{% endif %}"></i>
-                        {{ user.profile.plan|title|default:"Free" }}
+                    <div class="profile-plan {% if user.plan == 'enterprise' %}enterprise{% elif user.plan == 'pro' %}pro{% else %}free{% endif %}">
+                        <i class="bi {% if user.plan == 'enterprise' %}building{% elif user.plan == 'pro' %}crown{% else %}person{% endif %}"></i>
+                        {{ user.plan|default:"Free"|title }}
                     </div>
                     <div class="profile-stats">
                         <div class="pstat">
@@ -985,11 +967,11 @@
                             <div class="pstat-label">Scans</div>
                         </div>
                         <div class="pstat">
-                            <div class="pstat-value">{{ api_calls|default:"1.2k" }}</div>
+                            <div class="pstat-value">{{ api_calls|default:0 }}</div>
                             <div class="pstat-label">API Calls</div>
                         </div>
                         <div class="pstat">
-                            <div class="pstat-value">{{ user.profile.reports_saved|default:8 }}</div>
+                            <div class="pstat-value">{{ reports_exported|default:0 }}</div>
                             <div class="pstat-label">Reports</div>
                         </div>
                     </div>
@@ -1001,24 +983,24 @@
             </div>
             <div class="col-12">
                 <div class="quick-scan-widget">
-                    <h5><i class="fas fa-bolt text-cyan"></i> Quick Scan</h5>
+                    <h5><i class="bi-lightning text-cyan"></i> Quick Scan</h5>
                     <p class="qs-subtitle">Scan a URL or file instantly</p>
                     <div class="qs-tabs">
-                        <button class="qs-tab active" data-qs-type="url"><i class="fas fa-link me-1"></i> URL</button>
-                        <button class="qs-tab" data-qs-type="file"><i class="fas fa-file me-1"></i> File</button>
-                        <button class="qs-tab" data-qs-type="ip"><i class="fas fa-network-wired me-1"></i> IP</button>
+                        <button class="qs-tab active" data-qs-type="url"><i class="bi-link-45deg me-1"></i> URL</button>
+                        <button class="qs-tab" data-qs-type="file"><i class="bi-file-earmark me-1"></i> File</button>
+                        <button class="qs-tab" data-qs-type="ip"><i class="bi-diagram-2 me-1"></i> IP</button>
                     </div>
                     <div class="qs-input-group">
                         <input type="text" id="qsInput" placeholder="https://example.com" autocomplete="off">
-                        <button class="btn-qs" id="qsSubmit"><i class="fas fa-magnifying-glass"></i> Scan</button>
+                        <button class="btn-qs" id="qsSubmit"><i class="bi-search"></i> Scan</button>
                     </div>
                     <div class="qs-recent">
                         <div class="qs-recent-title">Recent Scans</div>
-                        {% for scan in recent_scans|slice:":3" %}
+                        {% for scan in quick_scans|slice:":3" %}
                         <div class="qs-recent-item">
                             <span class="qs-item-target">{{ scan.target }}</span>
-                            <span class="badge-cs badge-cs-{% if scan.threat_level == 'critical' or scan.threat_level == 'high' %}danger{% elif scan.threat_level == 'medium' %}warning{% elif scan.threat_level == 'low' or scan.threat_level == 'safe' %}safe{% else %}info{% endif %}" style="font-size:0.65625rem;padding:0.125rem 0.375rem;">
-                                {{ scan.threat_level|title }}
+                            <span class="badge-cs badge-cs-{% if scan.verdict == 'MALICIOUS' %}danger{% elif scan.verdict == 'SUSPICIOUS' %}warning{% else %}safe{% endif %}" style="font-size:0.65625rem;padding:0.125rem 0.375rem;">
+                                {{ scan.verdict|title }}
                             </span>
                         </div>
                         {% empty %}
@@ -1040,14 +1022,16 @@
     <div class="col-xl-5">
         <div class="chart-card">
             <div class="chart-card-header">
-                <h5><i class="fas fa-chart-pie text-cyan me-1"></i> Threat Distribution</h5>
+                <h5><i class="bi-pie-chart text-cyan me-1"></i> Threat Distribution</h5>
                 <div class="chart-legend-custom" id="donutLegend"></div>
             </div>
             <div class="chart-wrapper-inner" style="position:relative;">
-                <canvas id="threatDonut"></canvas>
-                <div class="donut-center">
-                    <div class="donut-center-value">{{ threats_found|default:521 }}</div>
-                    <div class="donut-center-label">Total Threats</div>
+                <div class="threat-chart-wrapper">
+                    <canvas id="threatDonut"></canvas>
+                    <div class="donut-center">
+                        <div class="donut-center-value">{{ threats_found|default:0 }}</div>
+                        <div class="donut-center-label">Total Threats</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1055,7 +1039,7 @@
     <div class="col-xl-7">
         <div class="chart-card">
             <div class="chart-card-header">
-                <h5><i class="fas fa-chart-line text-cyan me-1"></i> Scan History — Last 30 Days</h5>
+                <h5><i class="bi-graph-up-arrow text-cyan me-1"></i> Scan History — Last 30 Days</h5>
                 <div style="display:flex;gap:0.5rem;align-items:center;">
                     <span style="font-size:0.71875rem;color:var(--text-muted);">Daily scans</span>
                     <span class="badge-cs badge-cs-info" style="font-size:0.65625rem;">
@@ -1163,7 +1147,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             var activeTab = document.querySelector('.qs-tab.active');
             var type = activeTab ? activeTab.dataset.qsType : 'url';
-            var urls = { url: '{% url "url_scan" %}', file: '{% url "file_scan" %}', ip: '{% url "ip_scan" %}' };
+            var urls = { url: '{% url "browser_isolation" %}', file: '{% url "file_scan" %}', ip: '{% url "ip_scan" %}' };
             window.location.href = (urls[type] || urls.url) + '?q=' + encodeURIComponent(val);
         });
         qsInput.addEventListener('keydown', function (e) {
@@ -1251,6 +1235,7 @@ document.addEventListener('DOMContentLoaded', function () {
             options: {
                 responsive: true,
                 maintainAspectRatio: true,
+                aspectRatio: 1,
                 cutout: '72%',
                 plugins: {
                     legend: { display: false },

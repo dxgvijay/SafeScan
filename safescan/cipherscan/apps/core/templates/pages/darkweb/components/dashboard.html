@@ -1,0 +1,217 @@
+<div id="dwDashboard" class="dw-dashboard">
+
+  <!-- ═══ Clean State (shown when no breaches found) ═══ -->
+  <div class="dw-clean-state" id="dwCleanState">
+    <div class="dw-clean-shield">
+      <i class="fas fa-shield-halved"></i>
+    </div>
+    <h2 class="dw-clean-title" id="dwCleanTitle">No breaches were found for this identity.</h2>
+    <p class="dw-clean-disclaimer" id="dwCleanDisclaimer">This does NOT guarantee your information has never been exposed. Private or undisclosed breaches cannot be searched.</p>
+    <div class="dw-clean-status" id="dwCleanStatus" style="display:none;">
+      <span class="dw-status-dot dw-status-dot--offline"></span>
+      Status: Offline
+    </div>
+  </div>
+
+  <div id="dwDashboardContent">
+
+  <!-- ═══ Verdict Banner ═══ -->
+  <div class="dw-verdict-banner" id="dwVerdictBanner">
+    <div class="dw-verdict-glow"></div>
+    <div class="dw-verdict-icon">
+      <i class="fas fa-shield-halved"></i>
+    </div>
+    <div class="dw-verdict-body">
+      <div class="dw-verdict-status" id="dwVerdictStatus">Scanning...</div>
+      <div class="dw-verdict-sub" id="dwVerdictSub">Analyzing your digital exposure across intelligence sources</div>
+    </div>
+    <div class="dw-verdict-badge" id="dwVerdictBadge">
+      <span class="dw-verdict-dot"></span>
+      <span class="dw-verdict-label">Processing</span>
+    </div>
+  </div>
+
+  <!-- ═══ Data Reliability ═══ -->
+  <div class="dw-data-reliability" id="dwDataReliability">
+    <i class="fas fa-circle-info dw-data-reliability-info" title="CipherScan combines verified public breach information with analytical risk estimation. Values marked as estimated are predictions and should not be treated as confirmed breaches."></i>
+    <span class="dw-data-reliability-dot" id="dwReliabilityDot"></span>
+    <span class="dw-data-reliability-text" id="dwReliabilityText">No Public Evidence Found</span>
+  </div>
+
+  <!-- ═══ Metrics Row: Risk + Confidence ═══ -->
+  <div class="dw-metrics-row">
+    <div class="dw-metric-card dw-risk-gauge-card">
+      <div class="dw-metric-card-header">
+        <i class="fas fa-gauge-high"></i>
+        <span>Identity Risk Score</span>
+      </div>
+      <div class="dw-gauge-wrap">
+        <svg class="dw-gauge-svg" viewBox="0 0 80 80">
+          <defs>
+            <linearGradient id="dwRiskGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#7850FF" />
+              <stop offset="100%" stop-color="#00FFC8" />
+            </linearGradient>
+          </defs>
+          <circle class="dw-gauge-bg" cx="40" cy="40" r="34" fill="none" stroke-width="5" />
+          <circle class="dw-gauge-fill" id="dwGaugeFill" cx="40" cy="40" r="34" fill="none" stroke-width="5" stroke-linecap="round" stroke-dasharray="213.628" stroke-dashoffset="213.628" />
+        </svg>
+        <span class="dw-gauge-number" id="dwResultRiskScore">0</span>
+      </div>
+      <div class="dw-risk-label" id="dwRiskLabel">—</div>
+    </div>
+
+    <div class="dw-metric-card dw-conf-gauge-card" title="Confidence indicates how certain CipherScan is about this assessment. It does NOT indicate risk.">
+      <div class="dw-metric-card-header">
+        <i class="fas fa-shield-check"></i>
+        <span>Confidence Level</span>
+      </div>
+      <div class="dw-gauge-wrap">
+        <svg class="dw-gauge-svg" viewBox="0 0 80 80">
+          <defs>
+            <linearGradient id="dwConfGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#00B4FF" />
+              <stop offset="100%" stop-color="#00FFC8" />
+            </linearGradient>
+          </defs>
+          <circle class="dw-gauge-bg" cx="40" cy="40" r="34" fill="none" stroke-width="5" />
+          <circle class="dw-gauge-fill" id="dwConfGaugeFill" cx="40" cy="40" r="34" fill="none" stroke-width="5" stroke-linecap="round" stroke-dasharray="213.628" stroke-dashoffset="213.628" />
+        </svg>
+        <span class="dw-gauge-number dw-conf-number" id="dwConfScore">0</span>
+      </div>
+      <div class="dw-risk-label" id="dwConfLabel">—</div>
+    </div>
+  </div>
+
+  <!-- ═══ Identity Details ═══ -->
+  <div class="dw-section-card dw-identity-card">
+    <div class="dw-section-card-header">
+      <i class="fas fa-id-card"></i>
+      <span>Identity Details</span>
+    </div>
+    <div class="dw-identity-grid">
+      <div class="dw-identity-item">
+        <span class="dw-identity-label">Asset</span>
+        <span class="dw-identity-value" id="dwResultAsset">—</span>
+      </div>
+      <div class="dw-identity-item">
+        <span class="dw-identity-label">Type</span>
+        <span class="dw-identity-value" id="dwResultType">—</span>
+      </div>
+      <div class="dw-identity-item">
+        <span class="dw-identity-label">Scan Date</span>
+        <span class="dw-identity-value" id="dwResultTime">—</span>
+      </div>
+      <div class="dw-identity-item">
+        <span class="dw-identity-label">First Seen</span>
+        <span class="dw-identity-value" id="dwResultFirstSeen">—</span>
+      </div>
+      <div class="dw-identity-item">
+        <span class="dw-identity-label">Last Seen</span>
+        <span class="dw-identity-value" id="dwResultLastSeen">—</span>
+      </div>
+      <div class="dw-identity-item">
+        <span class="dw-identity-label">Breaches</span>
+        <span class="dw-identity-value" id="dwResultBreachCount">0</span>
+      </div>
+      <div class="dw-identity-item">
+        <span class="dw-identity-label">Records Exposed</span>
+        <span class="dw-identity-value" id="dwResultRecords">0</span>
+      </div>
+      <div class="dw-identity-item">
+        <span class="dw-identity-label">Confidence</span>
+        <span class="dw-identity-value" id="dwIdentityConf">—</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Risk Factors: Why This Score? ═══ -->
+  <div class="dw-section-card dw-risk-factors-card" id="dwRiskFactorsCard">
+    <div class="dw-section-card-header">
+      <i class="fas fa-calculator"></i>
+      <span>Why This Score?</span>
+    </div>
+    <div class="dw-risk-factors-list" id="dwRiskFactorsList">
+      <span class="dw-placeholder">No contributing factors.</span>
+    </div>
+    <div class="dw-risk-factors-total" id="dwRiskFactorsTotal">
+      <span class="dw-risk-factors-total-label">Total</span>
+      <span class="dw-risk-factors-total-value" id="dwRiskTotalValue">0</span>
+    </div>
+  </div>
+
+  <!-- ═══ Exposure Summary (4 stat cards) ═══ -->
+  <div class="dw-section-card dw-exposure-summary-card">
+    <div class="dw-section-card-header">
+      <i class="fas fa-chart-simple"></i>
+      <span>Exposure Summary</span>
+    </div>
+    <div class="dw-stat-grid" id="dwStatGrid">
+      <div class="dw-stat-card" data-stat="breaches">
+        <div class="dw-stat-icon"><i class="fas fa-database"></i></div>
+        <div class="dw-stat-body">
+          <span class="dw-stat-value" id="dwStatBreaches">0</span>
+          <span class="dw-stat-label">Data Breaches</span>
+        </div>
+      </div>
+      <div class="dw-stat-card" data-stat="exposures">
+        <div class="dw-stat-icon"><i class="fas fa-broadcast-tower"></i></div>
+        <div class="dw-stat-body">
+          <span class="dw-stat-value" id="dwStatExposures">0</span>
+          <span class="dw-stat-label">Dark Web Exposures</span>
+        </div>
+      </div>
+      <div class="dw-stat-card" data-stat="sources">
+        <div class="dw-stat-icon"><i class="fas fa-globe"></i></div>
+        <div class="dw-stat-body">
+          <span class="dw-stat-value" id="dwStatSources">0</span>
+          <span class="dw-stat-label">Sources Scanned</span>
+        </div>
+      </div>
+      <div class="dw-stat-card" data-stat="records">
+        <div class="dw-stat-icon"><i class="fas fa-file-lines"></i></div>
+        <div class="dw-stat-body">
+          <span class="dw-stat-value" id="dwStatRecords">0</span>
+          <span class="dw-stat-label">Records Exposed</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Affected Sources ═══ -->
+  <div class="dw-section-card dw-sources-card">
+    <div class="dw-section-card-header">
+      <i class="fas fa-database"></i>
+      <span>Affected Sources</span>
+    </div>
+    <div class="dw-section-body" id="dwResultSources">
+      <span class="dw-placeholder">—</span>
+    </div>
+  </div>
+
+  <!-- ═══ Compromised Fields ═══ -->
+  <div class="dw-section-card dw-fields-card">
+    <div class="dw-section-card-header">
+      <i class="fas fa-tags"></i>
+      <span>Compromised Fields</span>
+    </div>
+    <div class="dw-section-body" id="dwResultCompromisedFields">
+      <span class="dw-placeholder">—</span>
+    </div>
+  </div>
+
+  <!-- ═══ Action Buttons ═══ -->
+  <div class="dw-report-actions" id="dwReportActions">
+    <button class="dw-action-btn" data-action="rescan" title="Rescan">
+      <i class="fas fa-rotate"></i>
+      <span>Rescan</span>
+    </button>
+    <button class="dw-action-btn" data-action="share" title="Share Report">
+      <i class="fas fa-share-nodes"></i>
+      <span>Share</span>
+    </button>
+  </div>
+
+  </div><!-- /dwDashboardContent -->
+
+</div>

@@ -1,14 +1,14 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 {% load static %}
 
-{% block title %}File Scanner & Malware Analysis — CipherScan{% endblock %}
+{% block title %}File Scanner & Malware Analysis â€” CipherScan{% endblock %}
 
 {% block body_class %}full-width{% endblock %}
 
 {% block extra_css %}
 <style>
 /* ============================================================
-   FILE SCANNER — Root Variables (Purple Theme)
+   FILE SCANNER â€” Root Variables (Purple Theme)
    ============================================================ */
 :root {
     --fs-purple: #a855f7;
@@ -279,7 +279,7 @@
 }
 
 /* ============================================================
-   ANALYSIS CAPABILITIES — 3-Col Grid
+   ANALYSIS CAPABILITIES â€” 3-Col Grid
    ============================================================ */
 .cap-section {
     padding: 4rem 0;
@@ -611,6 +611,884 @@
 }
 
 /* ============================================================
+   SCAN RESULTS
+   ============================================================ */
+.fs-results {
+    padding: 2rem 0;
+}
+.fsr-card {
+    background: var(--card-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+.fsr-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--glass-border);
+}
+.fsr-verdict {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+}
+.fsr-verdict.safe { color: var(--accent-success); }
+.fsr-verdict.threat { color: #ff4757; }
+.fsr-verdict i { font-size: 1.25rem; }
+.fsr-file-info {
+    flex: 1;
+    text-align: right;
+    font-size: 0.8125rem;
+}
+.fsr-file-info .fsr-filename {
+    display: block;
+    font-weight: 600;
+    color: var(--text-primary);
+    word-break: break-all;
+}
+.fsr-file-info .fsr-filesize {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+.fsr-body { padding: 1.5rem; }
+.fsr-section { margin-bottom: 1.25rem; }
+.fsr-section h5 {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+}
+.fsr-hashes {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.fsr-hash {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+.fsr-hash-label {
+    font-size: 0.71875rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    width: 56px;
+    flex-shrink: 0;
+}
+.fsr-hash code {
+    font-size: 0.71875rem;
+    color: var(--accent-cyan);
+    background: rgba(0,212,255,0.06);
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm);
+    word-break: break-all;
+    font-family: var(--font-mono);
+}
+.fsr-stats-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+.fsr-stat {
+    flex: 1;
+    min-width: 100px;
+    text-align: center;
+    padding: 0.75rem;
+    border-radius: var(--radius-sm);
+    background: var(--bg-tertiary);
+}
+.fsr-stat-num {
+    display: block;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+.fsr-stat-label {
+    display: block;
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+    margin-top: 0.125rem;
+}
+.fsr-error {
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-sm);
+    background: rgba(255,71,87,0.08);
+    border: 1px solid rgba(255,71,87,0.2);
+    color: #ff4757;
+    font-size: 0.8125rem;
+}
+.fsr-actions {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--glass-border);
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+}
+.btn-purple {
+    background: var(--fs-purple);
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1.25rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.btn-purple:hover {
+    box-shadow: 0 0 16px var(--fs-purple-glow);
+    transform: translateY(-1px);
+}
+
+.hash-search-error {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    margin-top: 0.5rem;
+    border-radius: var(--radius-sm);
+    background: rgba(255,71,87,0.08);
+    border: 1px solid rgba(255,71,87,0.2);
+    color: #ff4757;
+    font-size: 0.75rem;
+    text-align: center;
+}
+
+/* ============================================================
+   DETAIL GRID (File Info / Detection / Threat / Scan Details)
+   ============================================================ */
+.fsr-detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    padding: 0 1.5rem 1.5rem;
+}
+@media (max-width: 768px) {
+    .fsr-detail-grid { grid-template-columns: 1fr; }
+}
+.fsr-detail-card {
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-sm);
+    padding: 1rem;
+    margin-bottom: 0;
+}
+.fsr-detail-card h5 {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+.fsr-detail-card h5 i {
+    color: var(--fs-purple);
+    font-size: 0.875rem;
+}
+.fsr-detail-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.fsr-detail-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+}
+.fsr-detail-label {
+    color: var(--text-muted);
+    font-weight: 500;
+    width: 100px;
+    flex-shrink: 0;
+}
+.fsr-detail-value {
+    color: var(--text-primary);
+    font-weight: 500;
+    word-break: break-all;
+    flex: 1;
+}
+.fsr-detail-hash {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: var(--accent-cyan);
+    background: rgba(0,212,255,0.06);
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+}
+.fsr-copy-btn {
+    background: none;
+    border: 1px solid var(--glass-border);
+    border-radius: 4px;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0.2rem 0.4rem;
+    font-size: 0.6875rem;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+.fsr-copy-btn:hover {
+    color: var(--fs-purple-light);
+    border-color: var(--fs-purple);
+    background: var(--fs-purple-dim);
+}
+.fsr-copy-btn.copied {
+    color: var(--accent-success);
+    border-color: var(--accent-success);
+}
+
+/* Progress bars */
+.fsr-pb-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.fsr-pb-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.fsr-pb-label {
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+    width: 72px;
+    flex-shrink: 0;
+    text-align: right;
+}
+.fsr-pb-track {
+    flex: 1;
+    height: 8px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 4px;
+    overflow: hidden;
+}
+.fsr-pb-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1.2s ease;
+}
+.fsr-pb-malicious { background: #ef4444; }
+.fsr-pb-suspicious { background: #f59e0b; }
+.fsr-pb-harmless { background: #22c55e; }
+.fsr-pb-undetected { background: #6b7280; }
+.fsr-pb-timeout { background: #8b5cf6; }
+.fsr-pb-count {
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    width: 28px;
+    text-align: right;
+}
+.fsr-detection-ratio {
+    margin-top: 0.75rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-align: center;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--glass-border);
+}
+.fsr-detection-ratio strong {
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+}
+
+/* Copy buttons on existing hash rows */
+.fsr-hash {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.fsr-hash .fsr-copy-btn {
+    margin-left: auto;
+}
+
+/* ── Strings Analysis ───────────────────────────── */
+.fsr-strings-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+@media (max-width: 768px) {
+    .fsr-strings-grid { grid-template-columns: 1fr; }
+}
+.fsr-strings-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    padding: 0.75rem;
+}
+.fsr-strings-card h6 {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--fs-purple-light);
+    margin-bottom: 0.4rem;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+.fsr-strings-card .fsr-str-count {
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+    margin-bottom: 0.35rem;
+}
+.fsr-strings-card .fsr-str-list {
+    font-size: 0.6875rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    max-height: 140px;
+    overflow-y: auto;
+    word-break: break-all;
+    font-family: var(--font-mono);
+}
+.fsr-strings-card .fsr-str-list::-webkit-scrollbar { width: 4px; }
+.fsr-strings-card .fsr-str-list::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 2px; }
+.fsr-strings-card .fsr-str-null {
+    color: var(--text-muted);
+    font-style: italic;
+    font-family: var(--font-ui);
+}
+
+/* ── Findings Cards ─────────────────────────────── */
+.fsr-findings-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+.fsr-finding {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--glass-border);
+    border-left: 4px solid var(--fs-purple);
+    border-radius: var(--radius-sm);
+    padding: 0.875rem 1rem;
+    transition: all var(--transition-fast);
+}
+.fsr-finding:hover {
+    border-color: rgba(168,85,247,0.25);
+}
+.fsr-finding.severity-critical { border-left-color: #ff3344; }
+.fsr-finding.severity-high { border-left-color: #ef4444; }
+.fsr-finding.severity-medium { border-left-color: #f59e0b; }
+.fsr-finding.severity-low { border-left-color: #fbbf24; }
+.fsr-finding .fsr-fi-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.4rem;
+}
+.fsr-finding .fsr-fi-title {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+.fsr-finding .fsr-fi-severity {
+    font-size: 0.65625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 0.15rem 0.5rem;
+    border-radius: 50px;
+}
+.fsr-finding .fsr-fi-severity.critical { background: rgba(255,71,87,0.18); color: #ff3344; border: 1px solid rgba(255,71,87,0.3); }
+.fsr-finding .fsr-fi-severity.high { background: rgba(239,68,68,0.14); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); }
+.fsr-finding .fsr-fi-severity.medium { background: rgba(245,158,11,0.12); color: #f59e0b; border: 1px solid rgba(245,158,11,0.2); }
+.fsr-finding .fsr-fi-severity.low { background: rgba(251,191,36,0.10); color: #fbbf24; border: 1px solid rgba(251,191,36,0.15); }
+.fsr-finding .fsr-fi-body {
+    font-size: 0.71875rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+.fsr-finding .fsr-fi-body strong {
+    color: var(--text-primary);
+}
+
+/* ── Risk Engine ────────────────────────────────── */
+.fsr-risk-gauge {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    margin-bottom: 0.75rem;
+}
+.fsr-risk-circle {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    flex-shrink: 0;
+}
+.fsr-risk-circle svg {
+    transform: rotate(-90deg);
+    width: 80px;
+    height: 80px;
+}
+.fsr-risk-circle .rc-bg { fill: none; stroke: rgba(255,255,255,0.06); stroke-width: 6; }
+.fsr-risk-circle .rc-fill { fill: none; stroke-width: 6; stroke-linecap: round; transition: stroke-dashoffset 1.5s ease; }
+.fsr-risk-circle .rc-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.125rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+}
+.fsr-risk-info {
+    flex: 1;
+}
+.fsr-risk-info .fsr-risk-class {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+}
+.fsr-risk-info .fsr-risk-class.safe { color: #22c55e; }
+.fsr-risk-info .fsr-risk-class.low { color: #4ade80; }
+.fsr-risk-info .fsr-risk-class.medium { color: #f59e0b; }
+.fsr-risk-info .fsr-risk-class.high { color: #ef4444; }
+.fsr-risk-info .fsr-risk-class.critical { color: #ff3344; }
+.fsr-risk-info .fsr-risk-sub {
+    font-size: 0.71875rem;
+    color: var(--text-muted);
+}
+.fsr-risk-factors {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+}
+.fsr-risk-tag {
+    display: inline-block;
+    font-size: 0.625rem;
+    padding: 0.2rem 0.5rem;
+    background: rgba(168,85,247,0.08);
+    border: 1px solid rgba(168,85,247,0.15);
+    border-radius: 4px;
+    color: var(--fs-purple-light);
+    font-family: var(--font-mono);
+}
+
+/* ── Timeline ───────────────────────────────────── */
+.fsr-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.fsr-tl-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.375rem 0;
+}
+.fsr-tl-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: var(--text-muted);
+}
+.fsr-tl-dot.done { background: var(--accent-success); box-shadow: 0 0 6px rgba(34,197,94,0.3); }
+.fsr-tl-dot.active { background: var(--fs-purple); box-shadow: 0 0 6px var(--fs-purple-glow); }
+.fsr-tl-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    width: 130px;
+    flex-shrink: 0;
+}
+.fsr-tl-time {
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+}
+
+/* ── Verdict Sub-Row ────────────────────────────── */
+.fsr-verdict-sub {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--bg-tertiary);
+    border-bottom: 1px solid var(--glass-border);
+    font-size: 0.75rem;
+}
+.fsr-vs-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+.fsr-vs-label {
+    color: var(--text-muted);
+    font-weight: 500;
+}
+.fsr-vs-value {
+    color: var(--text-primary);
+    font-weight: 700;
+    font-family: var(--font-mono);
+}
+.fsr-vs-value.verdict-safe { color: var(--accent-success); }
+.fsr-vs-value.verdict-threat { color: #ff4757; }
+.fsr-vs-value.verdict-critical { color: #ff3344; }
+
+/* ── Export buttons ─────────────────────────────── */
+.fsr-export-btn {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-family: var(--font-ui);
+    font-weight: 600;
+}
+.fsr-export-btn:hover {
+    border-color: var(--fs-purple);
+    color: var(--fs-purple-light);
+    background: var(--fs-purple-dim);
+}
+
+/* ============================================================
+   EXPANDED RESULT SECTIONS (File Info / Detection / Threat / Scan Details)
+   ============================================================ */
+.fsr-expanded {
+    padding: 0 1.5rem 1rem;
+}
+.fsr-expanded-card {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+}
+.fsr-expanded-card:last-child { margin-bottom: 0; }
+.fsr-expanded-card .fec-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    padding-bottom: 0.625rem;
+    border-bottom: 1px solid var(--glass-border);
+}
+.fsr-expanded-card .fec-header i {
+    color: var(--fs-purple);
+    font-size: 1rem;
+}
+.fsr-expanded-rows {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.625rem;
+}
+.fsr-expanded-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.78125rem;
+    min-width: 240px;
+    flex: 1 1 45%;
+}
+.fsr-expanded-row.full-width {
+    flex: 1 1 100%;
+}
+.fsr-expanded-label {
+    color: var(--text-muted);
+    font-weight: 500;
+    width: 110px;
+    flex-shrink: 0;
+}
+.fsr-expanded-value {
+    color: var(--text-primary);
+    font-weight: 500;
+    word-break: break-all;
+    flex: 1;
+}
+.fsr-expanded-value.hash {
+    font-family: var(--font-mono);
+    font-size: 0.71875rem;
+    color: var(--accent-cyan);
+    background: rgba(0,212,255,0.06);
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+}
+.fsr-expanded-value.mono {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+}
+.fsr-expanded-value.verdict-safe { color: var(--accent-success); font-weight: 700; }
+.fsr-expanded-value.verdict-threat { color: #ff4757; font-weight: 700; }
+
+/* Detection Summary grid */
+.fsr-detection-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+@media (max-width: 768px) {
+    .fsr-detection-grid { grid-template-columns: 1fr; }
+}
+.fsr-detection-item {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    padding: 0.875rem 1rem;
+    transition: all var(--transition-fast);
+}
+.fsr-detection-item:hover {
+    border-color: rgba(168, 85, 247, 0.2);
+}
+.fsr-detection-item .fsr-di-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+.fsr-detection-item .fsr-di-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+.fsr-detection-item .fsr-di-count {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+}
+.fsr-detection-item .fsr-di-bar {
+    height: 6px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 0.25rem;
+}
+.fsr-detection-item .fsr-di-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1.2s ease;
+}
+.fsr-detection-item .fsr-di-pct {
+    font-size: 0.65625rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    text-align: right;
+}
+.fsr-di-clean { background: #22c55e; }
+.fsr-di-malicious { background: #ef4444; }
+.fsr-di-suspicious { background: #f59e0b; }
+.fsr-di-undetected { background: #6b7280; }
+.fsr-di-timeout { background: #8b5cf6; }
+.fsr-di-failure { background: #ec4899; }
+.fsr-di-unavailable { background: #94a3b8; }
+
+/* Expand/Collapse toggle for new sections */
+.fsr-expanded-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-top: 1px solid var(--glass-border);
+    cursor: pointer;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    transition: all var(--transition-fast);
+    user-select: none;
+}
+.fsr-expanded-toggle:hover {
+    color: var(--fs-purple-light);
+    background: var(--fs-purple-dim);
+}
+.fsr-expanded-toggle i {
+    font-size: 0.75rem;
+    transition: transform 0.3s ease;
+}
+.fsr-expanded-toggle.collapsed i {
+    transform: rotate(-90deg);
+}
+
+/* Threat Overview layout */
+.fsr-threat-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+.fsr-threat-badge.safe {
+    background: rgba(34,197,94,0.12);
+    color: #22c55e;
+    border: 1px solid rgba(34,197,94,0.2);
+}
+.fsr-threat-badge.threat {
+    background: rgba(255,71,87,0.12);
+    color: #ff4757;
+    border: 1px solid rgba(255,71,87,0.2);
+}
+.fsr-threat-badge.critical {
+    background: rgba(255,71,87,0.18);
+    color: #ff3344;
+    border: 1px solid rgba(255,71,87,0.3);
+}
+.fsr-threat-badge.high {
+    background: rgba(245,158,11,0.12);
+    color: #f59e0b;
+    border: 1px solid rgba(245,158,11,0.2);
+}
+.fsr-threat-badge.medium {
+    background: rgba(251,191,36,0.10);
+    color: #fbbf24;
+    border: 1px solid rgba(251,191,36,0.15);
+}
+.fsr-threat-badge.low {
+    background: rgba(34,197,94,0.08);
+    color: #4ade80;
+    border: 1px solid rgba(34,197,94,0.12);
+}
+
+/* ============================================================
+   THREAT ANALYSIS (NEW SECTION)
+   ============================================================ */
+.fsr-threat-analysis {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+.fsr-ta-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.78125rem;
+}
+.fsr-ta-label {
+    color: var(--text-muted);
+    font-weight: 500;
+    width: 140px;
+    flex-shrink: 0;
+}
+.fsr-ta-value {
+    color: var(--text-primary);
+    font-weight: 500;
+    flex: 1;
+}
+.fsr-ta-severity {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 50px;
+    font-size: 0.71875rem;
+    font-weight: 700;
+}
+.fsr-ta-severity.critical { background: rgba(255,71,87,0.18); color: #ff3344; border: 1px solid rgba(255,71,87,0.3); }
+.fsr-ta-severity.high { background: rgba(239,68,68,0.14); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); }
+.fsr-ta-severity.medium { background: rgba(245,158,11,0.12); color: #f59e0b; border: 1px solid rgba(245,158,11,0.2); }
+.fsr-ta-severity.low { background: rgba(251,191,36,0.10); color: #fbbf24; border: 1px solid rgba(251,191,36,0.15); }
+.fsr-ta-severity.none { background: rgba(34,197,94,0.08); color: #4ade80; border: 1px solid rgba(34,197,94,0.12); }
+
+/* Detected By table */
+.fsr-ta-table-wrap {
+    margin-top: 0.5rem;
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+.fsr-ta-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.75rem;
+}
+.fsr-ta-table th {
+    background: rgba(255,255,255,0.03);
+    color: var(--text-muted);
+    font-weight: 600;
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid var(--glass-border);
+}
+.fsr-ta-table td {
+    padding: 0.4rem 0.75rem;
+    border-bottom: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    font-weight: 500;
+}
+.fsr-ta-table tr:last-child td { border-bottom: none; }
+.fsr-ta-table .ta-engine {
+    color: var(--accent-cyan);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+}
+.fsr-ta-table .ta-detection {
+    color: #ef4444;
+    font-weight: 600;
+}
+.fsr-ta-table tr:hover td { background: rgba(168,85,247,0.04); }
+.fsr-ta-table .ta-header-engine { width: 50%; }
+.fsr-ta-table .ta-header-result { width: 50%; }
+
+/* Safe file message */
+.fsr-safe-msg {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: rgba(34,197,94,0.06);
+    border: 1px solid rgba(34,197,94,0.12);
+    border-radius: var(--radius-sm);
+    color: #4ade80;
+    font-size: 0.8125rem;
+    font-weight: 500;
+}
+.fsr-safe-msg i { font-size: 1.25rem; }
+
+/* Status badge in file info header */
+.fsr-file-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+.fsr-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 50px;
+    font-size: 0.625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.fsr-status-badge.malicious {
+    background: rgba(255,71,87,0.14);
+    color: #ef4444;
+    border: 1px solid rgba(255,71,87,0.2);
+}
+.fsr-status-badge.clean {
+    background: rgba(34,197,94,0.10);
+    color: #22c55e;
+    border: 1px solid rgba(34,197,94,0.15);
+}
+.fsr-status-badge.pending {
+    background: rgba(245,158,11,0.10);
+    color: #f59e0b;
+    border: 1px solid rgba(245,158,11,0.15);
+}
+
+/* ============================================================
    RESPONSIVE
    ============================================================ */
 @media (max-width: 768px) {
@@ -630,7 +1508,7 @@
 <!-- ============================================================
      HERO
      ============================================================ -->
-<section class="fs-hero">
+<section class="fs-hero" id="fsUploadSection">
     <div class="hero-inner">
         <div class="hero-badge">
             <span class="badge-dot"></span>
@@ -641,50 +1519,50 @@
 
         <!-- Drop Zone -->
         <div class="drop-zone" id="dropZone">
-            <div class="dz-icon"><i class="fas fa-cloud-arrow-up"></i></div>
+            <div class="dz-icon"><i class="bi-cloud-upload"></i></div>
             <div class="dz-title">Drag &amp; Drop your file here</div>
             <div class="dz-sub">or</div>
-            <button class="dz-btn" id="dzBrowseBtn" type="button"><i class="fas fa-folder-open me-1"></i> click to browse</button>
+            <button class="dz-btn" id="dzBrowseBtn" type="button"><i class="bi-folder2-open me-1"></i> click to browse</button>
             <input type="file" id="fileInput">
-            <div class="dz-max"><i class="fas fa-info-circle me-1"></i> Max file size: 100MB</div>
+            <div class="dz-max"><i class="bi-info-circle me-1"></i> Max file size: 100MB</div>
 
             <!-- Supported formats -->
             <div class="dz-formats">
-                <span class="dz-fmt"><i class="fas fa-file-pdf"></i> PDF</span>
-                <span class="dz-fmt"><i class="fas fa-file-word"></i> DOCX</span>
-                <span class="dz-fmt"><i class="fas fa-file-word"></i> DOC</span>
-                <span class="dz-fmt"><i class="fas fa-file-excel"></i> XLS</span>
-                <span class="dz-fmt"><i class="fas fa-file-excel"></i> XLSX</span>
-                <span class="dz-fmt"><i class="fas fa-file-powerpoint"></i> PPTX</span>
-                <span class="dz-fmt"><i class="fas fa-cog"></i> EXE</span>
-                <span class="dz-fmt"><i class="fas fa-cog"></i> DLL</span>
-                <span class="dz-fmt"><i class="fas fa-cog"></i> SYS</span>
-                <span class="dz-fmt"><i class="fas fa-cog"></i> MSI</span>
-                <span class="dz-fmt"><i class="fas fa-apple-alt"></i> APP</span>
-                <span class="dz-fmt"><i class="fas fa-terminal"></i> BAT</span>
-                <span class="dz-fmt"><i class="fas fa-terminal"></i> PS1</span>
-                <span class="dz-fmt"><i class="fas fa-terminal"></i> SH</span>
-                <span class="dz-fmt"><i class="fas fa-terminal"></i> CMD</span>
-                <span class="dz-fmt"><i class="fas fa-code"></i> VBS</span>
-                <span class="dz-fmt"><i class="fas fa-code"></i> HTA</span>
-                <span class="dz-fmt"><i class="fas fa-file-archive"></i> ZIP</span>
-                <span class="dz-fmt"><i class="fas fa-file-archive"></i> RAR</span>
-                <span class="dz-fmt"><i class="fas fa-file-archive"></i> 7Z</span>
-                <span class="dz-fmt"><i class="fas fa-file-archive"></i> TAR</span>
-                <span class="dz-fmt"><i class="fas fa-file-archive"></i> GZ</span>
-                <span class="dz-fmt"><i class="fab fa-js"></i> JS</span>
-                <span class="dz-fmt"><i class="fab fa-python"></i> PY</span>
-                <span class="dz-fmt"><i class="fab fa-php"></i> PHP</span>
-                <span class="dz-fmt"><i class="fas fa-code"></i> RB</span>
-                <span class="dz-fmt"><i class="fas fa-code"></i> GO</span>
-                <span class="dz-fmt"><i class="fas fa-code"></i> RS</span>
-                <span class="dz-fmt"><i class="fab fa-java"></i> JAVA</span>
-                <span class="dz-fmt"><i class="fab fa-android"></i> APK</span>
-                <span class="dz-fmt"><i class="fab fa-java"></i> JAR</span>
-                <span class="dz-fmt"><i class="fas fa-cube"></i> DEX</span>
-                <span class="dz-fmt"><i class="fas fa-music"></i> MP3</span>
-                <span class="dz-fmt"><i class="fas fa-video"></i> MP4</span>
-                <span class="dz-fmt"><i class="fas fa-binary"></i> BIN</span>
+                <span class="dz-fmt"><i class="bi-filetype-pdf"></i> PDF</span>
+                <span class="dz-fmt"><i class="bi-filetype-docx"></i> DOCX</span>
+                <span class="dz-fmt"><i class="bi-filetype-docx"></i> DOC</span>
+                <span class="dz-fmt"><i class="bi-filetype-xlsx"></i> XLS</span>
+                <span class="dz-fmt"><i class="bi-filetype-xlsx"></i> XLSX</span>
+                <span class="dz-fmt"><i class="bi-filetype-pptx"></i> PPTX</span>
+                <span class="dz-fmt"><i class="bi-gear"></i> EXE</span>
+                <span class="dz-fmt"><i class="bi-gear"></i> DLL</span>
+                <span class="dz-fmt"><i class="bi-gear"></i> SYS</span>
+                <span class="dz-fmt"><i class="bi-gear"></i> MSI</span>
+                <span class="dz-fmt"><i class="bi-apple"></i> APP</span>
+                <span class="dz-fmt"><i class="bi-terminal"></i> BAT</span>
+                <span class="dz-fmt"><i class="bi-terminal"></i> PS1</span>
+                <span class="dz-fmt"><i class="bi-terminal"></i> SH</span>
+                <span class="dz-fmt"><i class="bi-terminal"></i> CMD</span>
+                <span class="dz-fmt"><i class="bi-code"></i> VBS</span>
+                <span class="dz-fmt"><i class="bi-code"></i> HTA</span>
+                <span class="dz-fmt"><i class="bi-file-zip"></i> ZIP</span>
+                <span class="dz-fmt"><i class="bi-file-zip"></i> RAR</span>
+                <span class="dz-fmt"><i class="bi-file-zip"></i> 7Z</span>
+                <span class="dz-fmt"><i class="bi-file-zip"></i> TAR</span>
+                <span class="dz-fmt"><i class="bi-file-zip"></i> GZ</span>
+                <span class="dz-fmt"><i class="bi-filetype-js"></i> JS</span>
+                <span class="dz-fmt"><i class="bi-filetype-py"></i> PY</span>
+                <span class="dz-fmt"><i class="bi-filetype-php"></i> PHP</span>
+                <span class="dz-fmt"><i class="bi-code"></i> RB</span>
+                <span class="dz-fmt"><i class="bi-code"></i> GO</span>
+                <span class="dz-fmt"><i class="bi-code"></i> RS</span>
+                <span class="dz-fmt"><i class="bi-filetype-java"></i> JAVA</span>
+                <span class="dz-fmt"><i class="bi-android2"></i> APK</span>
+                <span class="dz-fmt"><i class="bi-filetype-java"></i> JAR</span>
+                <span class="dz-fmt"><i class="bi-box"></i> DEX</span>
+                <span class="dz-fmt"><i class="bi-music-note"></i> MP3</span>
+                <span class="dz-fmt"><i class="bi-film"></i> MP4</span>
+                <span class="dz-fmt"><i class="bi-file-binary"></i> BIN</span>
             </div>
         </div>
 
@@ -692,9 +1570,10 @@
         <div class="fs-or">or search by hash</div>
 
         <!-- Hash search -->
-        <div class="hash-search">
+        <div class="hash-search" id="hashSearchWrap">
             <input type="text" id="hashInput" placeholder="Enter MD5, SHA1, or SHA256 hash" autocomplete="off" spellcheck="false">
-            <button class="hs-btn" id="hashSearchBtn"><i class="fas fa-magnifying-glass"></i> Search Existing Report</button>
+            <button class="hs-btn" id="hashSearchBtn"><i class="bi-search"></i> Search Existing Report</button>
+            <div id="hashSearchError" class="hash-search-error" style="display:none;"></div>
         </div>
     </div>
 </section>
@@ -709,45 +1588,45 @@
             <p>Three layers of deep file inspection to catch every threat</p>
         </div>
         <div class="cap-grid">
-            <!-- Column 1 — Static Analysis -->
+            <!-- Column 1 â€” Static Analysis -->
             <div class="cap-card">
-                <div class="cc-icon"><i class="fas fa-microscope"></i></div>
+                <div class="cc-icon"><i class="bi-microscope"></i></div>
                 <h4>Static Analysis</h4>
                 <ul>
-                    <li><i class="fas fa-check-circle"></i> Hash calculation (MD5 / SHA1 / SHA256 / SHA512)</li>
-                    <li><i class="fas fa-check-circle"></i> Magic bytes &amp; MIME detection</li>
-                    <li><i class="fas fa-check-circle"></i> Entropy analysis (packer / encryption detect)</li>
-                    <li><i class="fas fa-check-circle"></i> PE header analysis (EXE / DLL)</li>
-                    <li><i class="fas fa-check-circle"></i> Macro detection (Office files)</li>
-                    <li><i class="fas fa-check-circle"></i> String extraction &amp; pattern matching</li>
+                    <li><i class="bi-check-circle"></i> Hash calculation (MD5 / SHA1 / SHA256 / SHA512)</li>
+                    <li><i class="bi-check-circle"></i> Magic bytes &amp; MIME detection</li>
+                    <li><i class="bi-check-circle"></i> Entropy analysis (packer / encryption detect)</li>
+                    <li><i class="bi-check-circle"></i> PE header analysis (EXE / DLL)</li>
+                    <li><i class="bi-check-circle"></i> Macro detection (Office files)</li>
+                    <li><i class="bi-check-circle"></i> String extraction &amp; pattern matching</li>
                 </ul>
             </div>
 
-            <!-- Column 2 — Vendor Scanning -->
+            <!-- Column 2 â€” Vendor Scanning -->
             <div class="cap-card">
-                <div class="cc-icon"><i class="fas fa-shield-halo"></i></div>
+                <div class="cc-icon"><i class="bi-shield-fill-check"></i></div>
                 <h4>Vendor Scanning</h4>
                 <ul>
-                    <li><i class="fas fa-check-circle"></i> 70+ AV engines via VirusTotal</li>
-                    <li><i class="fas fa-check-circle"></i> Detection ratio &amp; severity badge</li>
-                    <li><i class="fas fa-check-circle"></i> Per-vendor result breakdown</li>
-                    <li><i class="fas fa-check-circle"></i> Historical scan lookup</li>
-                    <li><i class="fas fa-check-circle"></i> Community vote &amp; reputation</li>
-                    <li><i class="fas fa-check-circle"></i> First-seen / last-analysis timestamps</li>
+                    <li><i class="bi-check-circle"></i> 70+ AV engines via VirusTotal</li>
+                    <li><i class="bi-check-circle"></i> Detection ratio &amp; severity badge</li>
+                    <li><i class="bi-check-circle"></i> Per-vendor result breakdown</li>
+                    <li><i class="bi-check-circle"></i> Historical scan lookup</li>
+                    <li><i class="bi-check-circle"></i> Community vote &amp; reputation</li>
+                    <li><i class="bi-check-circle"></i> First-seen / last-analysis timestamps</li>
                 </ul>
             </div>
 
-            <!-- Column 3 — Deep Analysis -->
+            <!-- Column 3 â€” Deep Analysis -->
             <div class="cap-card">
-                <div class="cc-icon"><i class="fas fa-brain"></i></div>
+                <div class="cc-icon"><i class="bi-brain"></i></div>
                 <h4>Deep Analysis</h4>
                 <ul>
-                    <li><i class="fas fa-check-circle"></i> PDF structure &amp; JavaScript analysis</li>
-                    <li><i class="fas fa-check-circle"></i> Office macro extraction &amp; deobfuscation</li>
-                    <li><i class="fas fa-check-circle"></i> Script deobfuscation (JS / VBS / PS1)</li>
-                    <li><i class="fas fa-check-circle"></i> Archive bomb &amp; zip-slip detection</li>
-                    <li><i class="fas fa-check-circle"></i> APK permission &amp; manifest review</li>
-                    <li><i class="fas fa-check-circle"></i> YARA rule matching (5000+ rules)</li>
+                    <li><i class="bi-check-circle"></i> PDF structure &amp; JavaScript analysis</li>
+                    <li><i class="bi-check-circle"></i> Office macro extraction &amp; deobfuscation</li>
+                    <li><i class="bi-check-circle"></i> Script deobfuscation (JS / VBS / PS1)</li>
+                    <li><i class="bi-check-circle"></i> Archive bomb &amp; zip-slip detection</li>
+                    <li><i class="bi-check-circle"></i> APK permission &amp; manifest review</li>
+                    <li><i class="bi-check-circle"></i> YARA rule matching (5000+ rules)</li>
                 </ul>
             </div>
         </div>
@@ -765,9 +1644,9 @@
         </div>
         <div class="fs-table-wrap">
             <div class="fst-header">
-                <h5><i class="fas fa-clock-rotate" style="color:var(--fs-purple);"></i> Latest Submissions</h5>
+                <h5><i class="bi-clock-history" style="color:var(--fs-purple);"></i> Latest Submissions</h5>
                 <div class="fst-search">
-                    <i class="fas fa-search"></i>
+                    <i class="bi-search"></i>
                     <input type="text" id="tableSearch" placeholder="Filter by filename or hash..." autocomplete="off">
                 </div>
             </div>
@@ -785,9 +1664,9 @@
                 </tbody>
             </table>
             <div class="st-paginate" id="tablePagination">
-                <button class="page-btn" id="prevPage" disabled><i class="fas fa-chevron-left"></i> Prev</button>
+                <button class="page-btn" id="prevPage" disabled><i class="bi-chevron-left"></i> Prev</button>
                 <span class="page-info" id="pageInfo">Page 1 of 3</span>
-                <button class="page-btn" id="nextPage">Next <i class="fas fa-chevron-right"></i></button>
+                <button class="page-btn" id="nextPage">Next <i class="bi-chevron-right"></i></button>
             </div>
         </div>
     </div>
@@ -799,7 +1678,7 @@
 <div class="fs-modal-overlay" id="uploadModal">
     <div class="fs-modal">
         <div class="fsm-header">
-            <h4><i class="fas fa-file-circle-check" style="color:var(--fs-purple);margin-right:0.5rem;"></i> Analyzing File</h4>
+            <h4><i class="bi-file-check" style="color:var(--fs-purple);margin-right:0.5rem;"></i> Analyzing File</h4>
             <p id="fsmFileName">scanning...</p>
         </div>
         <div class="fsm-step active" data-step="0">
@@ -848,6 +1727,657 @@
         <div class="fsm-percent" id="fsmPercent">0%</div>
     </div>
 </div>
+
+<!-- ============================================================
+     SCAN RESULTS
+     ============================================================ -->
+<div id="fs-results" class="fs-results" style="display:none;">
+    <div class="container">
+        <div class="fsr-card">
+            <div class="fsr-header">
+                <div class="fsr-verdict" id="fsrVerdict">
+                    <i class="bi-check-circle" id="fsrVerdictIcon"></i>
+                    <span id="fsrVerdictLabel">Scan Failed</span>
+                </div>
+                <div class="fsr-file-info">
+                    <span class="fsr-filename" id="fsrFileName">-</span>
+                    <span class="fsr-status-badge" id="fsrStatusBadge">-</span>
+                    <span class="fsr-filesize" id="fsrFileSize">-</span>
+                </div>
+            </div>
+            <div class="fsr-verdict-sub" id="fsrVerdictSub">
+                <span class="fsr-vs-item">
+                    <span class="fsr-vs-label">Risk Score:</span>
+                    <span class="fsr-vs-value" id="fsrVsScore">—</span>
+                </span>
+                <span class="fsr-vs-item">
+                    <span class="fsr-vs-label">Threat Level:</span>
+                    <span class="fsr-vs-value" id="fsrVsThreatLevel">—</span>
+                </span>
+                <span class="fsr-vs-item">
+                    <span class="fsr-vs-label">Confidence:</span>
+                    <span class="fsr-vs-value" id="fsrVsConfidence">—</span>
+                </span>
+                <span class="fsr-vs-item">
+                    <span class="fsr-vs-label">Detection Ratio:</span>
+                    <span class="fsr-vs-value" id="fsrVsRatio">—</span>
+                </span>
+                <span class="fsr-vs-item">
+                    <span class="fsr-vs-label">Duration:</span>
+                    <span class="fsr-vs-value" id="fsrVsDuration">—</span>
+                </span>
+                <span class="fsr-vs-item">
+                    <span class="fsr-vs-label">Timestamp:</span>
+                    <span class="fsr-vs-value" id="fsrVsTimestamp">—</span>
+                </span>
+            </div>
+            <div class="fsr-body">
+                <div class="fsr-section">
+                    <h5>Hash Values</h5>
+                    <div class="fsr-hashes">
+                        <div class="fsr-hash"><span class="fsr-hash-label">MD5</span><code id="fsrMd5">-</code><button class="fsr-copy-btn" data-copy="fsrMd5"><i class="bi-clipboard"></i></button></div>
+                        <div class="fsr-hash"><span class="fsr-hash-label">SHA256</span><code id="fsrSha256">-</code><button class="fsr-copy-btn" data-copy="fsrSha256"><i class="bi-clipboard"></i></button></div>
+                        <div class="fsr-hash"><span class="fsr-hash-label">SHA3-256</span><code id="fsrSha3">-</code><button class="fsr-copy-btn" data-copy="fsrSha3"><i class="bi-clipboard"></i></button></div>
+                    </div>
+                </div>
+                <div id="fsrError" class="fsr-error" style="display:none;"></div>
+            </div>
+
+            <!-- ============================================================
+                 EXPANDED RESULT SECTIONS (shown for complete scans only)
+                 ============================================================ -->
+            <div class="fsr-expanded" id="fsrExpandedSections" style="display:none;">
+
+                <!-- SECTION 1: FILE INFORMATION -->
+                <div class="fsr-expanded-card">
+                    <div class="fec-header"><i class="bi-info-circle"></i> File Information</div>
+                    <div class="fsr-expanded-rows">
+                        <div class="fsr-expanded-row full-width">
+                            <span class="fsr-expanded-label">Original Filename</span>
+                            <span class="fsr-expanded-value" id="fsrFiFilename">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">File Extension</span>
+                            <span class="fsr-expanded-value" id="fsrFiExtension">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">MIME Type</span>
+                            <span class="fsr-expanded-value" id="fsrFiMime">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">File Category</span>
+                            <span class="fsr-expanded-value" id="fsrFiCategory">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">Encoding</span>
+                            <span class="fsr-expanded-value" id="fsrFiEncoding">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">Entropy</span>
+                            <span class="fsr-expanded-value mono" id="fsrFiEntropy">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">Compression Ratio</span>
+                            <span class="fsr-expanded-value" id="fsrFiCompression">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">SHA1</span>
+                            <span class="fsr-expanded-value hash" id="fsrFiSha1">Not Available</span>
+                            <button class="fsr-copy-btn" data-copy="fsrFiSha1"><i class="bi-clipboard"></i></button>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">Scan Timestamp</span>
+                            <span class="fsr-expanded-value mono" id="fsrFiTimestamp">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row full-width">
+                            <span class="fsr-expanded-label">VT Scan ID</span>
+                            <span class="fsr-expanded-value hash" id="fsrFiVtId">Not Available</span>
+                            <button class="fsr-copy-btn" data-copy="fsrFiVtId"><i class="bi-clipboard"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 2: DETECTION SUMMARY -->
+                <div class="fsr-expanded-card">
+                    <div class="fec-header"><i class="bi-bar-chart"></i> Detection Summary</div>
+                    <div class="fsr-detection-grid" id="fsrDetSummaryGrid">
+                        <div class="fsr-detection-item">
+                            <div class="fsr-di-header">
+                                <span class="fsr-di-label"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#22c55e;"></span> Clean Vendors</span>
+                                <span class="fsr-di-count" id="fsrDsCleanCount">0</span>
+                            </div>
+                            <div class="fsr-di-bar"><div class="fsr-di-fill fsr-di-clean" id="fsrDsCleanBar" style="width:0%"></div></div>
+                            <div class="fsr-di-pct" id="fsrDsCleanPct">0%</div>
+                        </div>
+                        <div class="fsr-detection-item">
+                            <div class="fsr-di-header">
+                                <span class="fsr-di-label"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#ef4444;"></span> Malicious Vendors</span>
+                                <span class="fsr-di-count" id="fsrDsMaliciousCount">0</span>
+                            </div>
+                            <div class="fsr-di-bar"><div class="fsr-di-fill fsr-di-malicious" id="fsrDsMaliciousBar" style="width:0%"></div></div>
+                            <div class="fsr-di-pct" id="fsrDsMaliciousPct">0%</div>
+                        </div>
+                        <div class="fsr-detection-item">
+                            <div class="fsr-di-header">
+                                <span class="fsr-di-label"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#f59e0b;"></span> Suspicious Vendors</span>
+                                <span class="fsr-di-count" id="fsrDsSuspiciousCount">0</span>
+                            </div>
+                            <div class="fsr-di-bar"><div class="fsr-di-fill fsr-di-suspicious" id="fsrDsSuspiciousBar" style="width:0%"></div></div>
+                            <div class="fsr-di-pct" id="fsrDsSuspiciousPct">0%</div>
+                        </div>
+                        <div class="fsr-detection-item">
+                            <div class="fsr-di-header">
+                                <span class="fsr-di-label"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#6b7280;"></span> Undetected Vendors</span>
+                                <span class="fsr-di-count" id="fsrDsUndetectedCount">0</span>
+                            </div>
+                            <div class="fsr-di-bar"><div class="fsr-di-fill fsr-di-undetected" id="fsrDsUndetectedBar" style="width:0%"></div></div>
+                            <div class="fsr-di-pct" id="fsrDsUndetectedPct">0%</div>
+                        </div>
+                        <div class="fsr-detection-item">
+                            <div class="fsr-di-header">
+                                <span class="fsr-di-label"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#8b5cf6;"></span> Timeout Vendors</span>
+                                <span class="fsr-di-count" id="fsrDsTimeoutCount">0</span>
+                            </div>
+                            <div class="fsr-di-bar"><div class="fsr-di-fill fsr-di-timeout" id="fsrDsTimeoutBar" style="width:0%"></div></div>
+                            <div class="fsr-di-pct" id="fsrDsTimeoutPct">0%</div>
+                        </div>
+                        <div class="fsr-detection-item">
+                            <div class="fsr-di-header">
+                                <span class="fsr-di-label"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#ec4899;"></span> Failure Vendors</span>
+                                <span class="fsr-di-count" id="fsrDsFailureCount">0</span>
+                            </div>
+                            <div class="fsr-di-bar"><div class="fsr-di-fill fsr-di-failure" id="fsrDsFailureBar" style="width:0%"></div></div>
+                            <div class="fsr-di-pct" id="fsrDsFailurePct">0%</div>
+                        </div>
+                        <div class="fsr-detection-item">
+                            <div class="fsr-di-header">
+                                <span class="fsr-di-label"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#94a3b8;"></span> Unavailable Vendors</span>
+                                <span class="fsr-di-count" id="fsrDsUnavailableCount">0</span>
+                            </div>
+                            <div class="fsr-di-bar"><div class="fsr-di-fill fsr-di-unavailable" id="fsrDsUnavailableBar" style="width:0%"></div></div>
+                            <div class="fsr-di-pct" id="fsrDsUnavailablePct">0%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 3: THREAT ANALYSIS (NEW, replaces Threat Overview) -->
+                <div class="fsr-expanded-card" id="fsrThreatAnalysisCard" style="display:none;">
+                    <div class="fec-header"><i class="bi-shield-exclamation"></i> Threat Analysis</div>
+                    <div class="fsr-threat-analysis" id="fsrThreatAnalysisBody">
+                        <div class="fsr-ta-row">
+                            <span class="fsr-ta-label">Detected Threat</span>
+                            <span class="fsr-ta-value" id="fsrTaThreat">Not Available</span>
+                        </div>
+                        <div class="fsr-ta-row">
+                            <span class="fsr-ta-label">Malware Category</span>
+                            <span class="fsr-ta-value" id="fsrTaCategory">Not Available</span>
+                        </div>
+                        <div class="fsr-ta-row">
+                            <span class="fsr-ta-label">Severity</span>
+                            <span class="fsr-ta-value"><span class="fsr-ta-severity" id="fsrTaSeverity">Not Available</span></span>
+                        </div>
+                        <div class="fsr-ta-row">
+                            <span class="fsr-ta-label">Detection Ratio</span>
+                            <span class="fsr-ta-value mono" id="fsrTaRatio">Not Available</span>
+                        </div>
+                        <div class="fsr-ta-row">
+                            <span class="fsr-ta-label">Confidence</span>
+                            <span class="fsr-ta-value" id="fsrTaConfidence">Not Available</span>
+                        </div>
+                        <div class="fsr-ta-row">
+                            <span class="fsr-ta-label">Recommended Action</span>
+                            <span class="fsr-ta-value" id="fsrTaAction">Not Available</span>
+                        </div>
+                        <div class="fsr-ta-row" style="align-items:flex-start;">
+                            <span class="fsr-ta-label">Detected By</span>
+                            <div class="fsr-ta-value fsr-ta-table-wrap">
+                                <table class="fsr-ta-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="ta-header-engine">Engine</th>
+                                            <th class="ta-header-result">Detection</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="fsrTaDetectedByBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Safe file message (shown when no threats) -->
+                <div class="fsr-expanded-card" id="fsrSafeFileCard" style="display:none;">
+                    <div class="fsr-safe-msg">
+                        <i class="bi-check-circle"></i>
+                        <span id="fsrSafeMessage">No threats detected by any antivirus engine.</span>
+                    </div>
+                </div>
+
+                <!-- SECTION 4: SCAN DETAILS -->
+                <div class="fsr-expanded-card">
+                    <div class="fec-header"><i class="bi-clock"></i> Scan Details</div>
+                    <div class="fsr-expanded-rows">
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">Scan Started</span>
+                            <span class="fsr-expanded-value mono" id="fsrSdStarted">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">Scan Finished</span>
+                            <span class="fsr-expanded-value mono" id="fsrSdFinished">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">Processing Time</span>
+                            <span class="fsr-expanded-value mono" id="fsrSdProcessing">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">VT API Version</span>
+                            <span class="fsr-expanded-value mono" id="fsrSdApiVersion">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">API Status</span>
+                            <span class="fsr-expanded-value" id="fsrSdApiStatus">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">Rate Limit Status</span>
+                            <span class="fsr-expanded-value" id="fsrSdRateLimit">Not Available</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 5: HASH VERIFICATION -->
+                <div class="fsr-expanded-card">
+                    <div class="fec-header"><i class="bi-fingerprint"></i> Hash Verification</div>
+                    <div class="fsr-expanded-rows">
+                        <div class="fsr-expanded-row full-width">
+                            <span class="fsr-expanded-label">SHA-512</span>
+                            <span class="fsr-expanded-value hash" id="fsrHvSha512">Not Available</span>
+                            <button class="fsr-copy-btn" data-copy="fsrHvSha512"><i class="bi-clipboard"></i></button>
+                        </div>
+                        <div class="fsr-expanded-row full-width">
+                            <span class="fsr-expanded-label">CRC-32</span>
+                            <span class="fsr-expanded-value hash" id="fsrHvCrc32">Not Available</span>
+                            <button class="fsr-copy-btn" data-copy="fsrHvCrc32"><i class="bi-clipboard"></i></button>
+                        </div>
+                        <div class="fsr-expanded-row full-width">
+                            <span class="fsr-expanded-label">VHash (VT)</span>
+                            <span class="fsr-expanded-value hash" id="fsrHvVhash">Not Available</span>
+                            <button class="fsr-copy-btn" data-copy="fsrHvVhash"><i class="bi-clipboard"></i></button>
+                        </div>
+                        <div class="fsr-expanded-row full-width">
+                            <span class="fsr-expanded-label">Authentihash</span>
+                            <span class="fsr-expanded-value hash" id="fsrHvAuthentihash">Not Available</span>
+                            <button class="fsr-copy-btn" data-copy="fsrHvAuthentihash"><i class="bi-clipboard"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 6: DOCUMENT ANALYSIS -->
+                <div class="fsr-expanded-card" id="fsrDocCard" style="display:none;">
+                    <div class="fec-header"><i class="bi-file-earmark-text"></i> Document Analysis</div>
+                    <div class="fsr-expanded-rows" id="fsrDocBody">
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">Macros</span>
+                            <span class="fsr-expanded-value" id="fsrDocMacros">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">Embedded Objects</span>
+                            <span class="fsr-expanded-value" id="fsrDocEmbedded">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">JavaScript</span>
+                            <span class="fsr-expanded-value" id="fsrDocJS">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">OLE Objects</span>
+                            <span class="fsr-expanded-value" id="fsrDocOLE">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">AutoOpen Macro</span>
+                            <span class="fsr-expanded-value" id="fsrDocAutoOpen">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">Hidden Sheets/Slides</span>
+                            <span class="fsr-expanded-value" id="fsrDocHidden">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">External Links</span>
+                            <span class="fsr-expanded-value" id="fsrDocLinks">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">Forms</span>
+                            <span class="fsr-expanded-value" id="fsrDocForms">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">Attachments</span>
+                            <span class="fsr-expanded-value" id="fsrDocAttachments">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row full-width">
+                            <span class="fsr-expanded-label">Suspicious Keywords</span>
+                            <span class="fsr-expanded-value" id="fsrDocKeywords">Not Available</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 7: ARCHIVE ANALYSIS -->
+                <div class="fsr-expanded-card" id="fsrArchiveCard" style="display:none;">
+                    <div class="fec-header"><i class="bi-archive"></i> Archive Analysis</div>
+                    <div class="fsr-expanded-rows" id="fsrArchiveBody">
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">Contained Files</span>
+                            <span class="fsr-expanded-value" id="fsrArcFiles">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">Nested Archives</span>
+                            <span class="fsr-expanded-value" id="fsrArcNested">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">Password Protected</span>
+                            <span class="fsr-expanded-value" id="fsrArcPassword">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">Compression Method</span>
+                            <span class="fsr-expanded-value" id="fsrArcCompression">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">Largest File</span>
+                            <span class="fsr-expanded-value" id="fsrArcLargest">Not Available</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 8: STRINGS ANALYSIS -->
+                <div class="fsr-expanded-card" id="fsrStringsCard" style="display:none;">
+                    <div class="fec-header"><i class="bi-fonts"></i> Strings Analysis</div>
+                    <div class="fsr-strings-grid" id="fsrStringsGrid"></div>
+                </div>
+
+                <!-- SECTION 9: DIGITAL SIGNATURE -->
+                <div class="fsr-expanded-card" id="fsrSignatureCard" style="display:none;">
+                    <div class="fec-header"><i class="bi-patch-check"></i> Digital Signature</div>
+                    <div class="fsr-expanded-rows" id="fsrSignatureBody">
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">Signed</span>
+                            <span class="fsr-expanded-value" id="fsrSigSigned">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">Signer</span>
+                            <span class="fsr-expanded-value" id="fsrSigSigner">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">Signing Date</span>
+                            <span class="fsr-expanded-value" id="fsrSigDate">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">Valid Signature</span>
+                            <span class="fsr-expanded-value" id="fsrSigValid">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">Compiler</span>
+                            <span class="fsr-expanded-value" id="fsrSigCompiler">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">Compiler Version</span>
+                            <span class="fsr-expanded-value" id="fsrSigCompilerVer">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">Packer</span>
+                            <span class="fsr-expanded-value" id="fsrSigPacker">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">Entry Point</span>
+                            <span class="fsr-expanded-value mono" id="fsrSigEntryPoint">Not Available</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 7: YARA MATCHES -->
+                <div class="fsr-expanded-card" id="fsrYaraCard" style="display:none;">
+                    <div class="fec-header"><i class="bi-shield"></i> YARA Rule Matches</div>
+                    <div class="fsr-yara-body" id="fsrYaraBody">
+                        <div class="fsr-ta-value fsr-ta-table-wrap">
+                            <table class="fsr-ta-table">
+                                <thead>
+                                    <tr>
+                                        <th>Rule Name</th>
+                                        <th>Author</th>
+                                        <th>Description</th>
+                                        <th>Source</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="fsrYaraTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 8: THREAT CLASSIFICATION -->
+                <div class="fsr-expanded-card" id="fsrThreatClassCard" style="display:none;">
+                    <div class="fec-header"><i class="bi-tags"></i> Threat Classification</div>
+                    <div class="fsr-expanded-rows" id="fsrThreatClassBody">
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">Malware Family</span>
+                            <span class="fsr-expanded-value" id="fsrTcFamily">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">Threat Type</span>
+                            <span class="fsr-expanded-value" id="fsrTcType">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">Malicious Sources</span>
+                            <span class="fsr-expanded-value" id="fsrTcSources">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">Sandbox Label</span>
+                            <span class="fsr-expanded-value" id="fsrTcSandboxLabel">Not Available</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 9: SANDBOX ANALYSIS -->
+                <div class="fsr-expanded-card" id="fsrSandboxCard" style="display:none;">
+                    <div class="fec-header"><i class="bi-cpu"></i> Behavioral / Sandbox Analysis</div>
+                    <div class="fsr-expanded-rows" id="fsrSandboxBody">
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">Sandbox Verdict</span>
+                            <span class="fsr-expanded-value" id="fsrSbVerdict">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">Malicious Actions</span>
+                            <span class="fsr-expanded-value" id="fsrSbMalicious">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">Suspicious Actions</span>
+                            <span class="fsr-expanded-value" id="fsrSbSuspicious">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row full-width">
+                            <span class="fsr-expanded-label">Sandbox Details</span>
+                            <span class="fsr-expanded-value" id="fsrSbDetails">Not Available</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION: SECURITY FINDINGS -->
+                <div class="fsr-expanded-card" id="fsrFindingsCard" style="display:none;">
+                    <div class="fec-header"><i class="bi-exclamation-triangle"></i> Security Findings</div>
+                    <div class="fsr-findings-grid" id="fsrFindingsGrid"></div>
+                </div>
+
+                <!-- SECTION: RISK ENGINE -->
+                <div class="fsr-expanded-card" id="fsrRiskCard" style="display:none;">
+                    <div class="fec-header"><i class="bi-speedometer2"></i> Risk Engine Assessment</div>
+                    <div class="fsr-expanded-rows" id="fsrRiskBody">
+                        <div class="fsr-expanded-row full-width">
+                            <div class="fsr-risk-gauge" id="fsrRiskGauge"></div>
+                        </div>
+                        <div class="fsr-expanded-row full-width">
+                            <span class="fsr-expanded-label">Risk Factors</span>
+                            <span class="fsr-expanded-value" id="fsrRiskFactors">Not Available</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION: STATIC ANALYSIS (PE / Bundle Info) -->
+                <div class="fsr-expanded-card" id="fsrPeCard" style="display:none;">
+                    <div class="fec-header"><i class="bi-diagram-3"></i> Static Analysis (PE / Bundle Info)</div>
+                    <div class="fsr-expanded-rows" id="fsrPeBody">
+                        <div class="fsr-expanded-row full-width">
+                            <span class="fsr-expanded-label">Imports</span>
+                            <span class="fsr-expanded-value" id="fsrPeImports">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row full-width">
+                            <span class="fsr-expanded-label">Exports</span>
+                            <span class="fsr-expanded-value" id="fsrPeExports">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">Subsystem</span>
+                            <span class="fsr-expanded-value" id="fsrPeSubsystem">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">Machine Type</span>
+                            <span class="fsr-expanded-value" id="fsrPeMachine">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">File Version</span>
+                            <span class="fsr-expanded-value" id="fsrPeVersion">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">Linker Version</span>
+                            <span class="fsr-expanded-value" id="fsrPeLinker">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row full-width">
+                            <span class="fsr-expanded-label">Sections</span>
+                            <span class="fsr-expanded-value" id="fsrPeSections">Not Available</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 11: KNOWN NAMES -->
+                <div class="fsr-expanded-card" id="fsrNamesCard" style="display:none;">
+                    <div class="fec-header"><i class="bi-file-earmark-text"></i> Known Filenames</div>
+                    <div class="fsr-expanded-rows" id="fsrNamesBody">
+                        <div class="fsr-expanded-row full-width">
+                            <span class="fsr-expanded-label">Alternative Names</span>
+                            <span class="fsr-expanded-value" id="fsrNamesList">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row full-width">
+                            <span class="fsr-expanded-label">Submission Names</span>
+                            <span class="fsr-expanded-value" id="fsrSubNamesList">Not Available</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 12: FILE PROPERTIES -->
+                <div class="fsr-expanded-card" id="fsrPropsCard" style="display:none;">
+                    <div class="fec-header"><i class="bi-tag"></i> File Properties &amp; Tags</div>
+                    <div class="fsr-expanded-rows" id="fsrPropsBody">
+                        <div class="fsr-expanded-row full-width">
+                            <span class="fsr-expanded-label">VT Tags</span>
+                            <span class="fsr-expanded-value" id="fsrPropTags">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row full-width">
+                            <span class="fsr-expanded-label">Type Tags</span>
+                            <span class="fsr-expanded-value" id="fsrPropTypeTags">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row full-width">
+                            <span class="fsr-expanded-label">TrID Identifiers</span>
+                            <span class="fsr-expanded-value" id="fsrPropTrid">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">Magic Bytes</span>
+                            <span class="fsr-expanded-value mono" id="fsrPropMagic">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">Type Description</span>
+                            <span class="fsr-expanded-value" id="fsrPropTypeDesc">Not Available</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 13: TIMELINE & HISTORY -->
+                <div class="fsr-expanded-card">
+                    <div class="fec-header"><i class="bi-clock-history"></i> Timeline &amp; History</div>
+                    <div class="fsr-timeline" id="fsrTimeline"></div>
+                    <div style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid var(--glass-border);">
+                        <div class="fsr-expanded-rows">
+                            <div class="fsr-expanded-row">
+                                <span class="fsr-expanded-label">First Submission</span>
+                                <span class="fsr-expanded-value mono" id="fsrTlFirstSub">Not Available</span>
+                            </div>
+                            <div class="fsr-expanded-row">
+                                <span class="fsr-expanded-label">Last Analysis</span>
+                                <span class="fsr-expanded-value mono" id="fsrTlLastAnalysis">Not Available</span>
+                            </div>
+                            <div class="fsr-expanded-row">
+                                <span class="fsr-expanded-label">Times Submitted</span>
+                                <span class="fsr-expanded-value" id="fsrTlTimesSub">Not Available</span>
+                            </div>
+                            <div class="fsr-expanded-row">
+                                <span class="fsr-expanded-label">Scan Duration</span>
+                                <span class="fsr-expanded-value mono" id="fsrTlDuration">Not Available</span>
+                            </div>
+                            <div class="fsr-expanded-row">
+                                <span class="fsr-expanded-label">Last Analysis Date</span>
+                                <span class="fsr-expanded-value mono" id="fsrTlLastDate">Not Available</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 14: MITRE ATT&CK -->
+                <div class="fsr-expanded-card">
+                    <div class="fec-header"><i class="bi-crosshair"></i> MITRE ATT&CK Mapping</div>
+                    <div class="fsr-expanded-rows">
+                        <div class="fsr-expanded-row full-width">
+                            <span class="fsr-expanded-label">Status</span>
+                            <span class="fsr-expanded-value" id="fsrMitreStatus">Not Available (requires VirusTotal Intelligence)</span>
+                        </div>
+                        <div class="fsr-expanded-row full-width">
+                            <span class="fsr-expanded-label">Tactics</span>
+                            <span class="fsr-expanded-value" id="fsrMitreTactics">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row full-width">
+                            <span class="fsr-expanded-label">Techniques</span>
+                            <span class="fsr-expanded-value" id="fsrMitreTechniques">Not Available</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 15: RAW DATA / API INTEGRATION -->
+                <div class="fsr-expanded-card">
+                    <div class="fec-header"><i class="bi-braces"></i> Raw Analysis Data (API)</div>
+                    <div class="fsr-expanded-rows">
+                        <div class="fsr-expanded-row full-width">
+                            <span class="fsr-expanded-label">VT API Version</span>
+                            <span class="fsr-expanded-value" id="fsrRawApiVersion">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">API Status</span>
+                            <span class="fsr-expanded-value" id="fsrRawApiStatus">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row">
+                            <span class="fsr-expanded-label">Rate Limit</span>
+                            <span class="fsr-expanded-value" id="fsrRawRateLimit">Not Available</span>
+                        </div>
+                        <div class="fsr-expanded-row full-width" style="align-items:flex-start;">
+                            <span class="fsr-expanded-label">Raw JSON</span>
+                            <div class="fsr-ta-value fsr-ta-table-wrap">
+                                <pre class="fsr-raw-json" id="fsrRawJson" style="max-height:300px;overflow:auto;background:var(--bg-card);border:1px solid var(--border);border-radius:6px;padding:0.75rem;font-size:0.75rem;line-height:1.5;white-space:pre-wrap;word-break:break-all;color:var(--text-secondary);margin:0;">Not Available</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="fsr-actions">
+                <button class="fsr-export-btn" id="fsrExportJson"><i class="bi-download"></i> Export JSON</button>
+                <button class="fsr-export-btn" id="fsrExportPdf"><i class="bi-filetype-pdf"></i> Export PDF</button>
+                <button class="btn btn-purple" id="fsrNewScan"><i class="bi-arrow-repeat"></i> Scan Another File</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
@@ -873,7 +2403,9 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         fileInput.addEventListener('change', function () {
             if (this.files && this.files[0]) {
-                startUpload(this.files[0]);
+                var file = this.files[0];
+                startUpload(file);
+                uploadFile(file);
             }
         });
         // Drag events
@@ -892,9 +2424,12 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
         dropZone.addEventListener('drop', function (e) {
+            e.preventDefault();
             var files = e.dataTransfer.files;
             if (files && files[0]) {
-                startUpload(files[0]);
+                var file = files[0];
+                startUpload(file);
+                uploadFile(file);
             }
         });
     }
@@ -903,37 +2438,850 @@ document.addEventListener('DOMContentLoaded', function () {
     // 2. HASH SEARCH
     // -------------------------------------------------------
     var hashInput = document.getElementById('hashInput');
-    var hashSearchBtn = document.getElementById('hashSearchBtn');
-    if (hashSearchBtn && hashInput) {
-        function doHashSearch() {
-            var val = hashInput.value.trim();
-            if (!val) {
-                if (window.CipherScan && window.CipherScan.toast) {
-                    window.CipherScan.toast.warning('Hash Required', 'Please enter an MD5, SHA1, or SHA256 hash.');
+    var searchBtn = document.getElementById('hashSearchBtn');
+    var hashSearchError = document.getElementById('hashSearchError');
+
+    if (searchBtn && hashInput) {
+        searchBtn.addEventListener('click', function () {
+            var hash = hashInput.value.trim();
+            if (!hash) {
+                if (hashSearchError) {
+                    hashSearchError.textContent = 'Please enter a valid MD5 or SHA256 hash';
+                    hashSearchError.style.display = 'block';
                 }
                 return;
             }
-            if (window.CipherScan && window.CipherScan.toast) {
-                window.CipherScan.toast.info('Searching', 'Looking up report for hash: ' + val.substring(0, 16) + '...');
-            }
-        }
-        hashSearchBtn.addEventListener('click', doHashSearch);
+            if (hashSearchError) hashSearchError.style.display = 'none';
+            searchBtn.innerHTML = '<i class="bi-search"></i> Searching...';
+            searchBtn.disabled = true;
+
+            fetch('/api/file/search/?hash=' + encodeURIComponent(hash))
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    searchBtn.innerHTML = '<i class="bi-search"></i> Search Existing Report';
+                    searchBtn.disabled = false;
+                    if (data.found && !data.error) {
+                        showStateB(data);
+                    } else {
+                        hashInput.style.border = '2px solid red';
+                        var err = document.createElement('p');
+                        err.style.color = 'red';
+                        err.style.marginTop = '8px';
+                        err.textContent = 'No existing report found. Upload the file to scan it.';
+                        hashInput.parentNode.appendChild(err);
+                        setTimeout(function () {
+                            err.remove();
+                            hashInput.style.border = '';
+                        }, 4000);
+                    }
+                })
+                .catch(function () {
+                    searchBtn.innerHTML = '<i class="bi-search"></i> Search Existing Report';
+                    searchBtn.disabled = false;
+                    if (hashSearchError) {
+                        hashSearchError.textContent = 'Search failed. Please try again.';
+                        hashSearchError.style.display = 'block';
+                    }
+                    console.error('Search failed');
+                });
+        });
         hashInput.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter') doHashSearch();
+            if (e.key === 'Enter') searchBtn.click();
+        });
+        hashInput.addEventListener('input', function () {
+            if (hashSearchError) hashSearchError.style.display = 'none';
+            hashInput.style.border = '';
         });
     }
 
     // -------------------------------------------------------
     // 3. UPLOAD PROGRESS MODAL
     // -------------------------------------------------------
+
+    function updateStep(index, label, status) {
+        var step = document.querySelector('.fsm-step[data-step="' + index + '"]');
+        if (!step) return;
+        var statusEl = document.getElementById('fsmStep' + index);
+        step.classList.remove('active', 'done');
+        if (status === 'active') {
+            step.classList.add('active');
+            if (statusEl) statusEl.textContent = label || 'In Progress...';
+        } else if (status === 'done') {
+            step.classList.add('done');
+            if (statusEl) statusEl.textContent = label || 'Complete';
+        } else {
+            if (statusEl) statusEl.textContent = label || 'Pending';
+        }
+    }
+
+    function updateProgress(percent) {
+        var fill = document.getElementById('fsmProgressFill');
+        var pct = document.getElementById('fsmPercent');
+        if (fill) fill.style.width = Math.min(percent, 100) + '%';
+        if (pct) pct.textContent = Math.min(percent, 100) + '%';
+    }
+
+    function showStateB(data) {
+        var uploadSection = document.getElementById('fsUploadSection');
+        var results = document.getElementById('fs-results');
+        if (uploadSection) uploadSection.style.display = 'none';
+        if (results) {
+            results.style.display = 'block';
+            results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        // Populate results
+        var modal = document.getElementById('uploadModal');
+        if (modal) modal.classList.remove('active');
+
+        var verdict = document.getElementById('fsrVerdict');
+        var verdictIcon = document.getElementById('fsrVerdictIcon');
+        var verdictLabel = document.getElementById('fsrVerdictLabel');
+        if (verdict) {
+            verdict.classList.remove('safe', 'threat');
+            if (data.is_malicious) {
+                verdict.classList.add('threat');
+                if (verdictIcon) verdictIcon.className = 'bi-exclamation-triangle';
+                if (verdictLabel) verdictLabel.textContent = 'THREAT DETECTED';
+            } else {
+                verdict.classList.add('safe');
+                if (verdictIcon) verdictIcon.className = 'bi-check-circle';
+                if (verdictLabel) verdictLabel.textContent = 'FILE IS SAFE';
+            }
+        }
+        var fn = document.getElementById('fsrFileName');
+        var fs = document.getElementById('fsrFileSize');
+        if (fn) fn.textContent = data.file_name || '-';
+        if (fs) fs.textContent = data.file_size ? (data.file_size / 1024).toFixed(1) + ' KB' : '-';
+        var md5El = document.getElementById('fsrMd5');
+        var sha256El = document.getElementById('fsrSha256');
+        var sha3El = document.getElementById('fsrSha3');
+        if (md5El) md5El.textContent = data.file_hash_md5 || '-';
+        if (sha256El) sha256El.textContent = data.file_hash_sha256 || '-';
+        if (sha3El) sha3El.textContent = data.file_hash_sha3_256 || '-';
+        var errorEl = document.getElementById('fsrError');
+        if (errorEl) errorEl.style.display = 'none';
+
+        // Status badge beside filename
+        var statusBadge = document.getElementById('fsrStatusBadge');
+        if (statusBadge) {
+            if (data.is_malicious) {
+                statusBadge.textContent = 'Malicious';
+                statusBadge.className = 'fsr-status-badge malicious';
+            } else {
+                statusBadge.textContent = 'Clean';
+                statusBadge.className = 'fsr-status-badge clean';
+            }
+        }
+
+        // --- Verdict Sub-Row ---
+        function fmtDt(ts) { if (!ts) return 'Not Available'; return new Date(ts * 1000).toUTCString(); }
+        function fmtMs(ms) { if (ms == null) return 'Not Available'; if (ms < 1000) return ms + 'ms'; return (ms/1000).toFixed(2) + 's'; }
+        setEl('fsrVsScore', data.threat_score != null ? data.threat_score + '/100' : 'Not Available');
+        var vsLevel = document.getElementById('fsrVsThreatLevel');
+        if (vsLevel) {
+            var level = data.threat_level_label || data.risk_category || 'Unknown';
+            vsLevel.textContent = level;
+            vsLevel.className = 'fsr-vs-value';
+            if (data.is_malicious) vsLevel.classList.add('verdict-threat');
+            else if (data.threat_score > 60) vsLevel.classList.add('verdict-critical');
+            else vsLevel.classList.add('verdict-safe');
+        }
+        setEl('fsrVsConfidence', data.confidence_level || 'Not Available');
+        setEl('fsrVsRatio', data.detection_ratio || 'Not Available');
+        setEl('fsrVsDuration', fmtMs(data.scan_duration_ms));
+        setEl('fsrVsTimestamp', fmtDt(data.last_analysis_date || data.scan_date));
+
+        // --- Expanded sections (only for "complete" status) ---
+        if (data.status === 'complete') {
+                var expandedWrap = document.getElementById('fsrExpandedSections');
+                if (expandedWrap) expandedWrap.style.display = 'block';
+
+                // Helper formats
+                function setEl(id, text) {
+                    var el = document.getElementById(id);
+                    if (el) el.textContent = text;
+                }
+                function fmtSize(bytes) {
+                    if (bytes == null) return 'Not Available';
+                    if (bytes < 1024) return bytes + ' B';
+                    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+                    return (bytes / 1048576).toFixed(2) + ' MB';
+                }
+                function fmtDuration(ms) {
+                    if (ms == null) return 'Not Available';
+                    if (ms < 1000) return ms + ' ms';
+                    return (ms / 1000).toFixed(2) + ' s';
+                }
+                function fmtTimestamp(ts) {
+                    if (!ts) return 'Not Available';
+                    return new Date(ts * 1000).toUTCString();
+                }
+                function setPct(elId, pct) {
+                    var el = document.getElementById(elId);
+                    if (el) {
+                        el.style.width = '0%';
+                        setTimeout(function () { el.style.width = Math.round(pct) + '%'; }, 50);
+                    }
+                }
+                function escapeHtml(t) { return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+                function setHtml(id, html) { var el = document.getElementById(id); if (el) el.innerHTML = html; }
+
+                // File Information
+                var la = data.local_analysis || {};
+                setEl('fsrFiFilename', data.file_name || 'Not Available');
+                setEl('fsrFiExtension', data.file_extension || 'Not Available');
+                setEl('fsrFiMime', data.mime_type || 'Not Available');
+                setEl('fsrFiCategory', la.file_category || 'Not Available');
+                setEl('fsrFiEncoding', la.encoding || 'Not Available');
+                setEl('fsrFiEntropy', la.entropy != null ? la.entropy + ' / 8.0' : 'Not Available');
+                setEl('fsrFiCompression', la.compression_ratio != null ? la.compression_ratio + ':1' : 'Not Available');
+                setEl('fsrFiSha1', data.file_sha1 || 'Not Available');
+                setEl('fsrFiTimestamp', fmtTimestamp(data.scan_date));
+                setEl('fsrFiVtId', data.vt_scan_id || 'Not Available');
+
+                // Detection Summary
+                var dsStats = data.stats_detail || {};
+                var dsTotal = (dsStats.harmless || 0) + (dsStats.malicious || 0) + (dsStats.suspicious || 0) + (dsStats.undetected || 0) + (dsStats.timeout || 0) + (dsStats.failure || 0) + (dsStats['type-unsupported'] || 0);
+                var dsBase = dsTotal > 0 ? dsTotal : 1;
+
+                function setDsItem(countEl, barEl, pctEl, count) {
+                    var c = count || 0;
+                    setEl(countEl, c);
+                    setPct(barEl, (c / dsBase) * 100);
+                    setEl(pctEl, Math.round((c / dsBase) * 100) + '%');
+                }
+                setDsItem('fsrDsCleanCount', 'fsrDsCleanBar', 'fsrDsCleanPct', dsStats.harmless);
+                setDsItem('fsrDsMaliciousCount', 'fsrDsMaliciousBar', 'fsrDsMaliciousPct', dsStats.malicious);
+                setDsItem('fsrDsSuspiciousCount', 'fsrDsSuspiciousBar', 'fsrDsSuspiciousPct', dsStats.suspicious);
+                setDsItem('fsrDsUndetectedCount', 'fsrDsUndetectedBar', 'fsrDsUndetectedPct', dsStats.undetected);
+                setDsItem('fsrDsTimeoutCount', 'fsrDsTimeoutBar', 'fsrDsTimeoutPct', dsStats.timeout);
+                setDsItem('fsrDsFailureCount', 'fsrDsFailureBar', 'fsrDsFailurePct', dsStats.failure);
+                setDsItem('fsrDsUnavailableCount', 'fsrDsUnavailableBar', 'fsrDsUnavailablePct', dsStats['type-unsupported']);
+
+                // --- Threat Analysis (SECTION 3, replaces old Threat Overview) ---
+                var taCard = document.getElementById('fsrThreatAnalysisCard');
+                var safeCard = document.getElementById('fsrSafeFileCard');
+                var rawResults = data.raw_result || {};
+
+                if (data.is_malicious && rawResults) {
+                    // Get malicious engine results
+                    var maliciousEngines = [];
+                    var threatNames = [];
+                    for (var engineName in rawResults) {
+                        if (rawResults.hasOwnProperty(engineName)) {
+                            var res = rawResults[engineName];
+                            if (res.category === 'malicious' && res.result) {
+                                maliciousEngines.push({ engine: engineName, result: res.result });
+                                threatNames.push(res.result);
+                            }
+                        }
+                    }
+
+                    // Detect malware family (most common detection name)
+                    var family = 'Unknown';
+                    var category = 'Unknown';
+                    if (threatNames.length > 0) {
+                        var nameCounts = {};
+                        threatNames.forEach(function (n) { nameCounts[n] = (nameCounts[n] || 0) + 1; });
+                        family = Object.keys(nameCounts).reduce(function (a, b) { return nameCounts[a] > nameCounts[b] ? a : b; });
+                        // Categorize by family name keywords
+                        var famLower = family.toLowerCase();
+                        if (/trojan|dropper|downloader|loader/i.test(famLower)) category = 'Trojan';
+                        else if (/ransom/i.test(famLower)) category = 'Ransomware';
+                        else if (/worm/i.test(famLower)) category = 'Worm';
+                        else if (/spy|keylog/i.test(famLower)) category = 'Spyware';
+                        else if (/adware|pup|pua|bundler/i.test(famLower)) category = 'Adware';
+                        else if (/backdoor|remote|rat/i.test(famLower)) category = 'Backdoor';
+                        else if (/miner|cryptomin/i.test(famLower)) category = 'Cryptominer';
+                        else if (/rootkit/i.test(famLower)) category = 'Rootkit';
+                        else if (/phish/i.test(famLower)) category = 'Phishing';
+                        else if (/exploit/i.test(famLower)) category = 'Exploit';
+                        else if (/bot/i.test(famLower)) category = 'Botnet';
+                        else if (/virus/i.test(famLower)) category = 'Virus';
+                        else category = 'Malware';
+                    }
+
+                    var vFlagged = data.vendors_flagged != null ? data.vendors_flagged : 0;
+                    var vTotal = data.vendors_total != null ? data.vendors_total : 1;
+                    var score = data.threat_score != null ? data.threat_score : 0;
+
+                    // Determine severity
+                    var severity = 'none';
+                    var severityLabel = 'None';
+                    if (score >= 90) { severity = 'critical'; severityLabel = 'Critical'; }
+                    else if (score >= 60) { severity = 'high'; severityLabel = 'High'; }
+                    else if (score >= 30) { severity = 'medium'; severityLabel = 'Medium'; }
+                    else if (score > 0) { severity = 'low'; severityLabel = 'Low'; }
+
+                    // Recommendations
+                    var rec = 'No action required.';
+                    if (severity === 'critical') rec = 'Immediately isolate the affected system. Do not open the file. Run a full system scan with updated antivirus and contact your security team.';
+                    else if (severity === 'high') rec = 'Quarantine the file immediately. Conduct a thorough system scan. Investigate the source and method of delivery.';
+                    else if (severity === 'medium') rec = 'Flag the file for review. Scan the host system for additional threats. Monitor for unusual network activity.';
+                    else if (severity === 'low') rec = 'Monitor the file. Consider deleting it if not required. Report to your IT team for further evaluation.';
+
+                    // Populate Threat Analysis card
+                    setEl('fsrTaThreat', family);
+                    setEl('fsrTaCategory', category);
+                    var sevEl = document.getElementById('fsrTaSeverity');
+                    if (sevEl) {
+                        sevEl.textContent = severityLabel;
+                        sevEl.className = 'fsr-ta-severity ' + severity;
+                    }
+                    setEl('fsrTaRatio', vFlagged + '/' + vTotal + ' (' + score + '%)');
+                    setEl('fsrTaConfidence', data.confidence_level || 'Not Available');
+                    setEl('fsrTaAction', rec);
+
+                    // Detected By table
+                    var tbody = document.getElementById('fsrTaDetectedByBody');
+                    if (tbody) {
+                        tbody.innerHTML = '';
+                        if (maliciousEngines.length > 0) {
+                            maliciousEngines.sort(function (a, b) { return a.engine.localeCompare(b.engine); });
+                            maliciousEngines.forEach(function (item) {
+                                var tr = document.createElement('tr');
+                                tr.innerHTML = '<td><span class="ta-engine">' + escapeHtml(item.engine) + '</span></td><td><span class="ta-detection">' + escapeHtml(item.result) + '</span></td>';
+                                tbody.appendChild(tr);
+                            });
+                        } else {
+                            tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;color:var(--text-muted);padding:0.75rem;">No malicious detections found.</td></tr>';
+                        }
+                    }
+
+                    if (taCard) taCard.style.display = 'block';
+                    if (safeCard) safeCard.style.display = 'none';
+                } else {
+                    // Safe file — show safe message instead
+                    if (taCard) taCard.style.display = 'none';
+                    if (safeCard) {
+                        safeCard.style.display = 'block';
+                        var vTotal = data.vendors_total != null ? data.vendors_total : 0;
+                        var safeMsg = document.getElementById('fsrSafeMessage');
+                        if (safeMsg) safeMsg.textContent = 'No threats detected by ' + vTotal + ' antivirus engines. The file appears to be clean.';
+                    }
+                }
+
+                // Scan Details
+                setEl('fsrSdStarted', fmtTimestamp(data.first_submission_date));
+                setEl('fsrSdFinished', fmtTimestamp(data.last_analysis_date));
+                setEl('fsrSdProcessing', fmtDuration(data.scan_duration_ms));
+                setEl('fsrSdApiVersion', data.vt_api_version || 'v3');
+                setEl('fsrSdApiStatus', data.api_status || 'Operational');
+                setEl('fsrSdRateLimit', data.rate_limit_status || 'Available');
+
+                // SECTION 5: Hash Verification
+                setEl('fsrHvSha512', data.file_hash_sha512 || 'Not Available');
+                setEl('fsrHvCrc32', data.file_hash_crc32 || 'Not Available');
+                setEl('fsrHvVhash', data.file_vhash || 'Not Available');
+                setEl('fsrHvAuthentihash', data.file_authentihash || 'Not Available');
+
+                // SECTION 6: Document Analysis
+                var docAn = la.document_analysis || {};
+                var docCard = document.getElementById('fsrDocCard');
+                if (docCard) {
+                    if (docAn.is_document) {
+                        docCard.style.display = 'block';
+                        function setHtml(id, html) { var el = document.getElementById(id); if (el) el.innerHTML = html; }
+                        setHtml('fsrDocMacros', docAn.has_macros ? '<span style=\"color:#ef4444;font-weight:700;\"><i class=\"bi-check-circle\"></i> Detected</span>' : 'Not Detected');
+                        setHtml('fsrDocEmbedded', docAn.has_embedded_objects ? 'Yes' : 'No');
+                        setHtml('fsrDocJS', docAn.has_javascript ? '<span style=\"color:#ef4444;font-weight:700;\"><i class=\"bi-exclamation-triangle\"></i> Detected</span>' : 'Not Detected');
+                        setHtml('fsrDocOLE', docAn.has_ole_objects ? 'Yes' : 'No');
+                        setHtml('fsrDocAutoOpen', docAn.has_autoopen ? '<span style=\"color:#ef4444;font-weight:700;\"><i class=\"bi-exclamation-triangle\"></i> Detected</span>' : 'Not Detected');
+                        setHtml('fsrDocHidden', docAn.has_hidden_sheets || docAn.has_hidden_slides ? 'Yes' : 'No');
+                        setHtml('fsrDocLinks', docAn.has_links ? 'Yes' : 'No');
+                        setHtml('fsrDocForms', docAn.has_forms ? 'Yes' : 'No');
+                        setHtml('fsrDocAttachments', docAn.has_attachments ? 'Yes' : 'No');
+                        setHtml('fsrDocKeywords', docAn.suspicious_keywords && docAn.suspicious_keywords.length > 0 ? escapeHtml(docAn.suspicious_keywords.join(', ')) : 'None detected');
+                    } else {
+                        docCard.style.display = 'none';
+                    }
+                }
+
+                // SECTION 7: Archive Analysis
+                var arcAn = la.archive_analysis || {};
+                var arcCard = document.getElementById('fsrArchiveCard');
+                if (arcCard) {
+                    if (arcAn.is_archive) {
+                        arcCard.style.display = 'block';
+                        setEl('fsrArcFiles', arcAn.file_count != null ? arcAn.file_count + ' files' : 'Not Available');
+                        if (arcAn.file_list && arcAn.file_list.length > 0) {
+                            var fileList = arcAn.file_list.slice(0, 30).join(', ') + (arcAn.file_list.length > 30 ? ' (and ' + (arcAn.file_list.length - 30) + ' more)' : '');
+                            setEl('fsrArcFiles', fileList);
+                        }
+                        setEl('fsrArcNested', arcAn.contains_nested ? 'Yes' : 'No');
+                        setEl('fsrArcPassword', arcAn.password_protected ? 'Yes <i class=\"bi-lock\" style=\"color:#f59e0b\"></i>' : 'No');
+                        setEl('fsrArcCompression', arcAn.compression_method || 'Not Available');
+                        setEl('fsrArcLargest', arcAn.largest_file ? arcAn.largest_file + ' (' + fmtSize(arcAn.largest_file_size) + ')' : 'Not Available');
+                    } else {
+                        arcCard.style.display = 'none';
+                    }
+                }
+
+                // SECTION 8: Strings Analysis
+                var strs = la.strings || {};
+                var strsCard = document.getElementById('fsrStringsCard');
+                var strsGrid = document.getElementById('fsrStringsGrid');
+                if (strsCard && strsGrid) {
+                    var hasStrs = strs.total_strings > 0;
+                    if (hasStrs) {
+                        strsCard.style.display = 'block';
+                        strsGrid.innerHTML = '';
+                        var strCategories = [
+                            { key: 'urls', icon: 'bi-link-45deg', label: 'URLs' },
+                            { key: 'ips', icon: 'bi-hdd-network', label: 'IP Addresses' },
+                            { key: 'domains', icon: 'bi-globe2', label: 'Domains' },
+                            { key: 'emails', icon: 'bi-envelope', label: 'Email Addresses' },
+                            { key: 'registry_keys', icon: 'bi-key', label: 'Registry Keys' },
+                            { key: 'commands', icon: 'bi-terminal', label: 'System Commands' },
+                            { key: 'file_paths', icon: 'bi-folder', label: 'File Paths' },
+                            { key: 'mutexes', icon: 'bi-layers', label: 'Mutexes / GUIDs' },
+                            { key: 'crypto_wallets', icon: 'bi-currency-bitcoin', label: 'Crypto Wallets' },
+                        ];
+                        strCategories.forEach(function (cat) {
+                            var items = strs[cat.key] || [];
+                            var card = document.createElement('div');
+                            card.className = 'fsr-strings-card';
+                            if (items.length > 0) {
+                                var listStr = items.slice(0, 15).join(', ');
+                                if (items.length > 15) listStr += ' (and ' + (items.length - 15) + ' more)';
+                                card.innerHTML = '<h6><i class="' + cat.icon + '"></i> ' + cat.label + '</h6><div class="fsr-str-count">' + items.length + ' found</div><div class="fsr-str-list">' + escapeHtml(listStr) + '</div>';
+                            } else {
+                                card.innerHTML = '<h6><i class="' + cat.icon + '"></i> ' + cat.label + '</h6><div class="fsr-str-null">None found</div>';
+                            }
+                            strsGrid.appendChild(card);
+                        });
+                    } else {
+                        strsCard.style.display = 'none';
+                    }
+                }
+
+                // SECTION 9: Digital Signature
+                var sigInfo = data.signature_info || {};
+                var sigKeys = Object.keys(sigInfo);
+                var sigCard = document.getElementById('fsrSignatureCard');
+                if (sigCard) {
+                    if (sigKeys.length > 0) {
+                        sigCard.style.display = 'block';
+                        setEl('fsrSigSigned', sigInfo.signed ? 'Yes' : 'No');
+                        setEl('fsrSigSigner', sigInfo.signers ? sigInfo.signers.join(', ') : 'Not Available');
+                        setEl('fsrSigDate', sigInfo.signing_date || 'Not Available');
+                        setEl('fsrSigValid', sigInfo.valid ? 'Yes' : (sigInfo.valid === false ? 'No' : 'Not Available'));
+                        setEl('fsrSigCompiler', sigInfo.compiler || sigInfo.compiler_name || 'Not Available');
+                        setEl('fsrSigCompilerVer', sigInfo.compiler_version || 'Not Available');
+                        setEl('fsrSigPacker', sigInfo.packer || 'Not Available');
+                        setEl('fsrSigEntryPoint', sigInfo.entry_point || 'Not Available');
+                    } else {
+                        sigCard.style.display = 'none';
+                    }
+                }
+
+                // SECTION 7: YARA Matches
+                var yaraResults = data.crowdsourced_yara_results || [];
+                var yaraCard = document.getElementById('fsrYaraCard');
+                var yaraBody = document.getElementById('fsrYaraTableBody');
+                if (yaraCard && yaraBody) {
+                    yaraBody.innerHTML = '';
+                    if (yaraResults.length > 0) {
+                        yaraCard.style.display = 'block';
+                        yaraResults.forEach(function (yr) {
+                            var tr = document.createElement('tr');
+                            tr.innerHTML = '<td>' + escapeHtml(yr.rule_name || 'Unknown') + '</td><td>' + escapeHtml(yr.author || 'N/A') + '</td><td>' + escapeHtml(yr.description || 'N/A') + '</td><td>' + escapeHtml(yr.source || 'crowdsourced') + '</td>';
+                            yaraBody.appendChild(tr);
+                        });
+                    } else {
+                        yaraCard.style.display = 'none';
+                    }
+                }
+
+                // SECTION 8: Threat Classification
+                var ptc = data.popular_threat_classification || {};
+                var ptcCard = document.getElementById('fsrThreatClassCard');
+                if (ptcCard) {
+                    var ptcFamily = ptc.suggested_threat_label || '';
+                    var ptcCategories = ptc.popular_threat_category || [];
+                    var ptcNames = ptc.popular_threat_name || [];
+                    if (ptcFamily || ptcCategories.length > 0) {
+                        ptcCard.style.display = 'block';
+                        if (ptcFamily && ptcFamily.indexOf(':') > -1) {
+                            var parts = ptcFamily.split(':');
+                            setEl('fsrTcFamily', parts[1] || parts[0]);
+                            setEl('fsrTcType', parts[0] || 'Not Available');
+                        } else {
+                            setEl('fsrTcFamily', ptcFamily || 'Not Available');
+                            setEl('fsrTcType', 'Not Available');
+                        }
+                        var sources = ptcCategories.map(function (c) { return c.value + ' (' + c.count + ')'; }).join(', ');
+                        setEl('fsrTcSources', sources || 'Not Available');
+                        var malNames = ptcNames.map(function (n) { return n.value + ' (' + n.count + ')'; }).join(', ');
+                        if (!malNames) malNames = 'Not Available';
+                        setEl('fsrTcSandboxLabel', malNames);
+                    } else {
+                        ptcCard.style.display = 'none';
+                    }
+                }
+
+                // SECTION 9: Sandbox Analysis
+                var sbVerdicts = data.sandbox_verdicts || {};
+                var sbKeys = Object.keys(sbVerdicts);
+                var sbCard = document.getElementById('fsrSandboxCard');
+                if (sbCard) {
+                    if (sbKeys.length > 0) {
+                        sbCard.style.display = 'block';
+                        var sbDetails = [];
+                        var maliciousCount = 0;
+                        var suspiciousCount = 0;
+                        sbKeys.forEach(function (sbName) {
+                            var v = sbVerdicts[sbName] || {};
+                            if (v.category === 'malicious') maliciousCount++;
+                            if (v.category === 'suspicious') suspiciousCount++;
+                            sbDetails.push(sbName + ': ' + (v.category || 'unknown') + (v.sandbox_name ? ' (' + v.sandbox_name + ')' : ''));
+                        });
+                        var overallVerdict = maliciousCount > 0 ? 'Malicious' : (suspiciousCount > 0 ? 'Suspicious' : 'Clean');
+                        setEl('fsrSbVerdict', overallVerdict);
+                        setEl('fsrSbMalicious', maliciousCount > 0 ? maliciousCount + ' sandboxes detected malicious activity' : 'None');
+                        setEl('fsrSbSuspicious', suspiciousCount > 0 ? suspiciousCount + ' sandboxes reported suspicious behavior' : 'None');
+                        setEl('fsrSbDetails', sbDetails.join('; ') || 'Available');
+                    } else {
+                        sbCard.style.display = 'none';
+                    }
+                }
+
+                // SECTION: Security Findings
+                var findings = la.security_findings || [];
+                var findingsCard = document.getElementById('fsrFindingsCard');
+                var findingsGrid = document.getElementById('fsrFindingsGrid');
+                if (findingsCard && findingsGrid) {
+                    if (findings.length > 0) {
+                        findingsCard.style.display = 'block';
+                        findingsGrid.innerHTML = '';
+                        findings.forEach(function (f) {
+                            var sev = (f.severity || 'low').toLowerCase();
+                            var div = document.createElement('div');
+                            div.className = 'fsr-finding severity-' + sev;
+                            var sevBadge = '<span class="fsr-fi-severity ' + sev + '">' + f.severity + '</span>';
+                            var evidenceHtml = f.evidence ? '<br><strong>Evidence:</strong> ' + escapeHtml(f.evidence) : '';
+                            var recHtml = f.recommendation ? '<br><strong>Recommendation:</strong> ' + escapeHtml(f.recommendation) : '';
+                            div.innerHTML = '<div class="fsr-fi-header"><span class="fsr-fi-title">' + escapeHtml(f.title) + '</span>' + sevBadge + '</div><div class="fsr-fi-body"><strong>Finding:</strong> ' + escapeHtml(f.finding) + evidenceHtml + recHtml + '</div>';
+                            findingsGrid.appendChild(div);
+                        });
+                    } else {
+                        findingsCard.style.display = 'none';
+                    }
+                }
+
+                // SECTION: Risk Engine
+                var risk = la.risk_engine || {};
+                var riskCard = document.getElementById('fsrRiskCard');
+                var riskGauge = document.getElementById('fsrRiskGauge');
+                if (riskCard && riskGauge) {
+                    if (risk.risk_score != null) {
+                        riskCard.style.display = 'block';
+                        var score = Math.min(100, Math.max(0, risk.risk_score));
+                        var klass = risk.risk_classification ? risk.risk_classification.toLowerCase().replace(' ', '-') : 'unknown';
+                        klass = klass.replace('risk', '').trim() || 'unknown';
+                        var color = '#22c55e';
+                        if (score > 75) color = '#ff3344';
+                        else if (score > 50) color = '#ef4444';
+                        else if (score > 20) color = '#f59e0b';
+                        else if (score > 0) color = '#4ade80';
+                        var circumference = 2 * Math.PI * 34;
+                        var offset = circumference - (score / 100) * circumference;
+                        riskGauge.innerHTML = '<div class="fsr-risk-circle"><svg viewBox="0 0 80 80"><circle class="rc-bg" cx="40" cy="40" r="34"/><circle class="rc-fill" cx="40" cy="40" r="34" stroke="' + color + '" stroke-dasharray="' + circumference + '" stroke-dashoffset="' + circumference + '" id="riskCircleFill"/></svg><div class="rc-label" style="color:' + color + '">' + score + '</div></div><div class="fsr-risk-info"><div class="fsr-risk-class ' + klass + '" style="color:' + color + '">' + (risk.risk_classification || 'Unknown') + '</div><div class="fsr-risk-sub">Risk Score: ' + score + '/100</div></div>';
+                        setTimeout(function () {
+                            var fillEl = document.getElementById('riskCircleFill');
+                            if (fillEl) fillEl.style.strokeDashoffset = offset;
+                        }, 100);
+                        setEl('fsrRiskFactors', risk.risk_factors && risk.risk_factors.length > 0 ? risk.risk_factors.map(function (rf) { return '<span class="fsr-risk-tag">' + escapeHtml(rf) + '</span>'; }).join(' ') : 'No risk factors identified');
+                    } else {
+                        riskCard.style.display = 'none';
+                    }
+                }
+
+                // SECTION: Static Analysis (PE / Bundle Info)
+                var peInfo = data.pe_info || {};
+                var bundleInfo = data.bundle_info || {};
+                var peCard = document.getElementById('fsrPeCard');
+                if (peCard) {
+                    var hasPe = Object.keys(peInfo).length > 0;
+                    var hasBundle = Object.keys(bundleInfo).length > 0;
+                    if (hasPe || hasBundle) {
+                        peCard.style.display = 'block';
+                        if (hasPe) {
+                            var imports = peInfo.imports || [];
+                            var exports = peInfo.exports || [];
+                            setEl('fsrPeImports', imports.length > 0 ? imports.slice(0, 30).join(', ') + (imports.length > 30 ? ' (and ' + (imports.length - 30) + ' more)' : '') : 'Not Available');
+                            setEl('fsrPeExports', exports.length > 0 ? exports.slice(0, 20).join(', ') + (exports.length > 20 ? ' (and ' + (exports.length - 20) + ' more)' : '') : 'Not Available');
+                            setEl('fsrPeSubsystem', peInfo.subsystem || 'Not Available');
+                            setEl('fsrPeMachine', peInfo.machine_type || 'Not Available');
+                            var vi = peInfo.versioninfo || {};
+                            setEl('fsrPeVersion', vi.FileVersion || vi.ProductVersion || vi.CompanyName || 'Not Available');
+                            setEl('fsrPeLinker', peInfo.linker_version || 'Not Available');
+                            var sections = peInfo.sections || [];
+                            var sectionStr = sections.map(function (s) { return s.name + ' (' + (s.size || '?') + ')'; }).join(', ');
+                            setEl('fsrPeSections', sectionStr || 'Not Available');
+                        } else {
+                            setEl('fsrPeImports', 'Not Available');
+                            setEl('fsrPeExports', 'Not Available');
+                            setEl('fsrPeSubsystem', 'Not Available');
+                            setEl('fsrPeMachine', 'Not Available');
+                            setEl('fsrPeVersion', 'Not Available');
+                            setEl('fsrPeLinker', 'Not Available');
+                            setEl('fsrPeSections', 'Not Available');
+                        }
+                    } else {
+                        peCard.style.display = 'none';
+                    }
+                }
+
+                // SECTION 11: Known Names
+                var knownNames = data.known_names || [];
+                var subNames = data.submission_names || [];
+                var namesCard = document.getElementById('fsrNamesCard');
+                if (namesCard) {
+                    if (knownNames.length > 0 || subNames.length > 0) {
+                        namesCard.style.display = 'block';
+                        setEl('fsrNamesList', knownNames.length > 0 ? knownNames.slice(0, 20).join(', ') + (knownNames.length > 20 ? ' (and ' + (knownNames.length - 20) + ' more)' : '') : 'Not Available');
+                        setEl('fsrSubNamesList', subNames.length > 0 ? subNames.slice(0, 20).join(', ') + (subNames.length > 20 ? ' (and ' + (subNames.length - 20) + ' more)' : '') : 'Not Available');
+                    } else {
+                        namesCard.style.display = 'none';
+                    }
+                }
+
+                // SECTION 12: File Properties & Tags
+                var tags = data.file_tags || [];
+                var typeTags = data.file_type_tags || [];
+                var trid = data.trid || [];
+                var propsCard = document.getElementById('fsrPropsCard');
+                if (propsCard) {
+                    var hasProps = tags.length > 0 || typeTags.length > 0 || trid.length > 0 || data.magic_byte || data.file_type_description;
+                    if (hasProps) {
+                        propsCard.style.display = 'block';
+                        setEl('fsrPropTags', tags.length > 0 ? tags.join(', ') : 'Not Available');
+                        setEl('fsrPropTypeTags', typeTags.length > 0 ? typeTags.join(', ') : 'Not Available');
+                        setEl('fsrPropTrid', trid.length > 0 ? trid.map(function (t) { return t.file_type + ' (' + (t.probability || t.confidence || '?') + '%)'; }).join(', ') : 'Not Available');
+                        setEl('fsrPropMagic', data.magic_byte || 'Not Available');
+                        setEl('fsrPropTypeDesc', data.file_type_description || 'Not Available');
+                    } else {
+                        propsCard.style.display = 'none';
+                    }
+                }
+
+                // SECTION 13: Timeline & History
+                var tlEl = document.getElementById('fsrTimeline');
+                if (tlEl) {
+                    var now = new Date().toISOString();
+                    var timelineSteps = [
+                        { step: 'Upload', ts: fmtTimestamp(data.scan_date || data.first_submission_date) },
+                        { step: 'Hash Calculation', ts: fmtTimestamp(data.scan_date) },
+                        { step: 'Static Analysis', ts: fmtTimestamp(data.scan_date) },
+                        { step: 'VirusTotal Scan', ts: fmtTimestamp(data.last_analysis_date) },
+                        { step: 'Completed', ts: fmtTimestamp(data.last_analysis_date || data.scan_date) },
+                    ];
+                    tlEl.innerHTML = '';
+                    timelineSteps.forEach(function (s, idx) {
+                        var isDone = s.ts !== 'Not Available';
+                        var item = document.createElement('div');
+                        item.className = 'fsr-tl-item';
+                        item.innerHTML = '<span class="fsr-tl-dot ' + (isDone ? 'done' : '') + '"></span><span class="fsr-tl-label">' + s.step + '</span><span class="fsr-tl-time">' + (isDone ? s.ts : 'Pending') + '</span>';
+                        tlEl.appendChild(item);
+                    });
+                }
+                setEl('fsrTlFirstSub', fmtTimestamp(data.first_submission_date));
+                setEl('fsrTlLastAnalysis', fmtTimestamp(data.last_analysis_date));
+                setEl('fsrTlTimesSub', data.times_submitted != null ? String(data.times_submitted) : 'Not Available');
+                setEl('fsrTlDuration', fmtDuration(data.scan_duration_ms));
+                setEl('fsrTlLastDate', fmtTimestamp(data.last_analysis_date));
+
+                // SECTION 14: MITRE ATT&CK
+                setEl('fsrMitreStatus', 'Not Available (requires VirusTotal Intelligence)');
+                setEl('fsrMitreTactics', 'Not Available');
+                setEl('fsrMitreTechniques', 'Not Available');
+
+                // SECTION 15: Raw API Data
+                setEl('fsrRawApiVersion', data.vt_api_version || 'v3');
+                setEl('fsrRawApiStatus', data.api_status || 'Operational');
+                setEl('fsrRawRateLimit', data.rate_limit_status || 'Available');
+                var rawJsonEl = document.getElementById('fsrRawJson');
+                if (rawJsonEl) {
+                    var apiSummary = {
+                        scan_id: data.scan_id,
+                        file_name: data.file_name,
+                        file_size: data.file_size,
+                        detection_ratio: data.detection_ratio,
+                        threat_score: data.threat_score,
+                        vendors_flagged: data.vendors_flagged,
+                        vendors_total: data.vendors_total,
+                        threat_type: data.threat_type,
+                        status: data.status,
+                        md5: data.file_hash_md5,
+                        sha256: data.file_hash_sha256,
+                        sha1: data.file_sha1,
+                        sha512: data.file_hash_sha512,
+                        scan_date: data.scan_date,
+                        first_submission_date: data.first_submission_date,
+                        times_submitted: data.times_submitted
+                    };
+                    rawJsonEl.textContent = JSON.stringify(apiSummary, null, 2);
+                }
+
+                } else {
+                        var expandedWrap = document.getElementById('fsrExpandedSections');
+                        if (expandedWrap) expandedWrap.style.display = 'none';
+                    }
+    }
+
+    // Copy button handler
+    document.addEventListener('click', function (e) {
+        var btn = e.target.closest('.fsr-copy-btn');
+        if (!btn) return;
+        var targetId = btn.getAttribute('data-copy');
+        var target = document.getElementById(targetId);
+        if (!target) return;
+        var text = target.textContent;
+        if (!text || text === '-' || text === 'Not Available') return;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(function () {
+                btn.classList.add('copied');
+                var icon = btn.querySelector('i');
+                if (icon) icon.className = 'bi-check';
+                setTimeout(function () {
+                    btn.classList.remove('copied');
+                    if (icon) icon.className = 'bi-clipboard';
+                }, 2000);
+            }).catch(function () {
+                fallbackCopy(text, btn);
+            });
+        } else {
+            fallbackCopy(text, btn);
+        }
+    });
+    function fallbackCopy(text, btn) {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+            document.execCommand('copy');
+            btn.classList.add('copied');
+            var icon = btn.querySelector('i');
+            if (icon) icon.className = 'bi-check';
+            setTimeout(function () {
+                btn.classList.remove('copied');
+                if (icon) icon.className = 'bi-clipboard';
+            }, 2000);
+        } catch (err) {}
+        document.body.removeChild(ta);
+    }
+
+    function showError(msg) {
+        var modal = document.getElementById('uploadModal');
+        if (modal) modal.classList.remove('active');
+        var errorEl = document.getElementById('fsrError');
+        var results = document.getElementById('fs-results');
+        if (errorEl) {
+            errorEl.textContent = msg;
+            errorEl.style.display = 'block';
+        }
+        if (results) results.style.display = 'block';
+        updateStep(4, 'Failed', 'done');
+        updateProgress(100);
+    }
+
+    function getCsrfToken() {
+        var meta = document.querySelector('meta[name="csrf-token"]');
+        if (meta) return meta.getAttribute('content');
+        var value = '; ' + document.cookie;
+        var parts = value.split('; csrftoken=');
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
+    }
+
+    function uploadFile(file) {
+        var formData = new FormData();
+        formData.append('file', file);
+
+        var xhr = new XMLHttpRequest();
+
+        xhr.upload.addEventListener('progress', function (e) {
+            if (e.lengthComputable) {
+                var percent = Math.round((e.loaded / e.total) * 100);
+                updateProgress(percent);
+                if (percent < 100) {
+                    updateStep(0, 'Uploading...', 'active');
+                } else {
+                    updateStep(0, 'Complete', 'done');
+                }
+                console.log('Upload progress:', percent + '%');
+            }
+        });
+
+        xhr.addEventListener('load', function () {
+            console.log('Upload complete, status:', xhr.status);
+            console.log('Response:', xhr.responseText);
+            clearTimeout(window._stepTimer);
+            updateStep(0, 'Complete', 'done');
+            updateStep(1, 'Complete', 'done');
+            updateStep(2, 'Complete', 'done');
+            updateStep(3, 'Complete', 'done');
+            updateStep(4, 'Complete', 'done');
+            updateProgress(100);
+
+            if (xhr.status === 200) {
+                try {
+                    var result = JSON.parse(xhr.responseText);
+                    console.log('Scan result:', result);
+                    if (result.error) {
+                        showError(result.error);
+                    } else {
+                        showResults(result);
+                    }
+                } catch (e) {
+                    console.error('Parse error:', e);
+                    showError('Invalid response from server.');
+                }
+            } else {
+                try {
+                    var errData = JSON.parse(xhr.responseText);
+                    showError(errData.error || 'Scan failed. Please try again.');
+                } catch (e) {
+                    showError('Scan failed with status: ' + xhr.status);
+                }
+            }
+        });
+
+        xhr.addEventListener('error', function () {
+            console.error('Network error during upload');
+            clearTimeout(window._stepTimer);
+            showError('Network error. Please try again.');
+        });
+
+        xhr.open('POST', '/api/file/scan/');
+        xhr.setRequestHeader('X-CSRFToken', getCsrfToken());
+        xhr.send(formData);
+
+        console.log('XHR request sent to /api/file/scan/');
+
+        window._stepTimer = setTimeout(function stepProgression() {
+            updateStep(1, 'Complete', 'done');
+            setTimeout(function () {
+                updateStep(2, 'Scanning...', 'active');
+            }, 1000);
+            setTimeout(function () {
+                updateStep(3, 'Inspecting...', 'active');
+            }, 60000);
+        }, 500);
+    }
+
     function startUpload(file) {
+        var uploadSection = document.getElementById('fsUploadSection');
+        if (uploadSection) uploadSection.style.display = 'none';
         var modal = document.getElementById('uploadModal');
         var fileName = document.getElementById('fsmFileName');
         if (!modal || !fileName) return;
         fileName.textContent = file.name + ' (' + (file.size / 1024 / 1024).toFixed(1) + ' MB)';
         modal.classList.add('active');
-
-        // Reset steps
         var steps = document.querySelectorAll('.fsm-step');
         steps.forEach(function (s, i) {
             s.classList.remove('active', 'done');
@@ -945,90 +3293,107 @@ document.addEventListener('DOMContentLoaded', function () {
         var pct = document.getElementById('fsmPercent');
         if (fill) fill.style.width = '0%';
         if (pct) pct.textContent = '0%';
-
     }
 
-
-    var typeIcons = {
-        PDF: 'fa-file-pdf', EXE: 'fa-cog', DLL: 'fa-cog', MSI: 'fa-cog',
-        DOC: 'fa-file-word', DOCX: 'fa-file-word', XLS: 'fa-file-excel',
-        XLSX: 'fa-file-excel', PPTX: 'fa-file-powerpoint',
-        ZIP: 'fa-file-archive', RAR: 'fa-file-archive', '7Z': 'fa-file-archive',
-        TAR: 'fa-file-archive', GZ: 'fa-file-archive',
-        JS: 'fab fa-js', PY: 'fab fa-python', PS1: 'fa-terminal',
-        BAT: 'fa-terminal', SH: 'fa-terminal', CMD: 'fa-terminal',
-        VBS: 'fa-code', HTA: 'fa-code',
-        APK: 'fab fa-android', JAR: 'fab fa-java', DEX: 'fa-cube',
-        BIN: 'fa-binary', PHP: 'fab fa-php', RB: 'fa-code',
-        GO: 'fa-code', RS: 'fa-code', JAVA: 'fab fa-java',
-        SYS: 'fa-cog', APP: 'fa-apple-alt',
-        MP3: 'fa-music', MP4: 'fa-video',
-    };
-    var threatBadges = {
-        safe: 'badge-cs-safe', low: 'badge-cs-info',
-        medium: 'badge-cs-warning', suspicious: 'badge-cs-warning',
-        high: 'badge-cs-danger', critical: 'badge-cs-danger',
-    };
-
-    var sampleScans = [];
-    var currentPage = 1;
-    var rowsPerPage = 8;
-    var filteredData = sampleScans.slice();
-
-    function renderTable() {
-        var tbody = document.getElementById('scansBody');
-        var totalPages = Math.max(1, Math.ceil(filteredData.length / rowsPerPage));
-        if (currentPage > totalPages) currentPage = totalPages;
-        var start = (currentPage - 1) * rowsPerPage;
-        var end = Math.min(start + rowsPerPage, filteredData.length);
-        var pageData = filteredData.slice(start, end);
-
-        if (!tbody) return;
-        if (pageData.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text-muted);"><i class="fas fa-inbox" style="font-size:1.5rem;display:block;margin-bottom:0.5rem;"></i>No scans match your filter.</td></tr>';
-        } else {
-            tbody.innerHTML = pageData.map(function (s) {
-                var icon = typeIcons[s.type] || 'fa-file';
-                var badge = threatBadges[s.threat] || 'badge-cs-info';
-                var threatLabel = s.threat.charAt(0).toUpperCase() + s.threat.slice(1);
-                return '<tr>' +
-                    '<td><span class="fst-name">' + s.name + '</span></td>' +
-                    '<td><span class="fst-type"><i class="fas ' + icon + '"></i> ' + s.type + '</span></td>' +
-                    '<td><span class="fst-detections">' + s.det + '</span></td>' +
-                    '<td class="fst-threat"><span class="badge-cs ' + badge + '">' + threatLabel + '</span></td>' +
-                    '<td><span class="fst-date">' + s.date + '</span></td>' +
-                    '</tr>';
-            }).join('');
-        }
-
-        var info = document.getElementById('pageInfo');
-        if (info) info.textContent = 'Page ' + currentPage + ' of ' + totalPages;
-        var prevBtn = document.getElementById('prevPage');
-        var nextBtn = document.getElementById('nextPage');
-        if (prevBtn) prevBtn.disabled = currentPage <= 1;
-        if (nextBtn) nextBtn.disabled = currentPage >= totalPages;
+    function showResults(data) {
+        var results = document.getElementById('fs-results');
+        if (results) results._data = data;
+        showStateB(data);
     }
-
-    document.getElementById('prevPage').addEventListener('click', function () {
-        if (currentPage > 1) { currentPage--; renderTable(); }
-    });
-    document.getElementById('nextPage').addEventListener('click', function () {
-        var totalPages = Math.max(1, Math.ceil(filteredData.length / rowsPerPage));
-        if (currentPage < totalPages) { currentPage++; renderTable(); }
-    });
-    document.getElementById('tableSearch').addEventListener('input', function () {
-        var q = this.value.toLowerCase().trim();
-        filteredData = q ? sampleScans.filter(function (s) {
-            return s.name.toLowerCase().includes(q);
-        }) : sampleScans.slice();
-        currentPage = 1;
-        renderTable();
-    });
-
-    renderTable();
 
     // -------------------------------------------------------
-    // 5. SCROLL ANIMATIONS
+    // 4. RECENT SCANS TABLE
+    // -------------------------------------------------------
+
+    fetch('/api/file/recent/')
+    .then(r => r.json())
+    .then(data => {
+        const tbody = document.querySelector('#submissions-table tbody, .submissions-table tbody, [class*="submissions"] tbody, table tbody');
+        if (!tbody) {
+            console.error('Table tbody not found');
+            return;
+        }
+        tbody.innerHTML = '';
+        if (!data.scans || data.scans.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">No files scanned yet</td></tr>';
+            return;
+        }
+        data.scans.forEach(scan => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${scan.file_name && scan.file_name.length > 30 ? scan.file_name.substring(0, 30) + '...' : scan.file_name}</td>
+                <td>${scan.file_type || 'Unknown'}</td>
+                <td>${scan.vendors_flagged != null ? scan.vendors_flagged : '0'}/${scan.vendors_total != null ? scan.vendors_total : '0'}</td>
+                <td><span style="color: ${scan.is_malicious ? '#ef4444' : '#22c55e'}; font-weight: bold;">
+                ${scan.is_malicious ? 'Threat' : 'Clean'}</span></td>
+                <td>${scan.scanned_at || '-'}</td>
+            `;
+            tbody.appendChild(row);
+        });
+    })
+    .catch(err => console.error('Failed to load recent scans:', err));
+
+    // Client-side search filter
+    document.querySelector('[placeholder*="Filter"], [placeholder*="filename"]').addEventListener('input', function() {
+        const query = this.value.toLowerCase();
+        document.querySelectorAll('tbody tr').forEach(row => {
+            const filename = row.cells[0]?.textContent.toLowerCase() || '';
+            row.style.display = filename.includes(query) ? '' : 'none';
+        });
+    });
+
+    // -------------------------------------------------------
+    // 5. STATE MANAGEMENT (exclusive A/B)
+    // -------------------------------------------------------
+    function showStateA() {
+        var uploadSection = document.getElementById('fsUploadSection');
+        var results = document.getElementById('fs-results');
+        if (uploadSection) uploadSection.style.display = '';
+        if (results) results.style.display = 'none';
+        if (fileInput) fileInput.value = '';
+        if (hashInput) hashInput.value = '';
+        if (hashSearchError) hashSearchError.style.display = 'none';
+    }
+
+    // "Scan Another File" button
+    var fsrNewScan = document.getElementById('fsrNewScan');
+    if (fsrNewScan) {
+        fsrNewScan.addEventListener('click', function () {
+            showStateA();
+            var dropZone = document.getElementById('dropZone');
+            if (dropZone) dropZone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+    }
+
+    // Export JSON
+    var exportJsonBtn = document.getElementById('fsrExportJson');
+    if (exportJsonBtn) {
+        exportJsonBtn.addEventListener('click', function () {
+            var results = document.getElementById('fs-results');
+            if (!results || !results._data) return;
+            var data = results._data;
+            var clean = {};
+            ['scan_id','file_name','file_size','file_hash_md5','file_hash_sha256','file_hash_sha512','file_hash_sha3_256','file_hash_crc32','is_malicious','threat_type','threat_level_label','threat_score','vendors_total','vendors_flagged','detection_ratio','status','confidence_level','risk_category','file_extension','mime_type','magic_byte','file_sha1','times_submitted','scan_duration_ms'].forEach(function (k) { if (data[k] != null) clean[k] = data[k]; });
+            var blob = new Blob([JSON.stringify(clean, null, 2)], { type: 'application/json' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = (data.file_name || 'file') + '_scan_report.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+    }
+
+    // Export PDF (use browser print)
+    var exportPdfBtn = document.getElementById('fsrExportPdf');
+    if (exportPdfBtn) {
+        exportPdfBtn.addEventListener('click', function () {
+            window.print();
+        });
+    }
+
+    // -------------------------------------------------------
+    // 6. SCROLL ANIMATIONS
     // -------------------------------------------------------
     var animEls = document.querySelectorAll('.cap-card, .drop-zone, .hash-search');
     if (animEls.length) {
@@ -1049,7 +3414,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    console.log('%cCipherScan%c File Scanner — Loaded',
+    console.log('%cCipherScan%c File Scanner â€” Loaded',
         'color:#a855f7;font-weight:700;font-size:1.2em;',
         'color:#8892b0;font-size:0.9em;');
 });

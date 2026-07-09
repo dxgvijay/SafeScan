@@ -50,8 +50,8 @@ class CustomUserAdmin(BaseUserAdmin):
 
 @admin.register(ScanHistory)
 class ScanHistoryAdmin(admin.ModelAdmin):
-    list_display = ['user', 'scan_type', 'target_preview', 'threat_level', 'created_at']
-    list_filter = ['scan_type', 'threat_level', 'created_at']
+    list_display = ['user', 'scan_type', 'target_preview', 'verdict', 'created_at']
+    list_filter = ['scan_type', 'verdict', 'created_at']
     search_fields = ['user__email', 'user__username', 'target']
     ordering = ['-created_at']
 

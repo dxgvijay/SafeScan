@@ -1,0 +1,1143 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Browser Isolation &mdash; CipherScan{% endblock %}
+
+{% block body_class %}full-width{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {
+    --bi-cyan: #00d4ff;
+    --bi-cyan-light: #66e3ff;
+    --bi-cyan-dark: #0099cc;
+    --bi-cyan-glow: rgba(0, 212, 255, 0.25);
+    --bi-cyan-dim: rgba(0, 212, 255, 0.08);
+    --bi-bg: linear-gradient(135deg, #0a0e1a 0%, #0a141e 35%, #0f1628 70%, #0a0e1a 100%);
+}
+.bi-hero {
+    position: relative;
+    padding: 4rem 2rem 3rem;
+    overflow: hidden;
+    background: var(--bi-bg);
+    min-height: 560px;
+    display: flex;
+    align-items: center;
+}
+.bi-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse at 30% 40%, rgba(0, 212, 255, 0.05) 0%, transparent 50%),
+        radial-gradient(ellipse at 70% 60%, rgba(0, 212, 255, 0.03) 0%, transparent 50%);
+    pointer-events: none;
+}
+.bi-hero .hero-inner { position: relative; z-index: 2; max-width: 720px; margin: 0 auto; text-align: center; }
+.bi-hero .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--bi-cyan-dim); backdrop-filter: blur(8px);
+    border: 1px solid var(--bi-cyan-glow); border-radius: 100px;
+    padding: 6px 18px 6px 10px; font-size: 0.8rem; color: var(--bi-cyan-light);
+    margin-bottom: 1.5rem;
+}
+.bi-hero .badge-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bi-cyan); animation: pulse-dot 2s ease-in-out infinite; }
+@keyframes pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+.bi-hero h1 { font-size: 2.75rem; font-weight: 800; margin-bottom: 0.75rem; line-height: 1.2; }
+.bi-hero .hl-cyan { color: var(--bi-cyan); }
+.bi-hero .hero-sub { color: var(--text-secondary); font-size: 1.05rem; margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto; }
+.bi-input-wrap {
+    display: flex; gap: 12px; max-width: 600px; margin: 0 auto;
+    background: var(--bg-secondary); border: 1px solid var(--border-color);
+    border-radius: 12px; padding: 6px; align-items: center;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+.bi-input-wrap:focus-within { border-color: var(--bi-cyan-glow); box-shadow: 0 0 20px var(--bi-cyan-dim); }
+.bi-input-wrap input {
+    flex: 1; background: transparent; border: none; outline: none;
+    color: var(--text-primary); font-size: 0.95rem; padding: 10px 14px;
+}
+.bi-input-wrap input::placeholder { color: var(--text-muted); }
+.bi-input-wrap .bi-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--bi-cyan); color: #000; border: none;
+    border-radius: 8px; padding: 10px 22px; font-weight: 600; font-size: 0.9rem;
+    cursor: pointer; transition: all 0.3s; white-space: nowrap;
+}
+.bi-input-wrap .bi-btn:hover { background: var(--bi-cyan-light); box-shadow: 0 0 20px var(--bi-cyan-glow); }
+.bi-input-wrap .bi-btn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+.bi-input-wrap .bi-btn i { font-size: 1.1rem; }
+.bi-error { color: #f48771; font-size: 0.85rem; margin-top: 0.75rem; display: none; }
+.bi-error.visible { display: block; }
+
+.bi-results { display: none; padding: 2rem 0 4rem; }
+.bi-results.visible { display: block; }
+
+.bi-card {
+    background: var(--bg-secondary); border: 1px solid var(--border-color);
+    border-radius: 16px; overflow: hidden; margin-bottom: 1.5rem;
+}
+.bi-card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color);
+    background: var(--bg-tertiary);
+}
+.bi-card-header h5 { margin: 0; font-size: 0.95rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.bi-card-body { padding: 1.5rem; }
+
+.bi-meta-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.bi-meta-item {
+    background: var(--bg-tertiary); border-radius: 10px; padding: 12px 16px;
+    border: 1px solid var(--border-color);
+}
+.bi-meta-item .label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 4px; }
+.bi-meta-item .value { font-size: 0.9rem; color: var(--text-primary); font-weight: 500; word-break: break-all; }
+
+.bi-stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+.bi-stat {
+    background: var(--bg-tertiary); border-radius: 10px; padding: 14px 10px;
+    text-align: center; border: 1px solid var(--border-color);
+}
+.bi-stat .num { font-size: 1.35rem; font-weight: 700; line-height: 1.2; }
+.bi-stat .lbl { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-top: 4px; }
+
+.bi-risk { display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px; border-radius: 100px; font-size: 0.85rem; font-weight: 600; }
+.bi-risk.excellent { background: rgba(34, 197, 94, 0.15); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3); }
+.bi-risk.good { background: rgba(132, 204, 22, 0.15); color: #84cc16; border: 1px solid rgba(132, 204, 22, 0.3); }
+.bi-risk.moderate { background: rgba(234, 179, 8, 0.15); color: #eab308; border: 1px solid rgba(234, 179, 8, 0.3); }
+.bi-risk.poor { background: rgba(249, 115, 22, 0.15); color: #f97316; border: 1px solid rgba(249, 115, 22, 0.3); }
+.bi-risk.critical { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+.bi-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.bi-table th, .bi-table td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
+.bi-table th { color: var(--text-muted); font-weight: 500; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }
+.bi-table tr:last-child td { border-bottom: none; }
+.bi-table .status-present { color: #22c55e; font-weight: 600; }
+.bi-table .status-missing { color: #ef4444; font-weight: 600; }
+.bi-table .status-weak { color: #eab308; font-weight: 600; }
+
+.bi-preview-frame {
+    width: 100%; min-height: 400px; border: 1px solid var(--border-color);
+    border-radius: 10px; background: white;
+}
+
+.bi-removed-list { max-height: 400px; overflow-y: auto; }
+.bi-removed-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 10px 14px; border-bottom: 1px solid var(--border-color);
+    font-size: 0.85rem;
+}
+.bi-removed-item:last-child { border-bottom: none; }
+.bi-removed-item .tag {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+    background: rgba(239, 68, 68, 0.15); color: #ef4444; white-space: nowrap; min-width: 60px; text-align: center;
+}
+.bi-removed-item .info { flex: 1; }
+.bi-removed-item .info .src { color: var(--text-secondary); word-break: break-all; }
+.bi-removed-item .info .reason { color: var(--text-muted); font-size: 0.8rem; margin-top: 2px; }
+.bi-empty-removed { color: var(--text-muted); text-align: center; padding: 2rem; font-size: 0.9rem; }
+
+.bi-loading { display: none; text-align: center; padding: 4rem 0; }
+.bi-loading.visible { display: block; }
+.bi-loading .spinner { width: 40px; height: 40px; border: 3px solid var(--border-color); border-top-color: var(--bi-cyan); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1rem; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.bi-loading .txt { color: var(--text-secondary); font-size: 0.9rem; }
+
+.bi-section { margin-bottom: 1.5rem; }
+.bi-section h3 { font-size: 1rem; font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+.bi-section h3 i { color: var(--bi-cyan); }
+
+.bi-score-wrap { display: flex; align-items: center; gap: 2rem; flex-wrap: wrap; }
+.bi-score-ring { position: relative; width: 140px; height: 140px; flex-shrink: 0; }
+.bi-score-ring svg { transform: rotate(-90deg); width: 140px; height: 140px; }
+.bi-score-ring-bg { fill: none; stroke: rgba(255,255,255,0.04); stroke-width: 8; }
+.bi-score-ring-fg { fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 0.8s ease; }
+.bi-score-ring-inner {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.bi-score-num { font-size: 2.25rem; font-weight: 800; font-family: var(--font-mono); letter-spacing: -0.03em; line-height: 1; }
+.bi-score-unit { font-size: 0.6rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+.bi-score-meta { flex: 1; min-width: 200px; }
+.bi-score-meta .bi-risk { font-size: 1rem; padding: 8px 20px; }
+.bi-score-deductions { font-size: 0.85rem; color: var(--text-secondary); margin-top: 8px; }
+
+.bi-findings-list { display: flex; flex-direction: column; gap: 10px; }
+.bi-finding {
+    border-radius: 10px; padding: 12px 16px; border: 1px solid;
+}
+.bi-finding.critical { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.2); }
+.bi-finding.high { background: rgba(249,115,22,0.08); border-color: rgba(249,115,22,0.2); }
+.bi-finding.medium { background: rgba(234,179,8,0.08); border-color: rgba(234,179,8,0.2); }
+.bi-finding.low { background: rgba(132,204,22,0.08); border-color: rgba(132,204,22,0.2); }
+.bi-finding .f-severity { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.bi-finding.critical .f-severity { color: #ef4444; }
+.bi-finding.high .f-severity { color: #f97316; }
+.bi-finding.medium .f-severity { color: #eab308; }
+.bi-finding.low .f-severity { color: #84cc16; }
+.bi-finding .f-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 4px; }
+.bi-finding .f-desc { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 6px; line-height: 1.4; }
+.bi-finding .f-rec { font-size: 0.78rem; color: var(--bi-cyan); }
+.bi-finding .f-rec i { margin-right: 4px; }
+
+.bi-tech-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.bi-tech-tag {
+    padding: 4px 12px; border-radius: 100px; font-size: 0.8rem; font-weight: 500;
+    background: var(--bi-cyan-dim); border: 1px solid var(--bi-cyan-glow); color: var(--bi-cyan-light);
+}
+
+.bi-cookie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+.bi-cookie-card {
+    background: var(--bg-tertiary); border-radius: 10px; padding: 12px 14px;
+    border: 1px solid var(--border-color); font-size: 0.8rem;
+}
+.bi-cookie-card .c-name { font-weight: 600; font-family: var(--font-mono); font-size: 0.82rem; margin-bottom: 4px; }
+.bi-cookie-card .c-detail { color: var(--text-secondary); font-size: 0.75rem; }
+.bi-cookie-card .c-detail span { color: var(--text-muted); }
+.bi-cookie-card .c-flags { margin-top: 4px; display: flex; gap: 4px; flex-wrap: wrap; }
+.bi-cookie-card .c-flag {
+    display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 0.6rem; font-weight: 600; text-transform: uppercase;
+}
+.bi-cookie-card .c-flag.ok { background: rgba(34,197,94,0.12); color: #22c55e; }
+.bi-cookie-card .c-flag.bad { background: rgba(239,68,68,0.12); color: #ef4444; }
+
+.bi-inline-code {
+    background: rgba(255,255,255,0.04); border-radius: 6px; padding: 8px 12px;
+    font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-secondary);
+    max-height: 200px; overflow-y: auto; white-space: pre-wrap; word-break: break-all;
+}
+.bi-toggle-btn {
+    background: none; border: 1px solid var(--border-color); border-radius: 6px;
+    color: var(--bi-cyan); padding: 4px 12px; font-size: 0.75rem; cursor: pointer;
+    transition: all 0.2s;
+}
+.bi-toggle-btn:hover { background: var(--bi-cyan-dim); border-color: var(--bi-cyan-glow); }
+
+.bi-dl-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: var(--bi-cyan); font-size: 0.8rem; cursor: pointer; text-decoration: none;
+}
+.bi-dl-link:hover { text-decoration: underline; }
+
+.bi-api-detected .num { color: #ef4444; font-weight: 600; }
+.bi-api-not-detected .num { color: #6b7280; }
+
+.bi-redirect-step {
+    display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+    background: rgba(255,255,255,0.03); border-radius: 8px; margin-bottom: 4px;
+}
+.bi-redirect-step.final { background: rgba(34,197,94,0.08); }
+.bi-redirect-status {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 40px; padding: 4px 8px; border-radius: 6px;
+    font-size: 0.75rem; font-weight: 700; font-family: var(--font-mono);
+}
+.bi-redirect-status.ok { background: rgba(34,197,94,0.15); color: #22c55e; }
+.bi-redirect-status.redirect { background: rgba(234,179,8,0.15); color: #eab308; }
+.bi-redirect-status.error { background: rgba(239,68,68,0.15); color: #ef4444; }
+.bi-redirect-url { flex: 1; font-size: 0.8rem; color: var(--text-secondary); word-break: break-all; }
+.bi-redirect-protocol { font-size: 0.7rem; color: var(--text-muted); }
+.bi-redirect-arrow { text-align: center; color: var(--text-muted); font-size: 0.8rem; padding: 2px 0; }
+
+.bi-meta-item.full-width { flex-direction: column; align-items: flex-start; gap: 4px; grid-column: 1 / -1; }
+.bi-meta-item.full-width .value { width: 100%; }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- ============================================================
+     HERO
+     ============================================================ -->
+<section class="bi-hero" id="biHero">
+    <div class="hero-inner">
+        <div class="hero-badge">
+            <span class="badge-dot"></span>
+            Server-Side Browser Isolation &mdash; Zero-Risk Preview
+        </div>
+        <h1>Scan. Isolate. <span class="hl-cyan">Preview.</span></h1>
+        <p class="hero-sub">Fetch any URL through our secure server-side scanner. We analyze the page, remove threats, and let you preview the sanitized result. Your browser never touches the original content.</p>
+
+        <div class="bi-input-wrap">
+            <input type="url" id="biUrlInput" placeholder="https://example.com" autocomplete="url" spellcheck="false">
+            <button class="bi-btn" id="biScanBtn"><i class="bi bi-shield-check"></i> Scan &amp; Isolate</button>
+        </div>
+        <div class="bi-error" id="biError"></div>
+    </div>
+</section>
+
+<!-- ============================================================
+     LOADING
+     ============================================================ -->
+<div class="bi-loading" id="biLoading">
+    <div class="spinner"></div>
+    <div class="txt">Fetching and analyzing page...</div>
+</div>
+
+<!-- ============================================================
+     RESULTS
+     ============================================================ -->
+<div class="bi-results" id="biResults">
+    <div class="container">
+
+        <!-- Security Score -->
+        <div class="bi-card">
+            <div class="bi-card-header">
+                <h5><i class="bi bi-shield-check" style="color:var(--bi-cyan)"></i> Security Score</h5>
+            </div>
+            <div class="bi-card-body">
+                <div class="bi-score-wrap">
+                    <div class="bi-score-ring">
+                        <svg viewBox="0 0 140 140">
+                            <circle class="bi-score-ring-bg" cx="70" cy="70" r="62"></circle>
+                            <circle class="bi-score-ring-fg" id="biScoreCircle" cx="70" cy="70" r="62"
+                                stroke="#22c55e" stroke-dasharray="389.56" stroke-dashoffset="0"></circle>
+                        </svg>
+                        <div class="bi-score-ring-inner">
+                            <span class="bi-score-num" id="biScoreNum">0</span>
+                            <span class="bi-score-unit">Score</span>
+                        </div>
+                    </div>
+                    <div class="bi-score-meta">
+                        <span class="bi-risk excellent" id="biRiskBadge">Excellent</span>
+                        <div class="bi-score-deductions" id="biDeductions"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Findings -->
+        <div class="bi-card">
+            <div class="bi-card-header">
+                <h5><i class="bi bi-exclamation-triangle" style="color:var(--bi-cyan)"></i> Security Findings</h5>
+                <span style="font-size:0.8rem;color:var(--text-muted)" id="biFindingsCount">0 findings</span>
+            </div>
+            <div class="bi-card-body">
+                <div class="bi-findings-list" id="biFindingsList">
+                    <div style="color:var(--text-muted);text-align:center;padding:1rem;font-size:0.9rem">No findings.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Request & Response -->
+        <div class="bi-card">
+            <div class="bi-card-header">
+                <h5><i class="bi bi-globe" style="color:var(--bi-cyan)"></i> Request &amp; Response</h5>
+            </div>
+            <div class="bi-card-body">
+                <div class="bi-meta-grid" id="biMetaGrid"></div>
+            </div>
+        </div>
+
+        <!-- Page Metadata -->
+        <div class="bi-card">
+            <div class="bi-card-header">
+                <h5><i class="bi bi-info-circle" style="color:var(--bi-cyan)"></i> Page Metadata</h5>
+            </div>
+            <div class="bi-card-body">
+                <div class="bi-meta-grid" id="biPageMetaGrid"></div>
+            </div>
+        </div>
+
+        <!-- DOM Statistics -->
+        <div class="bi-card">
+            <div class="bi-card-header">
+                <h5><i class="bi bi-bar-chart" style="color:var(--bi-cyan)"></i> DOM Statistics</h5>
+            </div>
+            <div class="bi-card-body">
+                <div class="bi-stats-grid" id="biDomStatsGrid"></div>
+            </div>
+        </div>
+
+        <!-- Link Analysis -->
+        <div class="bi-card">
+            <div class="bi-card-header">
+                <h5><i class="bi bi-link-45deg" style="color:var(--bi-cyan)"></i> Link Analysis</h5>
+            </div>
+            <div class="bi-card-body">
+                <div class="bi-stats-grid" id="biLinkStatsGrid"></div>
+            </div>
+        </div>
+
+        <!-- Script Analysis -->
+        <div class="bi-card">
+            <div class="bi-card-header">
+                <h5><i class="bi bi-code-slash" style="color:var(--bi-cyan)"></i> Script Analysis</h5>
+                <span id="biScriptSuspicion" style="font-size:0.8rem;color:var(--text-muted)"></span>
+            </div>
+            <div class="bi-card-body">
+                <div class="bi-stats-grid" id="biScriptStatsGrid" style="margin-bottom:12px"></div>
+                <div class="bi-stats-grid" id="biScriptFlagsGrid"></div>
+                <div style="margin-top:12px">
+                    <button class="bi-toggle-btn" id="biToggleScriptSources" onclick="toggleScriptSources()"><i class="bi bi-eye"></i> Show External Script Sources</button>
+                    <div id="biScriptSources" style="display:none;margin-top:8px"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Headers -->
+        <div class="bi-card">
+            <div class="bi-card-header">
+                <h5><i class="bi bi-lock" style="color:var(--bi-cyan)"></i> Security Headers</h5>
+            </div>
+            <div class="bi-card-body" style="padding:0">
+                <table class="bi-table" id="biSecHeaders">
+                    <thead><tr><th>Header</th><th>Status</th><th>Value</th></tr></thead>
+                    <tbody id="biSecHeadersBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Cookie Analysis -->
+        <div class="bi-card">
+            <div class="bi-card-header">
+                <h5><i class="bi bi-cookie" style="color:var(--bi-cyan)"></i> Cookie Analysis</h5>
+                <span id="biCookieSummary" style="font-size:0.8rem;color:var(--text-muted)"></span>
+            </div>
+            <div class="bi-card-body">
+                <div id="biCookieGrid" class="bi-cookie-grid"></div>
+            </div>
+        </div>
+
+        <!-- Technology Detection -->
+        <div class="bi-card">
+            <div class="bi-card-header">
+                <h5><i class="bi bi-cpu" style="color:var(--bi-cyan)"></i> Detected Technologies</h5>
+                <span id="biTechCount" style="font-size:0.8rem;color:var(--text-muted)"></span>
+            </div>
+            <div class="bi-card-body">
+                <div class="bi-tech-list" id="biTechList"></div>
+            </div>
+        </div>
+
+        <!-- TLS Analysis -->
+        <div class="bi-card">
+            <div class="bi-card-header">
+                <h5><i class="bi bi-shield-lock" style="color:var(--bi-cyan)"></i> TLS / SSL Analysis</h5>
+            </div>
+            <div class="bi-card-body">
+                <div class="bi-meta-grid" id="biTlsGrid"></div>
+            </div>
+        </div>
+
+        <!-- Performance Metrics -->
+        <div class="bi-card">
+            <div class="bi-card-header">
+                <h5><i class="bi bi-speedometer2" style="color:var(--bi-cyan)"></i> Performance Metrics</h5>
+            </div>
+            <div class="bi-card-body">
+                <div class="bi-stats-grid" id="biPerfGrid"></div>
+            </div>
+        </div>
+
+        <!-- Resource Summary -->
+        <div class="bi-card">
+            <div class="bi-card-header">
+                <h5><i class="bi bi-files" style="color:var(--bi-cyan)"></i> Resource Summary</h5>
+            </div>
+            <div class="bi-card-body">
+                <div class="bi-stats-grid" id="biResourceGrid"></div>
+            </div>
+        </div>
+
+        <!-- JavaScript API Analysis -->
+        <div class="bi-card" id="biJsAnalysisCard" style="display:none">
+            <div class="bi-card-header">
+                <h5><i class="bi bi-code" style="color:var(--bi-cyan)"></i> JavaScript API Analysis</h5>
+                <span style="font-size:0.8rem;color:var(--text-muted)" id="biJsApisCount">0 APIs detected</span>
+            </div>
+            <div class="bi-card-body">
+                <div class="bi-stats-grid" id="biJsApiGrid"></div>
+            </div>
+        </div>
+
+        <!-- Network Analysis -->
+        <div class="bi-card" id="biNetworkCard" style="display:none">
+            <div class="bi-card-header">
+                <h5><i class="bi bi-activity" style="color:var(--bi-cyan)"></i> Network Analysis</h5>
+            </div>
+            <div class="bi-card-body">
+                <div class="bi-stats-grid" id="biNetworkGrid"></div>
+            </div>
+        </div>
+
+        <!-- Resource Breakdown -->
+        <div class="bi-card" id="biResourceBreakdownCard" style="display:none">
+            <div class="bi-card-header">
+                <h5><i class="bi bi-pie-chart" style="color:var(--bi-cyan)"></i> Resource Breakdown</h5>
+            </div>
+            <div class="bi-card-body">
+                <div class="bi-meta-grid" id="biResourceBreakdownGrid"></div>
+            </div>
+        </div>
+
+        <!-- Redirect Chain -->
+        <div class="bi-card" id="biRedirectCard" style="display:none">
+            <div class="bi-card-header">
+                <h5><i class="bi bi-arrow-right-circle" style="color:var(--bi-cyan)"></i> Redirect Chain</h5>
+            </div>
+            <div class="bi-card-body">
+                <div class="bi-redirect-list" id="biRedirectList"></div>
+            </div>
+        </div>
+
+        <!-- Screenshot -->
+        <div class="bi-card" id="biScreenshotCard" style="display:none">
+            <div class="bi-card-header">
+                <h5><i class="bi bi-camera" style="color:var(--bi-cyan)"></i> Page Screenshot</h5>
+            </div>
+            <div class="bi-card-body">
+                <div id="biScreenshotContainer"></div>
+            </div>
+        </div>
+
+        <!-- Removed Elements -->
+        <div class="bi-card">
+            <div class="bi-card-header">
+                <h5><i class="bi bi-x-octagon" style="color:var(--bi-cyan)"></i> Removed Elements</h5>
+                <span style="font-size:0.8rem;color:var(--text-muted)" id="biRemovedCount">0 items</span>
+            </div>
+            <div class="bi-card-body">
+                <div class="bi-removed-list" id="biRemovedList">
+                    <div class="bi-empty-removed">No elements were removed.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sanitized Preview -->
+        <div class="bi-card">
+            <div class="bi-card-header">
+                <h5><i class="bi bi-eye" style="color:var(--bi-cyan)"></i> Sanitized Preview</h5>
+                <span style="font-size:0.8rem;color:var(--text-muted)" id="biSizeInfo"></span>
+            </div>
+            <div class="bi-card-body">
+                <iframe class="bi-preview-frame" id="biPreview" sandbox="allow-same-origin" loading="lazy"></iframe>
+            </div>
+        </div>
+
+        <!-- New Scan -->
+        <div style="text-align:center;padding:1rem 0 2rem">
+            <button class="btn btn-outline-light" id="biNewScan"><i class="bi bi-arrow-repeat"></i> Scan Another URL</button>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    var urlInput = document.getElementById('biUrlInput');
+    var scanBtn = document.getElementById('biScanBtn');
+    var errorDiv = document.getElementById('biError');
+    var loadingDiv = document.getElementById('biLoading');
+    var resultsDiv = document.getElementById('biResults');
+    var heroSection = document.getElementById('biHero');
+
+    var CIRCUMFERENCE = 2 * Math.PI * 62; // r=62
+
+    function getCookie(name) {
+        var val = null;
+        document.cookie.split(';').forEach(function(c) {
+            c = c.trim();
+            if (c.startsWith(name + '=')) val = decodeURIComponent(c.substring(name.length + 1));
+        });
+        return val;
+    }
+
+    function showError(msg) {
+        errorDiv.textContent = msg;
+        errorDiv.classList.add('visible');
+    }
+
+    function hideError() {
+        errorDiv.classList.remove('visible');
+        errorDiv.textContent = '';
+    }
+
+    function showLoading() {
+        loadingDiv.classList.add('visible');
+        resultsDiv.classList.remove('visible');
+        scanBtn.disabled = true;
+        scanBtn.innerHTML = '<i class="bi bi-arrow-repeat"></i> Scanning...';
+    }
+
+    function hideLoading() {
+        loadingDiv.classList.remove('visible');
+        scanBtn.disabled = false;
+        scanBtn.innerHTML = '<i class="bi bi-shield-check"></i> Scan &amp; Isolate';
+    }
+
+    function escapeHtml(t) { return (t || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    function fmtVal(v) {
+        if (v === null || v === undefined || v === '' || v === '—' || v === '&mdash;') return 'Not Available';
+        return String(v);
+    }
+
+    function fmtValMeta(v) {
+        if (v === null || v === undefined || v === '' || v === '—' || v === '&mdash;') return 'Not Present';
+        return String(v);
+    }
+
+    function fmtDetected(v) {
+        return v ? 'Detected' : 'Not Detected';
+    }
+
+    function riskClass(level) {
+        var map = { 'Excellent':'excellent', 'Good':'good', 'Moderate':'moderate', 'Poor':'poor', 'Critical':'critical' };
+        return map[level] || 'moderate';
+    }
+
+    function riskColor(level) {
+        var map = { 'Excellent':'#22c55e', 'Good':'#84cc16', 'Moderate':'#eab308', 'Poor':'#f97316', 'Critical':'#ef4444' };
+        return map[level] || '#eab308';
+    }
+
+    function severityClass(s) {
+        return (s || 'low').toLowerCase();
+    }
+
+    // ---- Render Results ----
+    function renderResults(data) {
+        // Security Score
+        var score = data.security && data.security.score;
+        var riskLevel = data.security && data.security.risk_level || 'Moderate';
+        var deductions = data.security && data.security.deductions || 0;
+        var findings = data.security && data.security.findings || [];
+
+        document.getElementById('biScoreNum').textContent = score != null ? score : 0;
+        var circle = document.getElementById('biScoreCircle');
+        var offset = CIRCUMFERENCE - (CIRCUMFERENCE * (score || 0) / 100);
+        circle.style.strokeDashoffset = offset;
+        circle.setAttribute('stroke', riskColor(riskLevel));
+
+        var badge = document.getElementById('biRiskBadge');
+        badge.className = 'bi-risk ' + riskClass(riskLevel);
+        badge.textContent = riskLevel + ' (' + (score != null ? score : 0) + '/100)';
+
+        document.getElementById('biDeductions').textContent = 'Total deductions: ' + deductions + ' points';
+
+        // Findings
+        var fc = document.getElementById('biFindingsCount');
+        fc.textContent = findings.length + ' finding' + (findings.length !== 1 ? 's' : '');
+        var fl = document.getElementById('biFindingsList');
+        if (findings.length === 0) {
+            fl.innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:1rem;font-size:0.9rem"><i class="bi bi-check-circle" style="color:#22c55e;font-size:1.5rem;display:block;margin-bottom:8px"></i>No security issues detected.</div>';
+        } else {
+            var fhtml = '';
+            findings.forEach(function(f) {
+                var sev = severityClass(f.severity);
+                fhtml += '<div class="bi-finding ' + sev + '">';
+                fhtml += '<div class="f-severity">' + escapeHtml(f.severity) + '</div>';
+                fhtml += '<div class="f-title">' + escapeHtml(f.title) + '</div>';
+                if (f.description) fhtml += '<div class="f-desc">' + escapeHtml(f.description) + '</div>';
+                if (f.recommendation) fhtml += '<div class="f-rec"><i class="bi bi-lightbulb"></i>' + escapeHtml(f.recommendation) + '</div>';
+                fhtml += '</div>';
+            });
+            fl.innerHTML = fhtml;
+        }
+
+        // Request & Response Metadata
+        var metaItems = [
+            { label:'Request URL', value: data.request && data.request.url },
+            { label:'Final URL', value: data.final_url },
+            { label:'HTTP Status', value: data.http ? (data.http.status_code + ' ' + data.http.reason) : '' },
+            { label:'Server', value: data.http && data.http.server },
+            { label:'Content Type', value: data.http && data.http.content_type },
+            { label:'Redirects', value: data.http && data.http.redirect_count },
+            { label:'User Agent', value: data.request && data.request.user_agent },
+        ];
+        if (data.http && data.http.redirect_chain && data.http.redirect_chain.length > 0) {
+            var chainStr = data.http.redirect_chain.map(function(r) { return r.status + ' ' + r.url; }).join(' \u2192 ');
+            metaItems.push({ label:'Redirect Chain', value: chainStr });
+        }
+        var mhtml = '';
+        metaItems.forEach(function(m) {
+            var v = m.value;
+            if (typeof v === 'number') v = v;
+            else v = fmtVal(v);
+            mhtml += '<div class="bi-meta-item"><div class="label">' + m.label + '</div><div class="value">' + (typeof v === 'number' ? v : escapeHtml(v)) + '</div></div>';
+        });
+        document.getElementById('biMetaGrid').innerHTML = mhtml;
+
+        // Page Metadata
+        var pm = data.page_metadata || {};
+        var pmeta = [
+            { label:'Title', value: fmtValMeta(pm.title) },
+            { label:'Description', value: fmtValMeta(pm.meta_description) },
+            { label:'Charset', value: fmtValMeta(pm.charset) },
+            { label:'Language', value: fmtValMeta(pm.language) },
+            { label:'Canonical URL', value: fmtValMeta(pm.canonical_url) },
+            { label:'Viewport', value: fmtValMeta(pm.viewport) },
+            { label:'Generator', value: fmtValMeta(pm.generator) },
+            { label:'Favicon', value: fmtValMeta(pm.favicon) },
+            { label:'OpenGraph Title', value: fmtValMeta(pm.og_title) },
+            { label:'OpenGraph Description', value: fmtValMeta(pm.og_description) },
+            { label:'Twitter Card', value: fmtValMeta(pm.twitter_card) },
+            { label:'Robots Meta', value: fmtValMeta(pm.robots) },
+        ];
+        var pmhtml = '';
+        pmeta.forEach(function(m) {
+            pmhtml += '<div class="bi-meta-item"><div class="label">' + m.label + '</div><div class="value">' + escapeHtml(m.value) + '</div></div>';
+        });
+        document.getElementById('biPageMetaGrid').innerHTML = pmhtml;
+
+        // DOM Statistics
+        var ds = data.dom_statistics || {};
+        var domItems = [
+            { label:'Total DOM Nodes', num: ds.total_dom_nodes },
+            { label:'Images', num: ds.images },
+            { label:'Links', num: ds.links },
+            { label:'CSS Files', num: ds.css_files },
+            { label:'Scripts', num: ds.scripts },
+            { label:'Inline Scripts', num: ds.inline_scripts },
+            { label:'External Scripts', num: ds.external_scripts },
+            { label:'Forms', num: ds.forms },
+            { label:'Buttons', num: ds.buttons },
+            { label:'Inputs', num: ds.inputs },
+            { label:'Tables', num: ds.tables },
+            { label:'SVGs', num: ds.svg_elements },
+            { label:'Canvas', num: ds.canvas_elements },
+            { label:'Videos', num: ds.videos },
+            { label:'Iframes', num: ds.iframes },
+        ];
+        var dshtml = '';
+        domItems.forEach(function(s) {
+            dshtml += '<div class="bi-stat"><div class="num">' + (s.num != null ? s.num : 0) + '</div><div class="lbl">' + s.label + '</div></div>';
+        });
+        document.getElementById('biDomStatsGrid').innerHTML = dshtml;
+
+        // Link Analysis
+        var la = data.link_analysis || {};
+        var linkItems = [
+            { label:'Internal', num: la.internal },
+            { label:'External', num: la.external },
+            { label:'Mailto', num: la.mailto },
+            { label:'Telephone', num: la.telephone },
+            { label:'JavaScript', num: la.javascript },
+            { label:'Download', num: la.download },
+            { label:'Redirect', num: la.redirect },
+            { label:'Total Links', num: la.total },
+        ];
+        var lhtml = '';
+        linkItems.forEach(function(s) {
+            lhtml += '<div class="bi-stat"><div class="num">' + (s.num != null ? s.num : 0) + '</div><div class="lbl">' + s.label + '</div></div>';
+        });
+        document.getElementById('biLinkStatsGrid').innerHTML = lhtml;
+
+        // Script Analysis
+        var sa = data.script_analysis || {};
+        var saItems = [
+            { label:'External Scripts', num: sa.external_scripts },
+            { label:'Inline Scripts', num: sa.inline_scripts },
+        ];
+        var sahtml = '';
+        saItems.forEach(function(s) {
+            sahtml += '<div class="bi-stat"><div class="num">' + (s.num != null ? s.num : 0) + '</div><div class="lbl">' + s.label + '</div></div>';
+        });
+        document.getElementById('biScriptStatsGrid').innerHTML = sahtml;
+
+        var flags = sa.analysis || {};
+        var flagItems = [
+            { label:'eval() Usage', num: flags.eval_usage },
+            { label:'document.write()', num: flags.document_write },
+            { label:'new Function()', num: flags.new_function },
+            { label:'setTimeout(String)', num: flags.set_timeout_string },
+            { label:'setInterval(String)', num: flags.set_interval_string },
+            { label:'Base64 Encoded', num: flags.base64_encoded },
+            { label:'Obfuscated', num: flags.obfuscated },
+            { label:'Suspicious Inline', num: flags.suspicious_inline },
+        ];
+        var fhtml = '';
+        flagItems.forEach(function(s) {
+            fhtml += '<div class="bi-stat"><div class="num">' + (s.num != null ? s.num : 0) + '</div><div class="lbl">' + s.label + '</div></div>';
+        });
+        document.getElementById('biScriptFlagsGrid').innerHTML = fhtml;
+
+        var suspicionScore = sa.suspicion_score || 0;
+        document.getElementById('biScriptSuspicion').textContent = 'Suspicion: ' + suspicionScore + '/40';
+
+        // Script sources
+        var sources = sa.external_sources || [];
+        var ssDiv = document.getElementById('biScriptSources');
+        if (sources.length > 0) {
+            ssDiv.innerHTML = '<div class="bi-inline-code">' + sources.map(function(s) { return escapeHtml(s); }).join('\n') + '</div>';
+        } else {
+            ssDiv.innerHTML = '<div style="color:var(--text-muted);font-size:0.8rem;padding:8px 0">No external script sources found.</div>';
+        }
+        window._biScriptSourcesShown = false;
+        window.toggleScriptSources = function() {
+            var el = document.getElementById('biScriptSources');
+            var btn = document.getElementById('biToggleScriptSources');
+            if (el.style.display === 'none') {
+                el.style.display = 'block';
+                btn.innerHTML = '<i class="bi bi-eye-slash"></i> Hide External Script Sources';
+            } else {
+                el.style.display = 'none';
+                btn.innerHTML = '<i class="bi bi-eye"></i> Show External Script Sources';
+            }
+        };
+
+        // Security Headers
+        var sh = data.security_headers || {};
+        var shKeys = Object.keys(sh);
+        var shBody = document.getElementById('biSecHeadersBody');
+        if (shKeys.length === 0) {
+            shBody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-muted);padding:1rem">No security headers found.</td></tr>';
+        } else {
+            var shhtml = '';
+            shKeys.forEach(function(k) {
+                var entry = sh[k] || {};
+                var status = entry.status || 'Missing';
+                var value = entry.value || '';
+                var cls = 'status-' + status.toLowerCase();
+                var displayVal = value ? escapeHtml(value.substring(0, 120)) : '&mdash;';
+                shhtml += '<tr><td>' + escapeHtml(k) + '</td><td class="' + cls + '">' + escapeHtml(status) + '</td><td style="color:var(--text-muted);font-size:0.75rem;font-family:var(--font-mono);max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + displayVal + '</td></tr>';
+            });
+            shBody.innerHTML = shhtml;
+        }
+
+        // Cookie Analysis
+        var ca = data.cookie_analysis || {};
+        document.getElementById('biCookieSummary').textContent = ca.count + ' cookie' + (ca.count !== 1 ? 's' : '') + (ca.insecure_count ? ', ' + ca.insecure_count + ' insecure' : '');
+        var cg = document.getElementById('biCookieGrid');
+        var cookies = ca.cookies || [];
+        if (cookies.length === 0) {
+            cg.innerHTML = '<div style="color:var(--text-muted);text-align:center;padding:1rem;font-size:0.9rem">No cookies set by this page.</div>';
+        } else {
+            var chtml = '';
+            cookies.forEach(function(c) {
+                chtml += '<div class="bi-cookie-card">';
+                chtml += '<div class="c-name">' + escapeHtml(c.name) + '</div>';
+                chtml += '<div class="c-detail"><span>Domain:</span> ' + escapeHtml(c.domain || '/') + '</div>';
+                chtml += '<div class="c-detail"><span>Path:</span> ' + escapeHtml(c.path || '/') + '</div>';
+                chtml += '<div class="c-detail"><span>Expires:</span> ' + escapeHtml(c.expires || 'Session') + '</div>';
+                chtml += '<div class="c-flags">';
+                chtml += '<span class="c-flag ' + (c.secure ? 'ok' : 'bad') + '">' + (c.secure ? 'Secure' : 'No Secure') + '</span>';
+                chtml += '<span class="c-flag ' + (c.httponly ? 'ok' : 'bad') + '">' + (c.httponly ? 'HttpOnly' : 'No HttpOnly') + '</span>';
+                chtml += '<span class="c-flag ' + ((c.samesite && c.samesite !== 'None') ? 'ok' : 'bad') + '">SameSite: ' + escapeHtml(c.samesite || 'None') + '</span>';
+                chtml += '</div></div>';
+            });
+            cg.innerHTML = chtml;
+        }
+
+        // Technology Detection
+        var techs = data.technologies || [];
+        document.getElementById('biTechCount').textContent = techs.length + ' technolog' + (techs.length !== 1 ? 'ies' : 'y');
+        var tl = document.getElementById('biTechList');
+        if (techs.length === 0) {
+            tl.innerHTML = '<span style="color:var(--text-muted);font-size:0.85rem">No technologies detected.</span>';
+        } else {
+            tl.innerHTML = techs.map(function(t) { return '<span class="bi-tech-tag">' + escapeHtml(t) + '</span>'; }).join('');
+        }
+
+        // TLS Analysis
+        var tls = data.tls_analysis || {};
+        var tlsItems = [];
+        if (tls.used) {
+            tlsItems.push({ label:'TLS Version', value: fmtVal(tls.tls_version) });
+            tlsItems.push({ label:'Cipher Suite', value: fmtVal(tls.cipher_suite) });
+            if (tls.cipher_bits != null) tlsItems.push({ label:'Cipher Bits', value: tls.cipher_bits });
+            tlsItems.push({ label:'Weak Cipher', value: tls.weak_cipher ? 'Yes' : 'No' });
+            tlsItems.push({ label:'Issuer', value: fmtVal(tls.issuer) });
+            tlsItems.push({ label:'Common Name', value: fmtVal(tls.common_name) });
+            tlsItems.push({ label:'Subject', value: fmtVal(tls.subject_name || '') });
+            tlsItems.push({ label:'Not Before', value: fmtVal(tls.not_before) });
+            tlsItems.push({ label:'Not After', value: fmtVal(tls.not_after) });
+            tlsItems.push({ label:'Days Remaining', value: tls.days_remaining != null ? tls.days_remaining + ' days' : 'Not Available' });
+            tlsItems.push({ label:'SAN Count', value: tls.san_count != null ? tls.san_count : 'Not Available' });
+            tlsItems.push({ label:'Self-Signed', value: tls.self_signed ? 'Yes' : 'No' });
+            tlsItems.push({ label:'Certificate Valid', value: tls.cert_valid ? 'Yes' : (tls.cert_valid === false ? 'No' : 'Not Available') });
+            tlsItems.push({ label:'Expired', value: tls.expired ? 'Yes' : 'No' });
+            tlsItems.push({ label:'OCSP', value: fmtVal(tls.ocsp) });
+            if (tls.cert_chain_count) tlsItems.push({ label:'Certificate Chain', value: tls.cert_chain_count + ' certificates' });
+            if (tls.subject_alt_names && tls.subject_alt_names.length > 0) {
+                tlsItems.push({ label:'Subject Alt Names', value: tls.subject_alt_names.join(', ') });
+            }
+        } else if (tls.note) {
+            tlsItems.push({ label:'Note', value: tls.note });
+        } else if (tls.error) {
+            tlsItems.push({ label:'Error', value: tls.error });
+        } else {
+            tlsItems.push({ label:'Status', value: 'Not available' });
+        }
+        var tlshtml = '';
+        tlsItems.forEach(function(m) {
+            var v = m.value;
+            if (v === null || v === undefined || v === '' || v === '—' || v === '&mdash;') v = 'Not Available';
+            tlshtml += '<div class="bi-meta-item"><div class="label">' + m.label + '</div><div class="value">' + escapeHtml(String(v)) + '</div></div>';
+        });
+        document.getElementById('biTlsGrid').innerHTML = tlshtml;
+
+        // Performance
+        var perf = data.performance || {};
+        var perfItems = [
+            { label:'Load Time', num: (perf.load_time_ms || 0).toFixed(1) + ' ms' },
+            { label:'Total Transfer', num: perf.total_transfer_size ? (perf.total_transfer_size > 1048576 ? (perf.total_transfer_size / 1048576).toFixed(2) + ' MB' : (perf.total_transfer_size / 1024).toFixed(1) + ' KB') : '0 B' },
+            { label:'Total Requests', num: perf.total_requests || 0 },
+            { label:'Redirects', num: perf.redirect_count || 0 },
+            { label:'Largest Resource', num: perf.largest_resource && perf.largest_resource !== 'Not Available' ? (perf.largest_resource_bytes > 1024 ? (perf.largest_resource_bytes / 1024).toFixed(1) + ' KB' : perf.largest_resource_bytes + ' B') : 'N/A' },
+        ];
+        var perfhtml = '';
+        perfItems.forEach(function(s) {
+            perfhtml += '<div class="bi-stat"><div class="num" style="font-size:1.1rem">' + s.num + '</div><div class="lbl">' + s.label + '</div></div>';
+        });
+        document.getElementById('biPerfGrid').innerHTML = perfhtml;
+
+        // Resource Summary
+        var rs = data.resource_summary || {};
+        var rsItems = [
+            { label:'Images', num: rs.images },
+            { label:'CSS', num: rs.css },
+            { label:'JavaScript', num: rs.javascript },
+            { label:'Fonts', num: rs.fonts },
+            { label:'XHR / Fetch', num: (rs.xhr || 0) + (rs.fetch || 0) },
+            { label:'Media', num: rs.media },
+            { label:'Total', num: rs.total },
+        ];
+        var rshtml = '';
+        rsItems.forEach(function(s) {
+            rshtml += '<div class="bi-stat"><div class="num">' + (s.num != null ? s.num : 0) + '</div><div class="lbl">' + s.label + '</div></div>';
+        });
+        document.getElementById('biResourceGrid').innerHTML = rshtml;
+
+        // JavaScript API Analysis
+        var ja = data.js_analysis || {};
+        var jaItems = [
+            { label:'Inline JavaScript', value: fmtDetected(ja.inline_javascript) },
+            { label:'External JavaScript', value: fmtDetected(ja.external_javascript) },
+            { label:'eval() Usage', value: fmtDetected(ja.eval_usage) },
+            { label:'document.write()', value: fmtDetected(ja.document_write) },
+            { label:'setTimeout(String)', value: fmtDetected(ja.setTimeout_string) },
+            { label:'setInterval(String)', value: fmtDetected(ja.setInterval_string) },
+            { label:'WebSocket Usage', value: fmtDetected(ja.websocket_usage) },
+            { label:'WebRTC Usage', value: fmtDetected(ja.webrtc_usage) },
+            { label:'Clipboard API', value: fmtDetected(ja.clipboard_api) },
+            { label:'Notification API', value: fmtDetected(ja.notification_api) },
+            { label:'Geolocation API', value: fmtDetected(ja.geolocation_api) },
+            { label:'Camera API', value: fmtDetected(ja.camera_api) },
+            { label:'Microphone API', value: fmtDetected(ja.microphone_api) },
+            { label:'Payment API', value: fmtDetected(ja.payment_api) },
+            { label:'Service Worker', value: fmtDetected(ja.service_worker) },
+            { label:'LocalStorage', value: fmtDetected(ja.localstorage_usage) },
+            { label:'SessionStorage', value: fmtDetected(ja.sessionstorage_usage) },
+            { label:'IndexedDB', value: fmtDetected(ja.indexeddb_usage) },
+        ];
+        var detectedCount = jaItems.filter(function(i) { return i.value === 'Detected'; }).length;
+        var jaCard = document.getElementById('biJsAnalysisCard');
+        var jaGrid = document.getElementById('biJsApiGrid');
+        if (jaCard && jaGrid) {
+            document.getElementById('biJsApisCount').textContent = detectedCount + ' API' + (detectedCount !== 1 ? 's' : '') + ' detected';
+            var jhtml = '';
+            jaItems.forEach(function(s) {
+                var cls = s.value === 'Detected' ? 'bi-api-detected' : 'bi-api-not-detected';
+                jhtml += '<div class="bi-stat ' + cls + '"><div class="num" style="font-size:0.75rem;">' + escapeHtml(s.value) + '</div><div class="lbl">' + s.label + '</div></div>';
+            });
+            jaGrid.innerHTML = jhtml;
+            jaCard.style.display = 'block';
+        }
+
+        // Network Analysis
+        var na = data.network_analysis || data.performance || {};
+        var naCard = document.getElementById('biNetworkCard');
+        var naGrid = document.getElementById('biNetworkGrid');
+        if (naCard && naGrid) {
+            var naItems = [
+                { label:'Total Requests', num: na.total_requests },
+                { label:'Images', num: na.images },
+                { label:'Fonts', num: na.fonts },
+                { label:'Scripts', num: na.scripts },
+                { label:'Stylesheets', num: na.stylesheets },
+                { label:'XHR', num: na.xhr },
+                { label:'Fetch', num: na.fetch },
+                { label:'Media', num: na.media },
+                { label:'Redirect Count', num: na.redirect_count },
+                { label:'Total Transfer', num: na.total_transfer_size ? (na.total_transfer_size > 1048576 ? (na.total_transfer_size / 1048576).toFixed(2) + ' MB' : (na.total_transfer_size / 1024).toFixed(1) + ' KB') : '0 B' },
+            ];
+            var nhtml = '';
+            naItems.forEach(function(s) {
+                nhtml += '<div class="bi-stat"><div class="num">' + (s.num != null ? s.num : 0) + '</div><div class="lbl">' + s.label + '</div></div>';
+            });
+            naGrid.innerHTML = nhtml;
+            naCard.style.display = 'block';
+        }
+
+        // Resource Breakdown
+        var rb = data.resource_breakdown || data.resource_summary || {};
+        var rbCard = document.getElementById('biResourceBreakdownCard');
+        var rbGrid = document.getElementById('biResourceBreakdownGrid');
+        if (rbCard && rbGrid) {
+            var rbhtml = '';
+            if (rb.third_party_domains && rb.third_party_domains.length > 0) {
+                rbhtml += '<div class="bi-meta-item full-width"><div class="label">Third-Party Domains</div><div class="value" style="word-break:break-all">' + rb.third_party_domains.map(function(d) { return escapeHtml(d[0] + ' (' + d[1] + ' reqs)'); }).join(', ') + '</div></div>';
+            }
+            if (rb.total_size) {
+                rbhtml += '<div class="bi-meta-item"><div class="label">Total Transfer Size</div><div class="value">' + (rb.total_size > 1048576 ? (rb.total_size / 1048576).toFixed(2) + ' MB' : (rb.total_size / 1024).toFixed(1) + ' KB') + '</div></div>';
+            }
+            if (rb.largest_resources && rb.largest_resources.length > 0) {
+                var lrStr = rb.largest_resources.slice(0, 10).map(function(r) { return escapeHtml(r.url.substring(0, 120) + ' (' + (r.size > 1024 ? (r.size / 1024).toFixed(1) + ' KB' : r.size + ' B') + ')'); }).join('<br>');
+                rbhtml += '<div class="bi-meta-item full-width"><div class="label">Largest Resources</div><div class="value" style="word-break:break-all;font-size:0.75rem;line-height:1.6">' + lrStr + '</div></div>';
+            }
+            if (rbhtml) {
+                rbGrid.innerHTML = rbhtml;
+                rbCard.style.display = 'block';
+            } else {
+                rbCard.style.display = 'none';
+            }
+        }
+
+        // Redirect Chain
+        var redirects = data.redirect_analysis || (data.http && data.http.redirect_chain) || [];
+        var rdCard = document.getElementById('biRedirectCard');
+        var rdList = document.getElementById('biRedirectList');
+        if (rdCard && rdList) {
+            if (redirects.length > 0) {
+                rdCard.style.display = 'block';
+                var rdhtml = '';
+                redirects.forEach(function(r, i) {
+                    var arrow = i < redirects.length - 1 ? '<div class="bi-redirect-arrow"><i class="bi bi-arrow-down"></i></div>' : '';
+                    rdhtml += '<div class="bi-redirect-step">';
+                    rdhtml += '<div class="bi-redirect-status ' + (r.status_code >= 400 ? 'error' : (r.status_code >= 300 ? 'redirect' : 'ok')) + '">' + (r.status_code || r.status || '?') + '</div>';
+                    rdhtml += '<div class="bi-redirect-url">' + escapeHtml(r.from_url || r.url || '') + '</div>';
+                    if (r.protocol_change) rdhtml += '<div class="bi-redirect-protocol">Protocol change: ' + escapeHtml(r.protocol_change) + '</div>';
+                    rdhtml += '</div>';
+                    rdhtml += arrow;
+                });
+                rdhtml += '<div class="bi-redirect-step final"><div class="bi-redirect-status ok">' + (data.http && data.http.status_code || data.final_url ? '200' : '?') + '</div><div class="bi-redirect-url"><strong>' + escapeHtml(data.final_url || '') + '</strong></div></div>';
+                rdList.innerHTML = rdhtml;
+            } else {
+                rdCard.style.display = 'none';
+            }
+        }
+
+        // Screenshot
+        var ssCard = document.getElementById('biScreenshotCard');
+        var ssContainer = document.getElementById('biScreenshotContainer');
+        if (ssCard && ssContainer) {
+            if (data.screenshot_b64) {
+                ssCard.style.display = 'block';
+                ssContainer.innerHTML = '<img src="data:image/png;base64,' + data.screenshot_b64 + '" alt="Page Screenshot" style="width:100%;max-width:100%;border-radius:8px;border:1px solid var(--border);box-shadow:0 4px 16px rgba(0,0,0,0.3)">';
+            } else {
+                ssCard.style.display = 'none';
+            }
+        }
+
+        // Removed Elements
+        var removed = data.removed_elements || [];
+        document.getElementById('biRemovedCount').textContent = removed.length + ' item' + (removed.length !== 1 ? 's' : '');
+        var rl = document.getElementById('biRemovedList');
+        if (removed.length === 0) {
+            rl.innerHTML = '<div class="bi-empty-removed">No elements were removed.</div>';
+        } else {
+            var rhtml = '';
+            removed.forEach(function(item) {
+                rhtml += '<div class="bi-removed-item">';
+                rhtml += '<span class="tag">' + escapeHtml(item.type || 'UNKNOWN') + '</span>';
+                rhtml += '<div class="info">';
+                if (item.source) rhtml += '<div class="src">' + escapeHtml(item.source) + '</div>';
+                rhtml += '<div class="reason">' + escapeHtml(item.reason || '') + '</div>';
+                rhtml += '</div></div>';
+            });
+            rl.innerHTML = rhtml;
+        }
+
+        // Size info
+        document.getElementById('biSizeInfo').textContent =
+            'Original: ' + (data.original_size || 0).toLocaleString() + ' B &middot; Sanitized: ' + (data.sanitized_size || 0).toLocaleString() + ' B';
+
+        // Sanitized Preview
+        var previewFrame = document.getElementById('biPreview');
+        if (data.sanitized_html) {
+            if (previewFrame._blobUrl) URL.revokeObjectURL(previewFrame._blobUrl);
+            var blob = new Blob([data.sanitized_html], {type: 'text/html'});
+            var blobUrl = URL.createObjectURL(blob);
+            previewFrame._blobUrl = blobUrl;
+            previewFrame.src = blobUrl;
+            previewFrame.onload = function() {
+                setTimeout(function() { URL.revokeObjectURL(blobUrl); }, 5000);
+            };
+        } else {
+            previewFrame.src = '';
+            previewFrame.srcdoc = '<html><body style="background:#fff;color:#333;display:flex;align-items:center;justify-content:center;font-family:sans-serif;padding:2rem"><p>No sanitized content to preview.</p></body></html>';
+        }
+
+        hideLoading();
+        resultsDiv.classList.add('visible');
+        window.scrollTo({ top: heroSection.offsetHeight - 40, behavior: 'smooth' });
+    }
+
+    // ---- Scan ----
+    async function scanUrl(targetUrl) {
+        var url = targetUrl || urlInput.value.trim();
+        if (!url) { showError('Please enter a URL.'); return; }
+        hideError();
+        showLoading();
+
+        var csrf = getCookie('csrftoken');
+        try {
+            var resp = await fetch('/api/browser-isolation/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrf
+                },
+                body: JSON.stringify({ url: url })
+            });
+
+            var contentType = resp.headers.get('content-type') || '';
+            if (!contentType.includes('application/json')) {
+                var text = await resp.text();
+                console.error('Non-JSON response:', text.substring(0, 500));
+                hideLoading();
+                showError('Server returned an unexpected response. Please try again.');
+                return;
+            }
+
+            if (!resp.ok) {
+                var errData = await resp.json();
+                throw new Error(errData.error || 'Request failed');
+            }
+
+            var data = await resp.json();
+            if (data.error) {
+                hideLoading();
+                showError(data.error);
+                return;
+            }
+            renderResults(data);
+        } catch (err) {
+            hideLoading();
+            var msg = err.message || 'Network error';
+            if (msg.indexOf('Failed to fetch') !== -1 || msg.indexOf('NetworkError') !== -1) {
+                msg = 'Could not reach this URL. It may be down or blocking external requests.';
+            }
+            showError(msg);
+        }
+    }
+
+    // ---- Event Listeners ----
+    scanBtn.addEventListener('click', function() { scanUrl(); });
+    urlInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); scanUrl(); }
+    });
+
+    document.getElementById('biNewScan').addEventListener('click', function() {
+        resultsDiv.classList.remove('visible');
+        var pf = document.getElementById('biPreview');
+        if (pf && pf._blobUrl) { URL.revokeObjectURL(pf._blobUrl); pf._blobUrl = null; pf.src = ''; }
+        urlInput.value = '';
+        urlInput.focus();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // ---- Auto-trigger from URL query parameter ----
+    var params = new URLSearchParams(window.location.search);
+    var urlParam = params.get('url');
+    if (urlParam && urlInput) {
+        urlInput.value = urlParam;
+        setTimeout(function() { scanUrl(urlParam); }, 300);
+    }
+})();
+</script>
+{% endblock %}

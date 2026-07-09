@@ -202,9 +202,9 @@
                         </td>
                         <td style="padding:12px;color:var(--text-primary);max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ scan.target }}">{{ scan.target }}</td>
                         <td style="padding:12px;">
-                            {% if scan.threat_level == 'malicious' %}
+                            {% if scan.verdict == 'MALICIOUS' %}
                             <span class="badge badge-danger">Malicious</span>
-                            {% elif scan.threat_level == 'suspicious' %}
+                            {% elif scan.verdict == 'SUSPICIOUS' %}
                             <span class="badge badge-warning">Suspicious</span>
                             {% else %}
                             <span class="badge badge-success">Safe</span>

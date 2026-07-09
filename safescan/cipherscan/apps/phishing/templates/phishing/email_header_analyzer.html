@@ -1,0 +1,595 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Email Header Analyzer - CipherScan{% endblock %}
+
+{% block extra_css %}
+<style>
+    .ha-hero {
+        text-align: center;
+        padding: 40px 0 32px;
+    }
+    .ha-hero h1 {
+        font-size: 32px;
+        font-weight: 800;
+        background: linear-gradient(135deg, #f59e0b, #ef4444);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 8px;
+    }
+    .ha-hero p {
+        color: var(--text-secondary);
+        font-size: 15px;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    .ha-input-section {
+        max-width: 800px;
+        margin: 0 auto 32px;
+    }
+    .ha-input-section textarea {
+        width: 100%;
+        min-height: 200px;
+        padding: 16px;
+        background: var(--bg-input);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        color: var(--text-primary);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 13px;
+        line-height: 1.6;
+        resize: vertical;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+    .ha-input-section textarea:focus {
+        border-color: #f59e0b;
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+    }
+    .ha-input-section textarea::placeholder {
+        color: var(--text-muted);
+        font-family: 'Inter', sans-serif;
+    }
+    .ha-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 16px;
+        justify-content: center;
+    }
+    .btn-analyze {
+        background: linear-gradient(135deg, #0d9488, #14b8a6);
+        color: #fff;
+        padding: 12px 32px;
+        font-size: 15px;
+        font-weight: 600;
+        border: none;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .btn-analyze:hover:not(:disabled) {
+        opacity: 0.9;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 20px rgba(13, 148, 136, 0.35);
+    }
+    .btn-analyze:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    .spinner {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .ha-results {
+        max-width: 800px;
+        margin: 0 auto;
+        display: none;
+    }
+    .ha-results.visible { display: block; }
+    .ha-error {
+        max-width: 800px;
+        margin: 0 auto 16px;
+        padding: 14px 18px;
+        background: rgba(239,68,68,0.1);
+        border: 1px solid rgba(239,68,68,0.25);
+        border-radius: var(--radius-md);
+        color: var(--accent-red);
+        font-size: 14px;
+        display: none;
+        align-items: center;
+        gap: 10px;
+    }
+    .ha-error.visible { display: flex; }
+    .verdict-banner {
+        padding: 20px 24px;
+        border-radius: var(--radius-lg);
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .verdict-banner.danger {
+        background: linear-gradient(135deg, rgba(239,68,68,0.15), rgba(239,68,68,0.05));
+        border: 1px solid rgba(239,68,68,0.3);
+    }
+    .verdict-banner.success {
+        background: linear-gradient(135deg, rgba(0,255,136,0.15), rgba(0,255,136,0.05));
+        border: 1px solid rgba(0,255,136,0.3);
+    }
+    .verdict-banner.warning {
+        background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(245,158,11,0.05));
+        border: 1px solid rgba(245,158,11,0.3);
+    }
+    .verdict-banner .v-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+    .verdict-banner .v-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+    }
+    .verdict-banner.danger .v-icon { background: rgba(239,68,68,0.2); color: var(--accent-red); }
+    .verdict-banner.success .v-icon { background: rgba(0,255,136,0.2); color: var(--accent-green); }
+    .verdict-banner.warning .v-icon { background: rgba(245,158,11,0.2); color: var(--accent-amber); }
+    .verdict-banner .v-text h2 { font-size: 20px; font-weight: 700; margin-bottom: 2px; }
+    .verdict-banner .v-text p { font-size: 13px; opacity: 0.8; }
+    .verdict-banner .v-score {
+        text-align: center;
+    }
+    .verdict-banner .v-score .score-num {
+        font-size: 36px;
+        font-weight: 800;
+    }
+    .verdict-banner .v-score .score-label {
+        font-size: 12px;
+        opacity: 0.7;
+    }
+    .verdict-banner.danger .v-score .score-num { color: var(--accent-red); }
+    .verdict-banner.success .v-score .score-num { color: var(--accent-green); }
+    .verdict-banner.warning .v-score .score-num { color: var(--accent-amber); }
+
+    .score-circle-section {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        margin-bottom: 24px;
+    }
+    .score-ring {
+        width: 120px;
+        height: 120px;
+        position: relative;
+        flex-shrink: 0;
+    }
+    .score-ring svg { transform: rotate(-90deg); }
+    .score-ring .ring-bg { fill: none; stroke: var(--border-color); stroke-width: 8; }
+    .score-ring .ring-fg { fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 1s ease; }
+    .score-ring .ring-text {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    .score-ring .ring-text .num {
+        font-size: 28px;
+        font-weight: 800;
+    }
+    .score-ring .ring-text .lbl {
+        font-size: 10px;
+        color: var(--text-muted);
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+    .ha-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        margin-bottom: 20px;
+    }
+    .ha-card h3 {
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .ha-card h3 .h-icon { width: 28px; height: 28px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; }
+    .info-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .info-table td {
+        padding: 8px 12px;
+        font-size: 13px;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .info-table td:first-child {
+        color: var(--text-muted);
+        font-weight: 500;
+        width: 130px;
+        white-space: nowrap;
+    }
+    .info-table td:last-child {
+        color: var(--text-primary);
+        word-break: break-all;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+    }
+    .auth-badges {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+    .auth-badge {
+        flex: 1;
+        min-width: 140px;
+        text-align: center;
+        padding: 14px 16px;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border-color);
+        background: var(--bg-input);
+    }
+    .auth-badge .ab-label {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 6px;
+    }
+    .auth-badge .ab-value {
+        font-size: 20px;
+        font-weight: 700;
+    }
+    .auth-badge.pass { border-color: rgba(0,255,136,0.3); }
+    .auth-badge.pass .ab-value { color: var(--accent-green); }
+    .auth-badge.fail { border-color: rgba(239,68,68,0.3); }
+    .auth-badge.fail .ab-value { color: var(--accent-red); }
+    .auth-badge.none { border-color: var(--border-color); }
+    .auth-badge.none .ab-value { color: var(--text-muted); }
+    .reason-card {
+        display: flex;
+        gap: 14px;
+        padding: 16px;
+        background: var(--bg-input);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        margin-bottom: 10px;
+    }
+    .reason-card .r-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: rgba(245,158,11,0.15);
+        color: var(--accent-amber);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        flex-shrink: 0;
+    }
+    .reason-card .r-text h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .reason-card .r-text p { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+    .hop-timeline {
+        position: relative;
+        padding-left: 28px;
+    }
+    .hop-timeline::before {
+        content: '';
+        position: absolute;
+        left: 10px;
+        top: 4px;
+        bottom: 4px;
+        width: 2px;
+        background: var(--border-color);
+    }
+    .hop-step {
+        position: relative;
+        margin-bottom: 16px;
+        padding: 12px 16px;
+        background: var(--bg-input);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+    }
+    .hop-step::before {
+        content: attr(data-step);
+        position: absolute;
+        left: -22px;
+        top: 14px;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: var(--accent-cyan);
+        color: #000;
+        font-size: 11px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .hop-step .hop-ip {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--accent-cyan);
+    }
+    .hop-step .hop-label {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-top: 2px;
+    }
+    .btn-reset {
+        background: var(--bg-card);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        padding: 10px 24px;
+        border-radius: var(--radius-sm);
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .btn-reset:hover {
+        background: var(--bg-card-hover);
+        border-color: var(--text-muted);
+    }
+    .section-divider {
+        text-align: center;
+        margin: 32px 0 16px;
+    }
+    @media (max-width: 640px) {
+        .verdict-banner { flex-direction: column; gap: 12px; text-align: center; }
+        .auth-badges { flex-direction: column; }
+        .score-circle-section { flex-direction: column; text-align: center; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ha-hero">
+    <h1>Email Header Analyzer</h1>
+    <p>Paste raw email headers to trace the sending path, detect spoofing, and verify SPF/DKIM/DMARC authentication status.</p>
+</div>
+
+<div class="ha-input-section" id="inputSection">
+    <textarea id="headerInput" placeholder="Paste raw email headers here..."></textarea>
+    <div class="ha-actions">
+        <button class="btn-analyze" id="analyzeBtn" onclick="analyzeHeader()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Analyze Header
+        </button>
+    </div>
+</div>
+
+<div class="ha-error" id="errorBox">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+    <span id="errorText"></span>
+</div>
+
+<div class="ha-results" id="resultsSection">
+
+    <div class="verdict-banner" id="verdictBanner">
+        <div class="v-left">
+            <div class="v-icon" id="verdictIcon">⚠</div>
+            <div class="v-text">
+                <h2 id="verdictText">—</h2>
+                <p id="verdictSubtext">Threat Score: <strong id="verdictScore">0</strong>/100</p>
+            </div>
+        </div>
+        <div class="v-score">
+            <div class="score-num" id="verdictScoreLarge">0</div>
+            <div class="score-label">/ 100</div>
+        </div>
+    </div>
+
+    <div class="score-circle-section">
+        <div class="score-ring">
+            <svg width="120" height="120" viewBox="0 0 120 120">
+                <circle class="ring-bg" cx="60" cy="60" r="48"/>
+                <circle class="ring-fg" id="scoreRing" cx="60" cy="60" r="48"
+                    stroke="var(--accent-green)"
+                    stroke-dasharray="301.6"
+                    stroke-dashoffset="301.6"/>
+            </svg>
+            <div class="ring-text">
+                <span class="num" id="ringScoreNum">0</span>
+                <span class="lbl">THREAT</span>
+            </div>
+        </div>
+        <div>
+            <div style="font-size:13px;color:var(--text-secondary);margin-bottom:4px;">Email Authentication Summary</div>
+            <div style="font-size:13px;color:var(--text-secondary);">SPF, DKIM, and DMARC results determine email legitimacy</div>
+        </div>
+    </div>
+
+    <div class="ha-card">
+        <h3><span class="h-icon" style="background:rgba(0,240,255,0.15);color:var(--accent-cyan);">📋</span> Email Information</h3>
+        <table class="info-table">
+            <tr><td>From</td><td id="infoFrom">—</td></tr>
+            <tr><td>Subject</td><td id="infoSubject">—</td></tr>
+            <tr><td>Date</td><td id="infoDate">—</td></tr>
+            <tr><td>Message-ID</td><td id="infoMsgId">—</td></tr>
+            <tr><td>Reply-To</td><td id="infoReplyTo">—</td></tr>
+            <tr><td>Return-Path</td><td id="infoReturnPath">—</td></tr>
+        </table>
+    </div>
+
+    <div class="ha-card">
+        <h3><span class="h-icon" style="background:rgba(0,255,136,0.15);color:var(--accent-green);">🔐</span> Authentication Results</h3>
+        <div class="auth-badges" id="authBadges">
+            <div class="auth-badge none"><div class="ab-label">SPF</div><div class="ab-value">—</div></div>
+            <div class="auth-badge none"><div class="ab-label">DKIM</div><div class="ab-value">—</div></div>
+            <div class="auth-badge none"><div class="ab-label">DMARC</div><div class="ab-value">—</div></div>
+        </div>
+    </div>
+
+    <div class="ha-card" id="reasonsSection">
+        <h3><span class="h-icon" style="background:rgba(245,158,11,0.15);color:var(--accent-amber);">⚠</span> Why We Predicted This</h3>
+        <div id="reasonsList"></div>
+    </div>
+
+    <div class="ha-card" id="hopsSection">
+        <h3><span class="h-icon" style="background:rgba(124,58,237,0.15);color:#7c3aed;">🔄</span> Email Routing Path (Hop Chain)</h3>
+        <div class="hop-timeline" id="hopTimeline"></div>
+    </div>
+
+    <div class="section-divider">
+        <button class="btn-reset" onclick="resetForm()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            Analyze Another Header
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+async function analyzeHeader() {
+    const header = document.querySelector('textarea').value.trim();
+
+    if (!header) {
+        alert('Please paste email headers first');
+        return;
+    }
+
+    const btn = document.querySelector('button');
+    btn.textContent = 'Analyzing...';
+    btn.disabled = true;
+
+    try {
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        const response = await fetch('/api/phishing/analyze-header/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ header: header })
+        });
+
+        console.log('Response status:', response.status);
+        const data = await response.json();
+        console.log('Analysis result:', data);
+
+        if (data.error) {
+            alert('Error: ' + data.error);
+            return;
+        }
+
+        showHeaderResults(data);
+    } catch (err) {
+        console.error('Fetch error:', err);
+        alert('Error: ' + err.message);
+    } finally {
+        btn.textContent = 'Analyze Header';
+        btn.disabled = false;
+    }
+}
+
+function showHeaderResults(data) {
+    const container = document.querySelector('main, .container, body');
+    const div = document.createElement('div');
+    div.style.cssText = 'padding:20px;margin:20px auto;max-width:900px;background:#1a1a2e;border-radius:12px;color:white;';
+
+    const verdictColor = data.is_malicious ? '#ef4444' : '#22c55e';
+    const spfColor = data.spf_result === 'pass' ? '#22c55e' : '#ef4444';
+    const dkimColor = data.dkim_result === 'pass' ? '#22c55e' : '#ef4444';
+    const dmarcColor = data.dmarc_result === 'pass' ? '#22c55e' : '#ef4444';
+
+    div.innerHTML = `
+        <div style="text-align:center;padding:20px;background:${data.is_malicious ? 'rgba(239,68,68,0.2)' : 'rgba(34,197,94,0.2)'};border-radius:12px;margin-bottom:20px;">
+            <h2 style="color:${verdictColor};font-size:2rem;">${data.verdict}</h2>
+            <p style="font-size:3rem;font-weight:bold;color:${verdictColor};">${data.threat_score}/100</p>
+            <p>Threat Score</p>
+        </div>
+
+        <h3>Email Information</h3>
+        <table style="width:100%;border-collapse:collapse;">
+            <tr><td style="padding:8px;color:#94a3b8;">From:</td><td style="padding:8px;">${data.from_email || '-'}</td></tr>
+            <tr><td style="padding:8px;color:#94a3b8;">Subject:</td><td style="padding:8px;">${data.subject || '-'}</td></tr>
+            <tr><td style="padding:8px;color:#94a3b8;">Reply-To:</td><td style="padding:8px;">${data.reply_to || '-'}</td></tr>
+            <tr><td style="padding:8px;color:#94a3b8;">Return-Path:</td><td style="padding:8px;">${data.return_path || '-'}</td></tr>
+        </table>
+
+        <h3 style="margin-top:20px;">Authentication Results</h3>
+        <div style="display:flex;gap:16px;margin:12px 0;">
+            <div style="flex:1;padding:16px;border-radius:8px;background:rgba(255,255,255,0.05);text-align:center;">
+                <p style="color:${spfColor};font-size:1.5rem;font-weight:bold;">${(data.spf_result || 'NONE').toUpperCase()}</p>
+                <p>SPF</p>
+            </div>
+            <div style="flex:1;padding:16px;border-radius:8px;background:rgba(255,255,255,0.05);text-align:center;">
+                <p style="color:${dkimColor};font-size:1.5rem;font-weight:bold;">${(data.dkim_result || 'NONE').toUpperCase()}</p>
+                <p>DKIM</p>
+            </div>
+            <div style="flex:1;padding:16px;border-radius:8px;background:rgba(255,255,255,0.05);text-align:center;">
+                <p style="color:${dmarcColor};font-size:1.5rem;font-weight:bold;">${(data.dmarc_result || 'NONE').toUpperCase()}</p>
+                <p>DMARC</p>
+            </div>
+        </div>
+
+        <h3 style="margin-top:20px;">Why We Predicted This</h3>
+        ${(data.reasons || []).map(function(r) {
+            return '<div style="padding:12px;margin:8px 0;border-radius:8px;background:rgba(239,68,68,0.1);border-left:4px solid #ef4444;">⚠️ ' + r + '</div>';
+        }).join('') || '<p style="color:#22c55e">No issues found</p>'}
+
+        <h3 style="margin-top:20px;">Email Routing Hops</h3>
+        ${(data.hops || []).length > 0
+            ? data.hops.map(function(hop, i) {
+                return '<div style="display:flex;align-items:center;margin:8px 0;gap:12px;"><span style="background:#0891b2;color:white;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;flex-shrink:0;">' + (i+1) + '</span><span style="color:#94a3b8;">' + hop + '</span></div>';
+              }).join('')
+            : '<p style="color:#94a3b8">No routing hops found</p>'}
+
+        <button onclick="location.reload()" style="margin-top:24px;padding:12px 24px;background:#0891b2;color:white;border:none;border-radius:8px;cursor:pointer;width:100%;">Analyze Another Header</button>
+    `;
+
+    document.querySelector('textarea')?.closest('section, div, form')?.style.setProperty('display', 'none');
+    container?.appendChild(div);
+}
+
+// Enter key support
+document.addEventListener('DOMContentLoaded', function() {
+    var textarea = document.querySelector('textarea');
+    if (textarea) {
+        textarea.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && e.ctrlKey) analyzeHeader();
+        });
+    }
+});
+</script>
+{% endblock %}

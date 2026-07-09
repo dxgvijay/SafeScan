@@ -1,0 +1,178 @@
+{% extends 'pages/tools/base_tool.html' %}{% load static %}
+
+{% block tool_id %}base64{% endblock %}
+{% block tool_name %}Base64 Encoder / Decoder{% endblock %}
+{% block tool_icon_class %}b64-icon{% endblock %}
+{% block tool_icon %}<i class="bi bi-arrow-left-right"></i>{% endblock %}
+{% block tool_title %}Base64 Encoder / Decoder{% endblock %}
+{% block tool_desc %}Encode text to Base64 or decode Base64 back to plain text. Supports UTF-8 encoding with validation and error detection.{% endblock %}
+
+{% block tool_input %}
+<div class="b64-toggle" id="b64-mode-toggle">
+  <button class="active" data-mode="encode" onclick="setMode('encode')"><i class="bi bi-lock"></i> Encode</button>
+  <button data-mode="decode" onclick="setMode('decode')"><i class="bi bi-unlock"></i> Decode</button>
+</div>
+<div class="tool-input-group">
+  <label for="b64-input">Input</label>
+  <textarea id="b64-input" placeholder="Enter text to encode..." rows="5">Hello, CipherScan!</textarea>
+</div>
+<div class="tool-action-row">
+  <button class="tool-btn" onclick="processB64()" id="b64-run-btn"><i class="bi bi-arrow-repeat"></i> Convert</button>
+  <button class="tool-btn tool-btn-outline tool-btn-sm" onclick="swapInput()"><i class="bi bi-arrow-left-right"></i> Swap</button>
+  <button class="tool-btn tool-btn-outline tool-btn-sm" onclick="clearAll()"><i class="bi-eraser"></i> Clear</button>
+</div>
+<div class="tool-error" id="b64-error"></div>
+{% endblock %}
+
+{% block results_actions %}
+<button class="tool-btn tool-btn-outline tool-btn-sm" onclick="copyResults()" title="Copy result"><i class="bi-clipboard"></i></button>
+<button class="tool-btn tool-btn-outline tool-btn-sm" onclick="downloadTXT()" title="Download TXT"><i class="bi-download"></i> TXT</button>
+{% endblock %}
+
+{% block tool_sidebar %}
+<div class="sidebar-section">
+  <div class="sidebar-section-title"><i class="bi-lightning"></i>Quick Actions</div>
+  <button class="sidebar-btn run-btn" onclick="processB64()"><i class="bi-arrow-repeat"></i> Convert</button>
+  <button class="sidebar-btn" onclick="swapInput()"><i class="bi-arrow-left-right"></i> Swap</button>
+  <button class="sidebar-btn" onclick="clearAll()"><i class="bi-eraser"></i> Clear All</button>
+</div>
+<div class="sidebar-section">
+  <div class="sidebar-section-title"><i class="bi-info-circle"></i>Info</div>
+  <div class="sidebar-info-row"><span class="sidebar-info-label">Runtime</span><span class="sidebar-info-value">&lt;1s</span></div>
+  <div class="sidebar-info-row"><span class="sidebar-info-label">Difficulty</span><span class="sidebar-info-value">Beginner</span></div>
+  <div class="sidebar-info-row"><span class="sidebar-info-label">API</span><span class="sidebar-info-value">Required</span></div>
+  <div class="sidebar-info-row"><span class="sidebar-info-label">Status</span><span class="sidebar-info-value online">Online</span></div>
+</div>
+<div class="sidebar-section">
+  <div class="sidebar-section-title"><i class="bi-keyboard"></i>Shortcuts</div>
+  <div class="sidebar-shortcut"><kbd>Ctrl</kbd><kbd>Enter</kbd> <span>Convert</span></div>
+  <div class="sidebar-shortcut"><kbd>Ctrl</kbd><kbd>S</kbd> <span>Swap</span></div>
+  <div class="sidebar-shortcut"><kbd>Esc</kbd> <span>Clear</span></div>
+</div>
+<div class="sidebar-section">
+  <div class="sidebar-section-title"><i class="bi-file-text"></i>Examples</div>
+  <button class="sidebar-btn" onclick="setExample('encode')"><i class="bi-chevron-right"></i> Encode "Hello World"</button>
+  <button class="sidebar-btn" onclick="setExample('decode')"><i class="bi-chevron-right"></i> Decode Base64</button>
+  <button class="sidebar-btn" onclick="setExample('binary')"><i class="bi-chevron-right"></i> Binary data check</button>
+</div>
+{% endblock %}
+
+{% block related_tools %}
+{% include 'pages/tools/includes/related_tools.html' with current='base64' %}
+{% endblock %}
+
+{% block tool_extra_js %}
+<script>
+var b64Mode = 'encode';
+var lastResult = null;
+
+function setMode(mode) {
+  b64Mode = mode;
+  document.querySelectorAll('#b64-mode-toggle button').forEach(function(b) {
+    b.classList.toggle('active', b.dataset.mode === mode);
+  });
+  document.getElementById('b64-input').placeholder = mode === 'encode' ? 'Enter text to encode...' : 'Enter Base64 to decode...';
+  clearResults();
+}
+
+function processB64() {
+  var input = document.getElementById('b64-input').value;
+  var errEl = document.getElementById('b64-error');
+  var card = document.getElementById('resultsCard');
+
+  errEl.classList.remove('show'); errEl.textContent = '';
+  card.classList.remove('show');
+  document.getElementById('resultsBody').innerHTML = '';
+
+  if (!input) { errEl.textContent = 'Please enter ' + (b64Mode === 'encode' ? 'text' : 'Base64') + '.'; errEl.classList.add('show'); return; }
+
+  fetch('/api/base64/process/', {
+    method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCSRF() },
+    body: JSON.stringify({ input: input, mode: b64Mode })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.error) { errEl.textContent = data.error; errEl.classList.add('show'); return; }
+    lastResult = data.result || data.output || '';
+
+    var label = b64Mode === 'encode' ? 'Encoded (Base64)' : 'Decoded (UTF-8)';
+    var html = '';
+    html += '<div class="result-line"><span class="result-label">' + label + '</span></div>';
+    html += '<div style="color:var(--accent-success);word-break:break-all;font-family:var(--font-mono);font-size:0.85rem;padding:0.5rem 0;">' + esc(lastResult) + '</div>';
+    if (b64Mode === 'encode') {
+      html += '<div class="result-line" style="margin-top:0.5rem;"><span class="result-label">Length</span><span class="result-value">' + lastResult.length + ' chars</span></div>';
+    }
+
+    document.getElementById('resultsBody').innerHTML = html;
+    card.classList.add('show');
+    document.getElementById('resultsActions').style.display = '';
+  })
+  .catch(function(err) {
+    errEl.textContent = 'Request failed: ' + err.message;
+    errEl.classList.add('show');
+  });
+}
+
+function swapInput() {
+  var input = document.getElementById('b64-input');
+  if (lastResult) {
+    input.value = lastResult;
+    setMode(b64Mode === 'encode' ? 'decode' : 'encode');
+    clearResults();
+  }
+}
+
+function clearAll() {
+  document.getElementById('b64-input').value = '';
+  clearResults();
+}
+
+function clearResults() {
+  document.getElementById('resultsCard').classList.remove('show');
+  document.getElementById('b64-error').classList.remove('show');
+  lastResult = null;
+}
+
+function copyResults() {
+  if (!lastResult) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(lastResult).catch(function(){});
+  }
+}
+
+function downloadTXT() {
+  if (!lastResult) return;
+  var blob = new Blob([lastResult], { type: 'text/plain' });
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = b64Mode === 'encode' ? 'encoded.txt' : 'decoded.txt';
+  a.click();
+}
+
+function setExample(type) {
+  if (type === 'encode') {
+    document.getElementById('b64-input').value = 'Hello, CipherScan Security Suite!';
+    setMode('encode'); processB64();
+  } else if (type === 'decode') {
+    document.getElementById('b64-input').value = 'SGVsbG8sIENpcGhlclNjYW4h';
+    setMode('decode'); processB64();
+  } else if (type === 'binary') {
+    document.getElementById('b64-input').value = '\u0000\u0001\u0002Binary\u0003Data';
+    setMode('encode');
+  }
+}
+
+function getCSRF() {
+  var val = null;
+  document.cookie.split(';').forEach(function(c) { c = c.trim(); if (c.startsWith('csrftoken=')) val = decodeURIComponent(c.substring(10)); });
+  return val;
+}
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+document.addEventListener('keydown', function(e) {
+  var ctrl = e.ctrlKey || e.metaKey;
+  if (ctrl && e.key === 'Enter') { e.preventDefault(); processB64(); }
+  if (ctrl && e.key === 's') { e.preventDefault(); swapInput(); }
+  if (e.key === 'Escape') { clearResults(); }
+});
+</script>
+{% endblock %}

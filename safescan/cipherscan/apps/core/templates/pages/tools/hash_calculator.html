@@ -1,0 +1,374 @@
+{% extends 'pages/tools/base_tool.html' %}{% load static %}
+
+{% block tool_id %}hash-calculator{% endblock %}
+{% block tool_name %}Hash Calculator{% endblock %}
+{% block tool_icon_class %}hc-icon{% endblock %}
+{% block tool_icon %}<i class="bi bi-hash"></i>{% endblock %}
+{% block tool_title %}Hash Calculator{% endblock %}
+{% block tool_desc %}Compute cryptographic hashes of any text using MD5, SHA-1, SHA-224, SHA-256, SHA-384 and SHA-512 algorithms.{% endblock %}
+
+{% block tool_input %}
+<div class="tool-input-group">
+  <label for="hc-text">Input Text</label>
+  <textarea id="hc-text" placeholder="Enter text to hash..." rows="5">Hello, CipherScan!</textarea>
+</div>
+<div class="tool-input-row">
+  <div class="tool-input-group">
+    <label>Algorithm</label>
+    <div class="cs-select" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-label="Algorithm">
+      <button type="button" class="cs-select-trigger" aria-labelledby="cs-value">
+        <span class="cs-select-value" id="cs-value">SHA-256</span>
+        <span class="cs-select-arrow">
+          <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
+            <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+      </button>
+      <ul class="cs-select-dropdown" role="listbox" aria-label="Algorithm">
+        <li role="option" data-value="md5" aria-selected="false">MD5</li>
+        <li role="option" data-value="sha1" aria-selected="false">SHA-1</li>
+        <li role="option" data-value="sha224" aria-selected="false">SHA-224</li>
+        <li role="option" data-value="sha256" aria-selected="true">SHA-256</li>
+        <li role="option" data-value="sha384" aria-selected="false">SHA-384</li>
+        <li role="option" data-value="sha512" aria-selected="false">SHA-512</li>
+      </ul>
+      <select id="hc-algo" style="display:none" aria-hidden="true">
+        <option value="md5">MD5</option>
+        <option value="sha1">SHA-1</option>
+        <option value="sha224">SHA-224</option>
+        <option value="sha256" selected>SHA-256</option>
+        <option value="sha384">SHA-384</option>
+        <option value="sha512">SHA-512</option>
+      </select>
+    </div>
+  </div>
+</div>
+<div class="tool-action-row">
+  <button class="tool-btn" onclick="computeHash()" id="hc-run-btn"><i class="bi-calculator"></i> Compute</button>
+  <button class="tool-btn tool-btn-outline tool-btn-sm" onclick="clearResults()"><i class="bi-eraser"></i> Clear</button>
+  <div class="tool-loading" id="hc-loading"><i class="bi-arrow-repeat"></i> Computing...</div>
+</div>
+<div class="tool-error" id="hc-error"></div>
+{% endblock %}
+
+{% block results_actions %}
+<button class="tool-btn tool-btn-outline tool-btn-sm" onclick="copyResults()" title="Copy hash"><i class="bi-clipboard"></i></button>
+<button class="tool-btn tool-btn-outline tool-btn-sm" onclick="downloadTXT()" title="Download TXT"><i class="bi-download"></i> TXT</button>
+{% endblock %}
+
+{% block tool_sidebar %}
+<div class="sidebar-section">
+  <div class="sidebar-section-title"><i class="bi-lightning"></i>Quick Actions</div>
+  <button class="sidebar-btn run-btn" onclick="computeHash()"><i class="bi-calculator"></i> Compute Hash</button>
+  <button class="sidebar-btn" onclick="document.getElementById('hc-text').value='';setAlgo('sha256')"><i class="bi-arrow-counterclockwise"></i> Reset</button>
+</div>
+<div class="sidebar-section">
+  <div class="sidebar-section-title"><i class="bi-info-circle"></i>Info</div>
+  <div class="sidebar-info-row"><span class="sidebar-info-label">Runtime</span><span class="sidebar-info-value">&lt;1s</span></div>
+  <div class="sidebar-info-row"><span class="sidebar-info-label">Difficulty</span><span class="sidebar-info-value">Beginner</span></div>
+  <div class="sidebar-info-row"><span class="sidebar-info-label">API</span><span class="sidebar-info-value">Required</span></div>
+  <div class="sidebar-info-row"><span class="sidebar-info-label">Status</span><span class="sidebar-info-value online">Online</span></div>
+</div>
+<div class="sidebar-section">
+  <div class="sidebar-section-title"><i class="bi-keyboard"></i>Shortcuts</div>
+  <div class="sidebar-shortcut"><kbd>Ctrl</kbd><kbd>Enter</kbd> <span>Compute</span></div>
+  <div class="sidebar-shortcut"><kbd>Esc</kbd> <span>Clear</span></div>
+</div>
+<div class="sidebar-section">
+  <div class="sidebar-section-title"><i class="bi-file-text"></i>Examples</div>
+  <button class="sidebar-btn" onclick="document.getElementById('hc-text').value='The quick brown fox jumps over the lazy dog';setAlgo('md5')"><i class="bi-chevron-right"></i> MD5 (fox)</button>
+  <button class="sidebar-btn" onclick="document.getElementById('hc-text').value='password123';setAlgo('sha256')"><i class="bi-chevron-right"></i> SHA-256</button>
+  <button class="sidebar-btn" onclick="document.getElementById('hc-text').value='CipherScan Security Suite';setAlgo('sha512')"><i class="bi-chevron-right"></i> SHA-512</button>
+</div>
+{% endblock %}
+
+{% block related_tools %}
+{% include 'pages/tools/includes/related_tools.html' with current='hash-calculator' %}
+{% endblock %}
+
+{% block tool_extra_css %}
+<style>
+/* ════════════════════════════════════════════════════════════
+   CUSTOM SELECT DROPDOWN — Dark Cyber Theme
+   ════════════════════════════════════════════════════════════ */
+.cs-select {
+  position: relative; width: 100%; user-select: none;
+  font-family: inherit;
+}
+
+.cs-select-trigger {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; height: 52px; padding: 0 16px;
+  border-radius: 12px; cursor: pointer;
+  background: #161d2f; border: 1px solid rgba(0,255,255,0.18);
+  color: #ffffff; font: inherit; font-size: 0.9rem;
+  transition: border-color 0.25s, box-shadow 0.25s;
+  box-sizing: border-box;
+}
+.cs-select-trigger:hover {
+  border-color: #27d3ff;
+  box-shadow: 0 0 0 3px rgba(39,211,255,0.08);
+}
+.cs-select.open .cs-select-trigger,
+.cs-select-trigger:focus {
+  outline: none; border-color: #2de0ff;
+  box-shadow: 0 0 18px rgba(45,224,255,0.22);
+}
+
+.cs-select-value {
+  flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  text-align: left; font-family: inherit; font-size: 0.9rem;
+}
+
+.cs-select-arrow {
+  display: flex; align-items: center; justify-content: center;
+  margin-left: 10px; flex-shrink: 0; color: rgba(0,255,255,0.6);
+  transition: transform 0.25s ease;
+}
+.cs-select.open .cs-select-arrow { transform: rotate(180deg); }
+
+.cs-select-dropdown {
+  display: none; position: absolute; top: calc(100% + 4px);
+  left: 0; right: 0; z-index: 100;
+  background: #1b2236; border: 1px solid rgba(0,255,255,0.15);
+  border-radius: 10px; overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  max-height: 280px; overflow-y: auto;
+}
+.cs-select-dropdown.open { display: block; }
+
+.cs-select-dropdown[role="listbox"] {
+  list-style: none; margin: 0; padding: 4px;
+}
+
+.cs-select-dropdown [role="option"] {
+  display: flex; align-items: center;
+  padding: 10px 14px; cursor: pointer;
+  color: #ffffff; font-size: 0.88rem;
+  border-radius: 6px; transition: background 0.15s;
+  font-family: inherit;
+}
+.cs-select-dropdown [role="option"]:hover { background: #25324d; }
+.cs-select-dropdown [role="option"][aria-selected="true"] {
+  background: #2d8cff; font-weight: 600;
+}
+.cs-select-dropdown [role="option"][aria-selected="true"]:hover {
+  background: #3d9cff;
+}
+.cs-select-dropdown [role="option"]:focus-visible {
+  outline: 2px solid #2de0ff; outline-offset: -2px;
+}
+
+/* Disabled state */
+.cs-select.disabled .cs-select-trigger {
+  background: #20263d; color: rgba(255,255,255,0.45);
+  cursor: not-allowed; pointer-events: none;
+}
+.cs-select.disabled .cs-select-arrow { color: rgba(255,255,255,0.2); }
+
+/* Responsive: match sibling input height */
+@media (max-width: 575.98px) {
+  .cs-select-trigger { height: 46px; font-size: 0.85rem; }
+}
+</style>
+{% endblock %}
+
+{% block tool_extra_js %}
+<script>
+var lastHash = null;
+
+/* ════════════════════════════════════════════════════════════
+   Custom Select — Backed by hidden <select id="hc-algo">
+   ════════════════════════════════════════════════════════════ */
+(function() {
+  var wrapper = document.querySelector('.cs-select');
+  if (!wrapper) return;
+  var trigger = wrapper.querySelector('.cs-select-trigger');
+  var dropdown = wrapper.querySelector('.cs-select-dropdown');
+  var options = Array.from(dropdown.querySelectorAll('[role="option"]'));
+  var valueEl = wrapper.querySelector('.cs-select-value');
+  var hidden = document.getElementById('hc-algo');
+  var isOpen = false;
+
+  window.setAlgo = function(val) {
+    hidden.value = val;
+    options.forEach(function(opt) {
+      var match = opt.dataset.value === val;
+      opt.setAttribute('aria-selected', match);
+      if (match) {
+        valueEl.textContent = opt.textContent;
+        opt.scrollIntoView({ block: 'nearest' });
+      }
+    });
+  };
+
+  function openDropdown() {
+    isOpen = true; wrapper.classList.add('open');
+    dropdown.classList.add('open');
+    trigger.setAttribute('aria-expanded', 'true');
+    var selected = dropdown.querySelector('[aria-selected="true"]');
+    if (selected) { setTimeout(function() { selected.scrollIntoView({ block: 'nearest' }); }, 10); }
+  }
+
+  function closeDropdown() {
+    isOpen = false; wrapper.classList.remove('open');
+    dropdown.classList.remove('open');
+    trigger.setAttribute('aria-expanded', 'false');
+  }
+
+  trigger.addEventListener('click', function(e) {
+    e.stopPropagation();
+    if (isOpen) closeDropdown(); else openDropdown();
+  });
+
+  options.forEach(function(opt) {
+    opt.addEventListener('click', function(e) {
+      e.stopPropagation();
+      setAlgo(this.dataset.value);
+      closeDropdown();
+      trigger.focus();
+      hidden.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+  });
+
+  // Keyboard
+  trigger.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (!isOpen) openDropdown();
+      if (e.key === 'ArrowDown') {
+        var first = dropdown.querySelector('[role="option"]');
+        if (first) { first.focus(); }
+      }
+    }
+    if (e.key === 'ArrowUp' && isOpen) {
+      e.preventDefault();
+      var last = dropdown.querySelector('[role="option"]:last-child');
+      if (last) last.focus();
+    }
+    if (e.key === 'Escape' && isOpen) { e.preventDefault(); closeDropdown(); trigger.focus(); }
+  });
+
+  dropdown.addEventListener('keydown', function(e) {
+    var current = document.activeElement;
+    var idx = options.indexOf(current);
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      var next = options[Math.min(idx + 1, options.length - 1)];
+      if (next) next.focus();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      var prev = options[Math.max(idx - 1, 0)];
+      if (prev) prev.focus();
+    } else if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      if (current) { setAlgo(current.dataset.value); closeDropdown(); trigger.focus(); hidden.dispatchEvent(new Event('change', { bubbles: true })); }
+    } else if (e.key === 'Escape') {
+      e.preventDefault(); closeDropdown(); trigger.focus();
+    } else if (e.key === 'Home') {
+      e.preventDefault(); if (options[0]) options[0].focus();
+    } else if (e.key === 'End') {
+      e.preventDefault(); if (options[options.length - 1]) options[options.length - 1].focus();
+    }
+  });
+
+  // Click outside
+  document.addEventListener('click', function(e) {
+    if (!wrapper.contains(e.target) && isOpen) closeDropdown();
+  });
+
+  // Sync initial value
+  var initialVal = hidden.value;
+  options.forEach(function(opt) {
+    if (opt.dataset.value === initialVal) valueEl.textContent = opt.textContent;
+  });
+})();
+
+function computeHash() {
+  var text = document.getElementById('hc-text').value;
+  var algo = document.getElementById('hc-algo').value;
+  var errEl = document.getElementById('hc-error');
+  var loadEl = document.getElementById('hc-loading');
+  var btn = document.getElementById('hc-run-btn');
+  var card = document.getElementById('resultsCard');
+
+  errEl.classList.remove('show'); errEl.textContent = '';
+  card.classList.remove('show');
+  document.getElementById('resultsBody').innerHTML = '';
+
+  if (!text) { errEl.textContent = 'Please enter text to hash.'; errEl.classList.add('show'); return; }
+
+  loadEl.classList.add('show');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="bi-arrow-repeat"></i> Computing...';
+
+  fetch('/api/sandbox/hash-calc/', {
+    method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCSRF() },
+    body: JSON.stringify({ text: text, algorithm: algo })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    loadEl.classList.remove('show');
+    btn.disabled = false; btn.innerHTML = '<i class="bi-calculator"></i> Compute';
+    if (data.error) { errEl.textContent = data.error; errEl.classList.add('show'); return; }
+    lastHash = data.hash;
+
+    var html = '';
+    html += '<div class="result-line"><span class="result-label">Algorithm</span><span class="result-value info">' + data.algorithm.toUpperCase() + '</span></div>';
+    html += '<div class="result-line"><span class="result-label">Hash</span></div>';
+    html += '<div class="hash-output"><code style="color:var(--accent-success);word-break:break-all;">' + esc(data.hash) + '</code>';
+    html += '<button class="tool-btn tool-btn-outline tool-btn-sm" onclick="copyHash()" title="Copy hash"><i class="bi-files"></i></button></div>';
+    html += '<div class="result-line" style="margin-top:0.5rem;"><span class="result-label">Chars</span><span class="result-value">' + data.char_count + '</span></div>';
+    html += '<div class="result-line"><span class="result-label">Duration</span><span class="result-value">' + data.duration_ms + ' ms</span></div>';
+
+    document.getElementById('resultsBody').innerHTML = html;
+    card.classList.add('show');
+    document.getElementById('resultsActions').style.display = '';
+  })
+  .catch(function(err) {
+    loadEl.classList.remove('show');
+    btn.disabled = false; btn.innerHTML = '<i class="bi-calculator"></i> Compute';
+    errEl.textContent = 'Request failed: ' + err.message;
+    errEl.classList.add('show');
+  });
+}
+
+function clearResults() {
+  document.getElementById('resultsCard').classList.remove('show');
+  document.getElementById('hc-error').classList.remove('show');
+  lastHash = null;
+}
+
+function copyHash() {
+  if (!lastHash) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(lastHash).catch(function(){});
+  }
+}
+
+function copyResults() { copyHash(); }
+
+function downloadTXT() {
+  if (!lastHash) return;
+  var text = document.getElementById('resultsBody').textContent;
+  var blob = new Blob([text], { type: 'text/plain' });
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'hash-result.txt';
+  a.click();
+}
+
+function getCSRF() {
+  var val = null;
+  document.cookie.split(';').forEach(function(c) { c = c.trim(); if (c.startsWith('csrftoken=')) val = decodeURIComponent(c.substring(10)); });
+  return val;
+}
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+document.addEventListener('keydown', function(e) {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); computeHash(); }
+  if (e.key === 'Escape') {
+    var openDropdown = document.querySelector('.cs-select.open');
+    if (!openDropdown) clearResults();
+  }
+});
+</script>
+{% endblock %}

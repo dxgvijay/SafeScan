@@ -1,0 +1,96 @@
+{% extends 'base.html' %}{% load static %}
+
+{% block body_class %}tool-page{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/tool_pages.css' %}">
+{% block tool_extra_css %}{% endblock %}
+{% endblock %}
+
+{% block content %}
+<div class="tool-page-wrapper">
+
+  <!-- Breadcrumb -->
+  <nav class="tool-breadcrumb">
+    <a href="{% url 'sandbox' %}"><i class="bi bi-grid"></i> Sandbox</a>
+    <span class="breadcrumb-sep"><i class="bi-chevron-right"></i></span>
+    <span class="breadcrumb-current">{% block tool_name %}Tool{% endblock %}</span>
+  </nav>
+
+  <!-- Header -->
+  <div class="tool-header">
+    <div class="tool-header-icon {% block tool_icon_class %}{% endblock %}">{% block tool_icon %}{% endblock %}</div>
+    <div>
+      <h1 class="tool-header-title">{% block tool_title %}Tool{% endblock %}</h1>
+      <p class="tool-header-desc">{% block tool_desc %}{% endblock %}</p>
+    </div>
+  </div>
+
+  <!-- Main Layout -->
+  <div class="tool-main-layout">
+    <div class="tool-main-content">
+
+      <!-- Input Card -->
+      <div class="tool-card input-card">
+        <div class="tool-card-header">
+          <i class="bi bi-terminal"></i> Input
+        </div>
+        <div class="tool-card-body">
+          {% block tool_input %}{% endblock %}
+        </div>
+      </div>
+
+      <!-- Results Card -->
+      <div class="tool-card results-card" id="resultsCard">
+        <div class="tool-card-header">
+          <i class="bi bi-graph-up-arrow"></i> Results
+          <div class="tool-card-header-actions" id="resultsActions">
+            {% block results_actions %}{% endblock %}
+          </div>
+        </div>
+        <div class="tool-card-body">
+          <div id="resultsBody"></div>
+          {% block results_extra %}{% endblock %}
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="tool-sidebar">
+      {% block tool_sidebar %}{% endblock %}
+    </aside>
+  </div>
+
+  <!-- Related Tools -->
+  <div class="related-tools">
+    <h3 class="related-tools-title"><i class="bi bi-link-45deg" style="margin-right:0.4rem"></i>Related Tools</h3>
+    <div class="related-tools-grid">
+      {% block related_tools %}{% endblock %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+  var toolId = '{% block tool_id %}{% endblock %}';
+  if (toolId) {
+    try {
+      var recent = JSON.parse(localStorage.getItem('sandbox_recent_tools')) || [];
+      recent = recent.filter(function(id) { return id !== toolId; });
+      recent.unshift(toolId);
+      if (recent.length > 8) recent = recent.slice(0, 8);
+      localStorage.setItem('sandbox_recent_tools', JSON.stringify(recent));
+    } catch(e) {}
+  }
+})();
+
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelector('.tool-page-wrapper').classList.add('page-entered');
+});
+</script>
+{% block tool_extra_js %}{% endblock %}
+{% endblock %}
