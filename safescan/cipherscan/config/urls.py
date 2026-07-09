@@ -66,6 +66,8 @@ urlpatterns = [
     path("api/scan/url/", url_scan_view, name="api_url_scan"),
     path("api/scan/url/<int:scan_id>/", url_scan_result_view, name="api_url_scan_result"),
     path("api/threat-intel/", include("apps.threat_intel.urls.api_urls")),
+    path("api/ip-scanner/", include("apps.ip_scanner.urls")),
+    path("api/dns-lookup/", include("apps.dns_lookup.urls")),
     path("api/darkweb/scan/", scan_view, name="api_darkweb_scan"),
     path("darkweb/", include("apps.darkweb.urls")),
 ]

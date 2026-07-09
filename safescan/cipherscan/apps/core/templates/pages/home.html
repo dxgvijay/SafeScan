@@ -749,26 +749,26 @@
                 </a>
             </div>
             <div class="col-lg-3 col-md-6">
-                <div class="tool-card text-decoration-none d-block tool-card-offline" title="Feature under development">
+                <a href="{% url 'ip_scan' %}" class="tool-card text-decoration-none d-block">
                     <div class="tool-icon cyan"><i class="bi bi-hdd-network"></i></div>
                     <h5>IP Scanner</h5>
-                    <p>Coming Soon</p>
+                    <p>Investigate IP addresses with geolocation, reverse DNS, WHOIS, port scanning, and threat data.</p>
                     <div class="tool-status">
-                        <span class="status-dot" style="background:var(--text-muted)"></span>
-                        <span style="color:var(--text-muted)"><i class="bi bi-lock-fill" style="font-size:0.65rem;margin-right:3px"></i>Offline</span>
+                        <span class="status-dot safe pulse"></span>
+                        <span style="color:var(--accent-success)">Online</span>
                     </div>
-                </div>
+                </a>
             </div>
             <div class="col-lg-3 col-md-6">
-                <div class="tool-card text-decoration-none d-block tool-card-offline" title="Feature under development">
+                <a href="{% url 'dns_lookup' %}" class="tool-card text-decoration-none d-block">
                     <div class="tool-icon warning"><i class="bi bi-server"></i></div>
                     <h5>DNS Lookup</h5>
-                    <p>Coming Soon</p>
+                    <p>Query DNS records including A, AAAA, MX, NS, TXT, CNAME, SOA, and DNSSEC details.</p>
                     <div class="tool-status">
-                        <span class="status-dot" style="background:var(--text-muted)"></span>
-                        <span style="color:var(--text-muted)"><i class="bi bi-lock-fill" style="font-size:0.65rem;margin-right:3px"></i>Offline</span>
+                        <span class="status-dot safe pulse"></span>
+                        <span style="color:var(--accent-success)">Online</span>
                     </div>
-                </div>
+                </a>
             </div>
             <div class="col-lg-3 col-md-6">
                 <a href="{% url 'darkweb:index' %}" class="tool-card text-decoration-none d-block">

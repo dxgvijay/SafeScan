@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     "apps.browser_isolation",
     "apps.threat_intel",
     "apps.darkweb",
+    "apps.ip_scanner",
+    "apps.dns_lookup",
 ]
 
 MIDDLEWARE = [
