@@ -1,1 +1,779 @@
-﻿{% extends 'base.html' %}{% load static %}{% block title %}DNS Lookup â€” CipherScan{% endblock %}{% block body_class %}full-width{% endblock %}{% block content %}<div class="container py-5"><div class="text-center py-5"><i class="bi-server" style="font-size:3rem;color:var(--accent-cyan);margin-bottom:1rem;"></i><h2>DNS Lookup</h2><p class="text-muted">Coming soon â€” Query A, AAAA, MX, NS, TXT, and other DNS record types.</p></div></div>{% endblock %}
+﻿{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}DNS Lookup — CipherScan{% endblock %}
+{% block body_class %}full-width{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {
+    --dl-cyan: #00d4ff;
+    --dl-cyan-light: #66e3ff;
+    --dl-cyan-dark: #0099cc;
+    --dl-cyan-glow: rgba(0, 212, 255, 0.25);
+    --dl-cyan-dim: rgba(0, 212, 255, 0.08);
+    --dl-purple: #a855f7;
+    --dl-purple-dim: rgba(168, 85, 247, 0.08);
+    --dl-orange: #f97316;
+    --dl-red: #ef4444;
+    --dl-green: #22c55e;
+    --dl-yellow: #eab308;
+    --dl-bg: linear-gradient(135deg, #0a0e1a 0%, #0d1120 35%, #0f1628 70%, #0a0e1a 100%);
+}
+
+/* Hero */
+.dl-hero {
+    position: relative;
+    padding: 3.5rem 2rem 2.5rem;
+    overflow: hidden;
+    background: var(--dl-bg);
+    min-height: 340px;
+    display: flex;
+    align-items: center;
+}
+.dl-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse at 30% 40%, rgba(0, 212, 255, 0.05) 0%, transparent 50%),
+        radial-gradient(ellipse at 70% 60%, rgba(124, 92, 255, 0.03) 0%, transparent 50%);
+    pointer-events: none;
+}
+.dl-hero .hero-inner { position: relative; z-index: 2; max-width: 800px; margin: 0 auto; text-align: center; }
+.dl-hero .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--dl-cyan-dim); backdrop-filter: blur(8px);
+    border: 1px solid var(--dl-cyan-glow); border-radius: 100px;
+    padding: 5px 16px 5px 8px; font-size: 0.75rem; color: var(--dl-cyan-light);
+    margin-bottom: 1.25rem;
+}
+.dl-hero .badge-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--dl-cyan); animation: dl-pulse 2s ease-in-out infinite; }
+@keyframes dl-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+.dl-hero h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 0.6rem; line-height: 1.2; }
+.dl-hero .hl-cyan { color: var(--dl-cyan); }
+.dl-hero .hero-sub { color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1.5rem; max-width: 620px; margin-left: auto; margin-right: auto; }
+
+/* Search Card */
+.dl-search-card {
+    max-width: 800px;
+    margin: -2rem auto 1.5rem;
+    position: relative;
+    z-index: 3;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 1.25rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+.dl-search-row {
+    display: flex; gap: 10px; align-items: center;
+    background: var(--bg-tertiary); border: 1px solid var(--border-color);
+    border-radius: 10px; padding: 5px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+.dl-search-row:focus-within { border-color: var(--dl-cyan-glow); box-shadow: 0 0 20px var(--dl-cyan-dim); }
+.dl-search-row input {
+    flex: 1; background: transparent; border: none; outline: none;
+    color: var(--text-primary); font-size: 0.92rem; padding: 9px 12px; min-width: 0;
+}
+.dl-search-row input::placeholder { color: var(--text-muted); }
+.dl-search-row .dl-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--dl-cyan); color: #000; border: none;
+    border-radius: 7px; padding: 9px 18px; font-weight: 600; font-size: 0.85rem;
+    cursor: pointer; transition: all 0.25s; white-space: nowrap;
+}
+.dl-search-row .dl-btn:hover { background: var(--dl-cyan-light); box-shadow: 0 0 20px var(--dl-cyan-glow); transform: translateY(-1px); }
+.dl-search-row .dl-btn:active { transform: translateY(0); }
+.dl-search-row .dl-btn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; transform: none; }
+
+/* Loading */
+.dl-loading { display: none; padding: 1rem 0; max-width: 1100px; margin: 0 auto; }
+.dl-loading.visible { display: block; }
+.dl-skeleton { border-radius: 14px; border: 1px solid var(--border-color); background: var(--bg-secondary); overflow: hidden; margin-bottom: 1.25rem; }
+.dl-skeleton-hdr { height: 44px; background: var(--bg-tertiary); border-bottom: 1px solid var(--border-color); }
+.dl-skeleton-body { padding: 1.25rem; }
+.dl-skeleton-row { display: flex; gap: 12px; margin-bottom: 10px; }
+.dl-skeleton-row:last-child { margin-bottom: 0; }
+.dl-skeleton-box { border-radius: 8px; background: linear-gradient(90deg, var(--bg-tertiary) 25%, rgba(255,255,255,0.04) 50%, var(--bg-tertiary) 75%); background-size: 200% 100%; animation: dl-shimmer 1.5s ease-in-out infinite; }
+.dl-skeleton-line { height: 14px; border-radius: 4px; flex: 1; }
+@keyframes dl-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+.dl-loading-txt { text-align: center; color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.75rem; animation: dl-pulse-txt 1.5s ease-in-out infinite; }
+@keyframes dl-pulse-txt { 0%,100% { opacity: 0.6; } 50% { opacity: 1; } }
+
+/* Error */
+.dl-error-wrap { display: none; text-align: center; padding: 1rem 0; max-width: 1100px; margin: 0 auto; }
+.dl-error-wrap.visible { display: block; }
+.dl-error-box {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2);
+    border-radius: 10px; padding: 12px 20px; font-size: 0.85rem;
+    color: #f48771; max-width: 600px;
+}
+.dl-error-box i { font-size: 1.1rem; }
+
+/* Results */
+.dl-results { display: none; padding: 0 0 3rem; max-width: 1100px; margin: 0 auto; }
+.dl-results.visible { display: block; }
+
+.dl-action-bar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1.25rem; justify-content: flex-end; }
+.dl-action-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 6px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 500;
+    background: var(--bg-tertiary); color: var(--text-secondary);
+    border: 1px solid var(--border-color); cursor: pointer; transition: all 0.2s;
+}
+.dl-action-btn:hover { border-color: var(--dl-cyan-glow); color: var(--text-primary); background: var(--dl-cyan-dim); }
+
+.dl-card {
+    background: var(--bg-secondary); border: 1px solid var(--border-color);
+    border-radius: 14px; overflow: hidden; margin-bottom: 1.25rem;
+    opacity: 0; transform: translateY(16px); transition: opacity 0.45s ease, transform 0.45s ease;
+}
+.dl-card.fade-in { opacity: 1; transform: translateY(0); }
+.dl-card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.85rem 1.25rem; border-bottom: 1px solid var(--border-color);
+    background: var(--bg-tertiary); gap: 8px; flex-wrap: wrap;
+}
+.dl-card-header h5 { margin: 0; font-size: 0.88rem; font-weight: 600; display: flex; align-items: center; gap: 7px; }
+.dl-card-body { padding: 1.25rem; }
+
+/* Overview Dashboard */
+.dl-ov-dash { display: flex; gap: 1.5rem; align-items: stretch; flex-wrap: wrap; }
+.dl-ov-left { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 120px; flex-shrink: 0; }
+.dl-status-badge {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    width: 100px; height: 100px; border-radius: 50%; font-size: 1.2rem;
+}
+.dl-status-badge .badge-icon { font-size: 1.6rem; margin-bottom: 2px; }
+.dl-status-badge .badge-label { font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.8; }
+.dl-status-badge.ok { background: rgba(34,197,94,0.12); color: var(--dl-green); border: 3px solid var(--dl-green); }
+.dl-status-badge.warn { background: rgba(234,179,8,0.12); color: var(--dl-yellow); border: 3px solid var(--dl-yellow); }
+.dl-status-badge.err { background: rgba(239,68,68,0.12); color: var(--dl-red); border: 3px solid var(--dl-red); }
+
+.dl-ov-right { flex: 1; min-width: 260px; display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; }
+.dl-ov-metric {
+    background: var(--bg-tertiary); border-radius: 8px; padding: 12px 14px;
+    border: 1px solid var(--border-color);
+}
+.dl-ov-metric .m-lbl { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-muted); margin-bottom: 3px; }
+.dl-ov-metric .m-val { font-size: 0.85rem; color: var(--text-primary); font-weight: 500; word-break: break-all; }
+
+.dl-ov-indicator { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; }
+.dl-ov-indicator .m-val { font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace; font-size: 0.78rem; flex: 1; }
+.dl-copy-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 6px;
+    background: transparent; color: var(--text-muted);
+    border: 1px solid var(--border-color); cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+    font-size: 0.75rem; padding: 0;
+}
+.dl-copy-btn:hover { border-color: var(--dl-cyan-glow); color: var(--dl-cyan); background: var(--dl-cyan-dim); }
+
+/* Security indicators */
+.dl-sec-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+.dl-sec-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; border-radius: 8px;
+    background: var(--bg-tertiary); border: 1px solid var(--border-color);
+}
+.dl-sec-item .sec-icon { font-size: 1rem; flex-shrink: 0; width: 22px; text-align: center; }
+.dl-sec-item .sec-text { flex: 1; }
+.dl-sec-item .sec-label { font-size: 0.72rem; font-weight: 600; color: var(--text-primary); }
+.dl-sec-item .sec-sub { font-size: 0.65rem; color: var(--text-muted); }
+.dl-sec-item.pass { border-left: 3px solid var(--dl-green); }
+.dl-sec-item.pass .sec-icon { color: var(--dl-green); }
+.dl-sec-item.fail { border-left: 3px solid var(--dl-orange); }
+.dl-sec-item.fail .sec-icon { color: var(--dl-orange); }
+.dl-sec-item.warn { border-left: 3px solid var(--dl-yellow); }
+.dl-sec-item.warn .sec-icon { color: var(--dl-yellow); }
+
+/* Record table */
+.dl-rec-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+.dl-rec-table th {
+    text-align: left; padding: 8px 12px; font-size: 0.65rem;
+    text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-muted);
+    border-bottom: 1px solid var(--border-color); font-weight: 600;
+}
+.dl-rec-table td { padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.03); color: var(--text-secondary); font-family: var(--font-mono); font-size: 0.78rem; }
+.dl-rec-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+.dl-rec-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 10px; border-radius: 100px;
+    font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px;
+}
+.dl-rec-badge.found { background: rgba(34,197,94,0.12); color: var(--dl-green); border: 1px solid rgba(34,197,94,0.2); }
+.dl-rec-badge.empty { background: rgba(148,163,184,0.08); color: #94a3b8; border: 1px solid rgba(148,163,184,0.15); }
+.dl-rec-badge.err { background: rgba(239,68,68,0.12); color: var(--dl-red); border: 1px solid rgba(239,68,68,0.2); }
+
+/* Record value */
+.dl-rec-val {
+    background: var(--bg-tertiary); border: 1px solid var(--border-color);
+    border-radius: 8px; padding: 10px 14px; margin-bottom: 6px;
+    font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-primary);
+    word-break: break-all; line-height: 1.6;
+}
+.dl-rec-val:last-child { margin-bottom: 0; }
+.dl-rec-val .rec-ttl { font-size: 0.65rem; color: var(--text-muted); margin-left: 8px; font-family: var(--font-ui); }
+
+/* MX priority */
+.dl-mx-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
+.dl-mx-row:last-child { border-bottom: none; }
+.dl-mx-priority {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 32px; height: 24px; border-radius: 6px;
+    background: var(--dl-cyan-dim); color: var(--dl-cyan); font-size: 0.7rem; font-weight: 700;
+    font-family: var(--font-mono); flex-shrink: 0;
+}
+.dl-mx-exchange { font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-primary); flex: 1; }
+.dl-mx-ttl { font-size: 0.65rem; color: var(--text-muted); flex-shrink: 0; }
+
+/* SOA fields */
+.dl-soa-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+.dl-soa-item {
+    background: var(--bg-tertiary); border-radius: 8px; padding: 10px 12px;
+    border: 1px solid var(--border-color);
+}
+.dl-soa-item .lbl { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-muted); margin-bottom: 3px; }
+.dl-soa-item .val { font-size: 0.82rem; color: var(--text-primary); font-weight: 500; word-break: break-all; font-family: var(--font-mono); }
+
+/* Toast */
+.dl-toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: var(--bg-secondary); border: 1px solid var(--border-color);
+    border-radius: 10px; padding: 10px 20px; font-size: 0.82rem;
+    color: var(--text-primary); z-index: 9999;
+    opacity: 0; transition: all 0.35s ease; pointer-events: none;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    display: flex; align-items: center; gap: 8px;
+}
+.dl-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.dl-toast.ok i { color: var(--dl-green); }
+
+/* Print */
+@media print {
+    .dl-hero { min-height: auto !important; padding: 1rem !important; background: #f5f5f5 !important; }
+    .dl-search-card, .dl-action-bar, .dl-loading, .dl-error-wrap { display: none !important; }
+    .dl-card { break-inside: avoid; border: 1px solid #ddd !important; background: #fff !important; opacity: 1 !important; transform: none !important; }
+    .dl-results.visible { display: block !important; }
+    .container { max-width: 100% !important; padding: 0 !important; }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+    .dl-hero { padding: 2.5rem 1rem 2rem; min-height: auto; }
+    .dl-hero h1 { font-size: 1.8rem; }
+    .dl-search-card { padding: 0.875rem; }
+    .dl-search-row { flex-wrap: wrap; }
+    .dl-search-row input { min-width: 100%; }
+    .dl-search-row .dl-btn { width: 100%; justify-content: center; }
+    .dl-ov-dash { flex-direction: column; align-items: center; }
+    .dl-ov-right { grid-template-columns: 1fr 1fr; min-width: 0; }
+    .dl-ov-indicator { grid-column: 1 / -1; }
+    .dl-sec-grid { grid-template-columns: 1fr; }
+    .dl-soa-grid { grid-template-columns: 1fr; }
+    .dl-rec-table { font-size: 0.72rem; }
+    .dl-rec-table th, .dl-rec-table td { padding: 6px 8px; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="dl-hero" id="dlHero">
+    <div class="hero-inner">
+        <div class="hero-badge">
+            <span class="badge-dot"></span>
+            DNS Intelligence &amp; Security Analysis
+        </div>
+        <h1>DNS <span class="hl-cyan">Lookup</span></h1>
+        <p class="hero-sub">Query all DNS record types for any domain — A, AAAA, MX, NS, TXT, CNAME, SOA — with DNSSEC and email security (SPF/DMARC) analysis.</p>
+    </div>
+</section>
+
+<div class="dl-search-card">
+    <div class="dl-search-row">
+        <input type="text" id="dlInput" placeholder="Enter domain name" autocomplete="off" spellcheck="false">
+        <button class="dl-btn" id="dlLookupBtn"><i class="bi bi-search"></i> Lookup</button>
+    </div>
+</div>
+
+<div class="dl-error-wrap" id="dlError">
+    <div class="dl-error-box">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <span id="dlErrorMsg"></span>
+    </div>
+</div>
+
+<div class="dl-loading" id="dlLoading">
+    <div class="container">
+        <div class="dl-skeleton">
+            <div class="dl-skeleton-hdr"></div>
+            <div class="dl-skeleton-body">
+                <div class="dl-skeleton-row">
+                    <div class="dl-skeleton-box" style="width:100px;height:100px;border-radius:50%"></div>
+                    <div class="dl-skeleton-box dl-skeleton-line" style="height:100px"></div>
+                </div>
+            </div>
+        </div>
+        <div class="dl-skeleton">
+            <div class="dl-skeleton-hdr"></div>
+            <div class="dl-skeleton-body">
+                <div class="dl-skeleton-row"><div class="dl-skeleton-box dl-skeleton-line"></div></div>
+                <div class="dl-skeleton-row"><div class="dl-skeleton-box dl-skeleton-line"></div></div>
+            </div>
+        </div>
+        <div class="dl-loading-txt"><i class="bi bi-arrow-repeat"></i> Resolving DNS records...</div>
+    </div>
+</div>
+
+<div class="dl-results" id="dlResults">
+    <div class="container">
+
+        <div class="dl-action-bar">
+            <button class="dl-action-btn" id="dlBtnCopyAll"><i class="bi bi-clipboard"></i> Copy All</button>
+            <button class="dl-action-btn" id="dlBtnJSON"><i class="bi bi-filetype-json"></i> JSON</button>
+            <button class="dl-action-btn" id="dlBtnPrint"><i class="bi bi-printer"></i> Print</button>
+        </div>
+
+        <div class="dl-card" id="dlOverviewCard">
+            <div class="dl-card-header">
+                <h5><i class="bi bi-speedometer2" style="color:var(--dl-cyan)"></i> Lookup Overview</h5>
+            </div>
+            <div class="dl-card-body" id="dlOverviewBody"></div>
+        </div>
+
+        <div class="dl-card" id="dlSecurityCard">
+            <div class="dl-card-header">
+                <h5><i class="bi bi-shield-check" style="color:var(--dl-cyan)"></i> Security Assessment</h5>
+            </div>
+            <div class="dl-card-body" id="dlSecurityBody">
+                <p style="color:var(--text-muted);text-align:center;padding:1rem 0;margin:0">Awaiting results...</p>
+            </div>
+        </div>
+
+        <div class="dl-card" id="dlACard">
+            <div class="dl-card-header">
+                <h5><i class="bi bi-arrow-left-right" style="color:var(--dl-cyan)"></i> A Records (IPv4)</h5>
+                <span class="dl-rec-badge empty" id="dlABadge">—</span>
+            </div>
+            <div class="dl-card-body" id="dlABody">
+                <p style="color:var(--text-muted);text-align:center;padding:1rem 0;margin:0">Awaiting results...</p>
+            </div>
+        </div>
+
+        <div class="dl-card" id="dlAAAACard">
+            <div class="dl-card-header">
+                <h5><i class="bi bi-arrow-left-right" style="color:var(--dl-purple)"></i> AAAA Records (IPv6)</h5>
+                <span class="dl-rec-badge empty" id="dlAAAABadge">—</span>
+            </div>
+            <div class="dl-card-body" id="dlAAAABody">
+                <p style="color:var(--text-muted);text-align:center;padding:1rem 0;margin:0">Awaiting results...</p>
+            </div>
+        </div>
+
+        <div class="dl-card" id="dlMXCard">
+            <div class="dl-card-header">
+                <h5><i class="bi bi-envelope-at" style="color:var(--dl-cyan)"></i> MX Records (Mail)</h5>
+                <span class="dl-rec-badge empty" id="dlMXBadge">—</span>
+            </div>
+            <div class="dl-card-body" id="dlMXBody">
+                <p style="color:var(--text-muted);text-align:center;padding:1rem 0;margin:0">Awaiting results...</p>
+            </div>
+        </div>
+
+        <div class="dl-card" id="dlNSCard">
+            <div class="dl-card-header">
+                <h5><i class="bi bi-diagram-3" style="color:var(--dl-cyan)"></i> NS Records (Nameservers)</h5>
+                <span class="dl-rec-badge empty" id="dlNSBadge">—</span>
+            </div>
+            <div class="dl-card-body" id="dlNSBody">
+                <p style="color:var(--text-muted);text-align:center;padding:1rem 0;margin:0">Awaiting results...</p>
+            </div>
+        </div>
+
+        <div class="dl-card" id="dlTXTCard">
+            <div class="dl-card-header">
+                <h5><i class="bi bi-file-text" style="color:var(--dl-cyan)"></i> TXT Records</h5>
+                <span class="dl-rec-badge empty" id="dlTXTBadge">—</span>
+            </div>
+            <div class="dl-card-body" id="dlTXTBody">
+                <p style="color:var(--text-muted);text-align:center;padding:1rem 0;margin:0">Awaiting results...</p>
+            </div>
+        </div>
+
+        <div class="dl-card" id="dlCNAMECard">
+            <div class="dl-card-header">
+                <h5><i class="bi bi-arrow-return-right" style="color:var(--dl-cyan)"></i> CNAME Records</h5>
+                <span class="dl-rec-badge empty" id="dlCNAMEBadge">—</span>
+            </div>
+            <div class="dl-card-body" id="dlCNAMEBody">
+                <p style="color:var(--text-muted);text-align:center;padding:1rem 0;margin:0">Awaiting results...</p>
+            </div>
+        </div>
+
+        <div class="dl-card" id="dlSOACard">
+            <div class="dl-card-header">
+                <h5><i class="bi bi-building" style="color:var(--dl-cyan)"></i> SOA Record (Zone Authority)</h5>
+                <span class="dl-rec-badge empty" id="dlSOABadge">—</span>
+            </div>
+            <div class="dl-card-body" id="dlSOABody">
+                <p style="color:var(--text-muted);text-align:center;padding:1rem 0;margin:0">Awaiting results...</p>
+            </div>
+        </div>
+
+        <div style="text-align:center;padding:0.5rem 0 2rem">
+            <button class="btn btn-outline-light" id="dlNewScan"><i class="bi bi-arrow-repeat"></i> New Lookup</button>
+        </div>
+    </div>
+</div>
+
+<div class="dl-toast" id="dlToast"><i class="bi bi-check-circle"></i> <span id="dlToastMsg"></span></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    var input = document.getElementById('dlInput');
+    var lookupBtn = document.getElementById('dlLookupBtn');
+    var errorWrap = document.getElementById('dlError');
+    var errorMsg = document.getElementById('dlErrorMsg');
+    var loadingDiv = document.getElementById('dlLoading');
+    var resultsDiv = document.getElementById('dlResults');
+    var toast = document.getElementById('dlToast');
+    var toastMsg = document.getElementById('dlToastMsg');
+
+    var _lastResponse = null;
+
+    function escapeHtml(t) { return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    function showToast(msg) {
+        toastMsg.textContent = msg;
+        toast.className = 'dl-toast ok';
+        toast.classList.add('show');
+        clearTimeout(toast._hide);
+        toast._hide = setTimeout(function() { toast.classList.remove('show'); }, 2500);
+    }
+
+    function showError(msg) {
+        errorWrap.classList.add('visible');
+        errorMsg.textContent = msg;
+    }
+
+    function hideError() { errorWrap.classList.remove('visible'); }
+
+    function showLoading() {
+        loadingDiv.classList.add('visible');
+        resultsDiv.classList.remove('visible');
+        lookupBtn.disabled = true;
+        lookupBtn.innerHTML = '<i class="bi bi-arrow-repeat"></i> Looking up...';
+    }
+
+    function hideLoading() {
+        loadingDiv.classList.remove('visible');
+        lookupBtn.disabled = false;
+        lookupBtn.innerHTML = '<i class="bi bi-search"></i> Lookup';
+    }
+
+    function fadeInCards() {
+        document.querySelectorAll('.dl-card').forEach(function(card, i) {
+            card.style.transitionDelay = (i * 80) + 'ms';
+            setTimeout(function() { card.classList.add('fade-in'); }, i * 80 + 50);
+        });
+    }
+
+    function getCsrfToken() {
+        var name = 'csrftoken';
+        var m = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+        return m ? decodeURIComponent(m[2]) : '';
+    }
+
+    function copyToClipboard(text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(function() { showToast('Copied to clipboard'); }).catch(function() { fallbackCopy(text); });
+        } else { fallbackCopy(text); }
+    }
+
+    function fallbackCopy(text) {
+        var ta = document.createElement('textarea');
+        ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); showToast('Copied to clipboard'); } catch(e) {}
+        document.body.removeChild(ta);
+    }
+
+    function setBadge(id, count, status) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        if (status === 'error' || status === 'timeout') {
+            el.className = 'dl-rec-badge err';
+            el.textContent = status === 'timeout' ? 'Timeout' : 'Error';
+        } else if (count > 0) {
+            el.className = 'dl-rec-badge found';
+            el.textContent = count + ' record' + (count !== 1 ? 's' : '');
+        } else {
+            el.className = 'dl-rec-badge empty';
+            el.textContent = 'None';
+        }
+    }
+
+    function doLookup() {
+        var val = input.value.trim();
+        if (!val) { showError('Please enter a domain name to look up.'); input.focus(); return; }
+        hideError();
+        showLoading();
+
+        fetch('/api/dns-lookup/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
+            body: JSON.stringify({ target: val }),
+        })
+        .then(function(r) { return r.json().then(function(d) { return { status: r.status, body: d }; }); })
+        .then(function(resp) {
+            hideLoading();
+            if (!resp.body.success) {
+                showError(resp.body.error || 'Lookup failed');
+                return;
+            }
+            _lastResponse = resp.body;
+            renderResults(resp.body);
+        })
+        .catch(function(err) {
+            hideLoading();
+            showError('Network error: ' + err.message);
+        });
+    }
+
+    lookupBtn.addEventListener('click', function() { doLookup(); });
+    input.addEventListener('keypress', function(e) { if (e.key === 'Enter') { e.preventDefault(); doLookup(); } });
+
+    document.getElementById('dlNewScan').addEventListener('click', function() {
+        resultsDiv.classList.remove('visible');
+        input.value = '';
+        input.focus();
+    });
+
+    document.getElementById('dlBtnCopyAll').addEventListener('click', function() {
+        if (!_lastResponse) return;
+        copyToClipboard(JSON.stringify(_lastResponse, null, 2));
+    });
+
+    document.getElementById('dlBtnJSON').addEventListener('click', function() {
+        if (!_lastResponse) return;
+        var blob = new Blob([JSON.stringify(_lastResponse, null, 2)], { type: 'application/json' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'dns-lookup-' + (_lastResponse.domain || 'result') + '.json';
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('JSON downloaded');
+    });
+
+    document.getElementById('dlBtnPrint').addEventListener('click', function() { window.print(); });
+
+    function renderResults(r) {
+        renderOverview(r);
+        renderSecurity(r.security);
+        renderA(r.records.A);
+        renderAAAA(r.records.AAAA);
+        renderMX(r.records.MX);
+        renderNS(r.records.NS);
+        renderTXT(r.records.TXT);
+        renderCNAME(r.records.CNAME);
+        renderSOA(r.records.SOA);
+        fadeInCards();
+        resultsDiv.classList.add('visible');
+    }
+
+    function renderOverview(r) {
+        var body = document.getElementById('dlOverviewBody');
+        var recTypes = ['A','AAAA','MX','NS','TXT','CNAME','SOA'];
+        var totalRecords = 0;
+        var foundTypes = 0;
+        recTypes.forEach(function(rt) {
+            var rec = r.records[rt];
+            if (rec && rec.records) {
+                totalRecords += rec.records.length;
+                if (rec.records.length > 0) foundTypes++;
+            }
+        });
+
+        var badgeClass = 'ok';
+        var badgeIcon = '<i class="bi bi-check-lg"></i>';
+        var badgeLabel = 'Resolved';
+        if (!r.success) { badgeClass = 'err'; badgeIcon = '<i class="bi bi-x-lg"></i>'; badgeLabel = 'Failed'; }
+        else if (totalRecords === 0) { badgeClass = 'warn'; badgeIcon = '<i class="bi bi-exclamation"></i>'; badgeLabel = 'No Records'; }
+
+        var html = '<div class="dl-ov-dash">';
+        html += '<div class="dl-ov-left">';
+        html += '<div class="dl-status-badge ' + badgeClass + '">';
+        html += '<span class="badge-icon">' + badgeIcon + '</span>';
+        html += '<span class="badge-label">' + badgeLabel + '</span>';
+        html += '</div></div>';
+        html += '<div class="dl-ov-right">';
+        html += '<div class="dl-ov-metric dl-ov-indicator"><div class="m-lbl">Domain</div><div class="m-val">' + escapeHtml(r.domain) + '</div><button class="dl-copy-btn" data-copy="' + escapeHtml(r.domain) + '" title="Copy"><i class="bi bi-clipboard"></i></button></div>';
+        html += '<div class="dl-ov-metric"><div class="m-lbl">Record Types Found</div><div class="m-val">' + foundTypes + ' / ' + recTypes.length + '</div></div>';
+        html += '<div class="dl-ov-metric"><div class="m-lbl">Total Records</div><div class="m-val">' + totalRecords + '</div></div>';
+        if (r.nameservers && r.nameservers.nameservers && r.nameservers.nameservers.length) {
+            html += '<div class="dl-ov-metric"><div class="m-lbl">Nameservers</div><div class="m-val">' + r.nameservers.nameservers.length + '</div></div>';
+        }
+        if (r.scan_time_ms) html += '<div class="dl-ov-metric"><div class="m-lbl">Total Time</div><div class="m-val">' + r.scan_time_ms + ' ms</div></div>';
+        html += '</div></div>';
+        body.innerHTML = html;
+
+        body.querySelectorAll('.dl-copy-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() { copyToClipboard(this.getAttribute('data-copy')); });
+        });
+    }
+
+    function renderSecurity(sec) {
+        var body = document.getElementById('dlSecurityBody');
+        if (!sec) { body.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:1rem 0;margin:0">No security data available.</p>'; return; }
+
+        var items = [
+            { label: 'DNSSEC', sub: sec.dnssec_enabled ? 'Enabled — DNS responses are cryptographically signed' : 'Not enabled — DNS responses are not signed',
+              pass: sec.dnssec_enabled, warn: false },
+            { label: 'SPF Record', sub: sec.spf_found ? 'Found — email spoofing protection active' : 'Missing — domain is vulnerable to email spoofing',
+              pass: sec.spf_found, warn: false },
+            { label: 'DMARC Record', sub: sec.dmarc_found ? 'Found — email policy enforcement active' : 'Missing — no email authentication policy',
+              pass: sec.dmarc_found, warn: false },
+            { label: 'DKIM Record', sub: sec.dkim_found ? 'Found — email integrity verification active' : 'Not detected — may be on subdomain or not configured',
+              pass: sec.dkim_found, warn: false },
+            { label: 'DNSKEY Records', sub: sec.dnskey_found ? 'Present (' + (sec.dnskey_found ? 'keys found' : 'none') + ')' : 'Not found',
+              pass: sec.dnskey_found, warn: !sec.dnskey_found },
+            { label: 'RRSIG Records', sub: sec.rrsig_found ? 'Present — zone signatures verified' : 'Not found',
+              pass: sec.rrsig_found, warn: !sec.rrsig_found },
+        ];
+
+        var html = '<div class="dl-sec-grid">';
+        items.forEach(function(item) {
+            var cls = item.pass ? 'pass' : (item.warn ? 'warn' : 'fail');
+            var icon = item.pass ? '<i class="bi bi-check-circle-fill"></i>' : (item.warn ? '<i class="bi bi-dash-circle"></i>' : '<i class="bi bi-x-circle-fill"></i>');
+            html += '<div class="dl-sec-item ' + cls + '">';
+            html += '<span class="sec-icon">' + icon + '</span>';
+            html += '<div class="sec-text"><div class="sec-label">' + escapeHtml(item.label) + '</div><div class="sec-sub">' + escapeHtml(item.sub) + '</div></div>';
+            html += '</div>';
+        });
+        html += '</div>';
+        body.innerHTML = html;
+    }
+
+    function renderA(rec) {
+        var body = document.getElementById('dlABody');
+        if (!rec) { setBadge('dlABadge', 0, 'empty'); body.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:1rem 0;margin:0">No data.</p>'; return; }
+        if (rec.status === 'timeout' || rec.status === 'error') { setBadge('dlABadge', 0, rec.status); body.innerHTML = '<p style="color:var(--dl-red);text-align:center;padding:1rem 0;margin:0"><i class="bi bi-exclamation-triangle"></i> ' + escapeHtml(rec.message || rec.status) + '</p>'; return; }
+        setBadge('dlABadge', rec.records.length, rec.status);
+        if (!rec.records.length) { body.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:1rem 0;margin:0"><i class="bi bi-dash-circle"></i> No A records found for this domain.</p>'; return; }
+        var html = '';
+        rec.records.forEach(function(r) {
+            html += '<div class="dl-rec-val">' + escapeHtml(r.value) + (r.ttl !== null ? '<span class="rec-ttl">TTL: ' + r.ttl + 's</span>' : '') + '</div>';
+        });
+        body.innerHTML = html;
+    }
+
+    function renderAAAA(rec) {
+        var body = document.getElementById('dlAAAABody');
+        if (!rec) { setBadge('dlAAAABadge', 0, 'empty'); body.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:1rem 0;margin:0">No data.</p>'; return; }
+        if (rec.status === 'timeout' || rec.status === 'error') { setBadge('dlAAAABadge', 0, rec.status); body.innerHTML = '<p style="color:var(--dl-red);text-align:center;padding:1rem 0;margin:0"><i class="bi bi-exclamation-triangle"></i> ' + escapeHtml(rec.message || rec.status) + '</p>'; return; }
+        setBadge('dlAAAABadge', rec.records.length, rec.status);
+        if (!rec.records.length) { body.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:1rem 0;margin:0"><i class="bi bi-dash-circle"></i> No AAAA records found (no IPv6).</p>'; return; }
+        var html = '';
+        rec.records.forEach(function(r) {
+            html += '<div class="dl-rec-val">' + escapeHtml(r.value) + (r.ttl !== null ? '<span class="rec-ttl">TTL: ' + r.ttl + 's</span>' : '') + '</div>';
+        });
+        body.innerHTML = html;
+    }
+
+    function renderMX(rec) {
+        var body = document.getElementById('dlMXBody');
+        if (!rec) { setBadge('dlMXBadge', 0, 'empty'); body.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:1rem 0;margin:0">No data.</p>'; return; }
+        if (rec.status === 'timeout' || rec.status === 'error') { setBadge('dlMXBadge', 0, rec.status); body.innerHTML = '<p style="color:var(--dl-red);text-align:center;padding:1rem 0;margin:0"><i class="bi bi-exclamation-triangle"></i> ' + escapeHtml(rec.message || rec.status) + '</p>'; return; }
+        setBadge('dlMXBadge', rec.records.length, rec.status);
+        if (!rec.records.length) { body.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:1rem 0;margin:0"><i class="bi bi-dash-circle"></i> No MX records found — this domain may not receive email.</p>'; return; }
+        var html = '';
+        rec.records.forEach(function(r) {
+            html += '<div class="dl-mx-row">';
+            html += '<span class="dl-mx-priority">' + r.priority + '</span>';
+            html += '<span class="dl-mx-exchange">' + escapeHtml(r.exchange) + '</span>';
+            html += (r.ttl !== null ? '<span class="dl-mx-ttl">TTL: ' + r.ttl + 's</span>' : '');
+            html += '</div>';
+        });
+        body.innerHTML = html;
+    }
+
+    function renderNS(rec) {
+        var body = document.getElementById('dlNSBody');
+        if (!rec) { setBadge('dlNSBadge', 0, 'empty'); body.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:1rem 0;margin:0">No data.</p>'; return; }
+        if (rec.status === 'timeout' || rec.status === 'error') { setBadge('dlNSBadge', 0, rec.status); body.innerHTML = '<p style="color:var(--dl-red);text-align:center;padding:1rem 0;margin:0"><i class="bi bi-exclamation-triangle"></i> ' + escapeHtml(rec.message || rec.status) + '</p>'; return; }
+        setBadge('dlNSBadge', rec.records.length, rec.status);
+        if (!rec.records.length) { body.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:1rem 0;margin:0"><i class="bi bi-dash-circle"></i> No NS records found.</p>'; return; }
+        var html = '';
+        rec.records.forEach(function(r) {
+            html += '<div class="dl-rec-val">' + escapeHtml(r.value) + (r.ttl !== null ? '<span class="rec-ttl">TTL: ' + r.ttl + 's</span>' : '') + '</div>';
+        });
+        body.innerHTML = html;
+    }
+
+    function renderTXT(rec) {
+        var body = document.getElementById('dlTXTBody');
+        if (!rec) { setBadge('dlTXTBadge', 0, 'empty'); body.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:1rem 0;margin:0">No data.</p>'; return; }
+        if (rec.status === 'timeout' || rec.status === 'error') { setBadge('dlTXTBadge', 0, rec.status); body.innerHTML = '<p style="color:var(--dl-red);text-align:center;padding:1rem 0;margin:0"><i class="bi bi-exclamation-triangle"></i> ' + escapeHtml(rec.message || rec.status) + '</p>'; return; }
+        setBadge('dlTXTBadge', rec.records.length, rec.status);
+        if (!rec.records.length) { body.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:1rem 0;margin:0"><i class="bi bi-dash-circle"></i> No TXT records found.</p>'; return; }
+        var html = '';
+        rec.records.forEach(function(r) {
+            var val = r.value;
+            var label = '';
+            var vl = val.toLowerCase();
+            if (vl.indexOf('v=spf1') === 0) label = '<span style="color:var(--dl-green);font-size:0.65rem;font-weight:700;font-family:var(--font-ui);margin-right:6px">SPF</span>';
+            else if (vl.indexOf('v=dmarc1') === 0) label = '<span style="color:var(--dl-purple);font-size:0.65rem;font-weight:700;font-family:var(--font-ui);margin-right:6px">DMARC</span>';
+            else if (vl.indexOf('v=dkim1') === 0 || vl.indexOf('k=rsa') !== -1) label = '<span style="color:var(--dl-cyan);font-size:0.65rem;font-weight:700;font-family:var(--font-ui);margin-right:6px">DKIM</span>';
+            html += '<div class="dl-rec-val">' + label + escapeHtml(val) + (r.ttl !== null ? '<span class="rec-ttl">TTL: ' + r.ttl + 's</span>' : '') + '</div>';
+        });
+        body.innerHTML = html;
+    }
+
+    function renderCNAME(rec) {
+        var body = document.getElementById('dlCNAMEBody');
+        if (!rec) { setBadge('dlCNAMEBadge', 0, 'empty'); body.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:1rem 0;margin:0">No data.</p>'; return; }
+        if (rec.status === 'timeout' || rec.status === 'error') { setBadge('dlCNAMEBadge', 0, rec.status); body.innerHTML = '<p style="color:var(--dl-red);text-align:center;padding:1rem 0;margin:0"><i class="bi bi-exclamation-triangle"></i> ' + escapeHtml(rec.message || rec.status) + '</p>'; return; }
+        setBadge('dlCNAMEBadge', rec.records.length, rec.status);
+        if (!rec.records.length) { body.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:1rem 0;margin:0"><i class="bi bi-dash-circle"></i> No CNAME records (domain is not an alias).</p>'; return; }
+        var html = '';
+        rec.records.forEach(function(r) {
+            html += '<div class="dl-rec-val">' + escapeHtml(r.value) + (r.ttl !== null ? '<span class="rec-ttl">TTL: ' + r.ttl + 's</span>' : '') + '</div>';
+        });
+        body.innerHTML = html;
+    }
+
+    function renderSOA(rec) {
+        var body = document.getElementById('dlSOABody');
+        if (!rec) { setBadge('dlSOABadge', 0, 'empty'); body.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:1rem 0;margin:0">No data.</p>'; return; }
+        if (rec.status === 'timeout' || rec.status === 'error') { setBadge('dlSOABadge', 0, rec.status); body.innerHTML = '<p style="color:var(--dl-red);text-align:center;padding:1rem 0;margin:0"><i class="bi bi-exclamation-triangle"></i> ' + escapeHtml(rec.message || rec.status) + '</p>'; return; }
+        setBadge('dlSOABadge', rec.records.length, rec.status);
+        if (!rec.records.length) { body.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:1rem 0;margin:0"><i class="bi bi-dash-circle"></i> No SOA record found.</p>'; return; }
+        var r = rec.records[0];
+        var fields = [
+            ['Primary NS (MNAME)', r.mname],
+            ['Admin Email (RNAME)', r.rname],
+            ['Serial', r.serial],
+            ['Refresh', r.refresh + 's'],
+            ['Retry', r.retry + 's'],
+            ['Expire', r.expire + 's'],
+            ['Minimum TTL', r.minimum + 's'],
+        ];
+        if (r.ttl !== null) fields.push(['Record TTL', r.ttl + 's']);
+        var html = '<div class="dl-soa-grid">';
+        fields.forEach(function(f) {
+            html += '<div class="dl-soa-item"><div class="lbl">' + escapeHtml(f[0]) + '</div><div class="val">' + escapeHtml(String(f[1])) + '</div></div>';
+        });
+        html += '</div>';
+        body.innerHTML = html;
+    }
+
+})();
+</script>
+{% endblock %}

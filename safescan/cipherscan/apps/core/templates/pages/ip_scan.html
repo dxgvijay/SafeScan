@@ -1,1 +1,781 @@
-﻿{% extends 'base.html' %}{% load static %}{% block title %}IP Scanner â€” CipherScan{% endblock %}{% block body_class %}full-width{% endblock %}{% block content %}<div class="container py-5"><div class="text-center py-5"><i class="bi-diagram-2" style="font-size:3rem;color:var(--accent-cyan);margin-bottom:1rem;"></i><h2>IP Scanner</h2><p class="text-muted">Coming soon â€” Investigate IP addresses for reputation, geolocation, and threat data.</p></div></div>{% endblock %}
+﻿{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}IP Scanner — CipherScan{% endblock %}
+{% block body_class %}full-width{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {
+    --ips-cyan: #00d4ff;
+    --ips-cyan-light: #66e3ff;
+    --ips-cyan-dark: #0099cc;
+    --ips-cyan-glow: rgba(0, 212, 255, 0.25);
+    --ips-cyan-dim: rgba(0, 212, 255, 0.08);
+    --ips-purple: #a855f7;
+    --ips-purple-dim: rgba(168, 85, 247, 0.08);
+    --ips-orange: #f97316;
+    --ips-red: #ef4444;
+    --ips-green: #22c55e;
+    --ips-yellow: #eab308;
+    --ips-bg: linear-gradient(135deg, #0a0e1a 0%, #0a1420 35%, #0f1628 70%, #0a0e1a 100%);
+}
+
+/* Hero */
+.ips-hero {
+    position: relative;
+    padding: 3.5rem 2rem 2.5rem;
+    overflow: hidden;
+    background: var(--ips-bg);
+    min-height: 340px;
+    display: flex;
+    align-items: center;
+}
+.ips-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse at 25% 35%, rgba(0, 212, 255, 0.05) 0%, transparent 50%),
+        radial-gradient(ellipse at 75% 65%, rgba(168, 85, 247, 0.03) 0%, transparent 50%);
+    pointer-events: none;
+}
+.ips-hero .hero-inner { position: relative; z-index: 2; max-width: 800px; margin: 0 auto; text-align: center; }
+.ips-hero .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--ips-cyan-dim); backdrop-filter: blur(8px);
+    border: 1px solid var(--ips-cyan-glow); border-radius: 100px;
+    padding: 5px 16px 5px 8px; font-size: 0.75rem; color: var(--ips-cyan-light);
+    margin-bottom: 1.25rem;
+}
+.ips-hero .badge-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ips-cyan); animation: ips-pulse 2s ease-in-out infinite; }
+@keyframes ips-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+.ips-hero h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 0.6rem; line-height: 1.2; }
+.ips-hero .hl-cyan { color: var(--ips-cyan); }
+.ips-hero .hl-purple { color: var(--ips-purple); }
+.ips-hero .hero-sub { color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1.5rem; max-width: 600px; margin-left: auto; margin-right: auto; }
+
+/* Search Card */
+.ips-search-card {
+    max-width: 800px;
+    margin: -2rem auto 1.5rem;
+    position: relative;
+    z-index: 3;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 1.25rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+.ips-search-row {
+    display: flex; gap: 10px; align-items: center;
+    background: var(--bg-tertiary); border: 1px solid var(--border-color);
+    border-radius: 10px; padding: 5px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+.ips-search-row:focus-within { border-color: var(--ips-cyan-glow); box-shadow: 0 0 20px var(--ips-cyan-dim); }
+.ips-search-row input {
+    flex: 1; background: transparent; border: none; outline: none;
+    color: var(--text-primary); font-size: 0.92rem; padding: 9px 12px; min-width: 0;
+}
+.ips-search-row input::placeholder { color: var(--text-muted); }
+.ips-search-row .ips-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--ips-cyan); color: #000; border: none;
+    border-radius: 7px; padding: 9px 18px; font-weight: 600; font-size: 0.85rem;
+    cursor: pointer; transition: all 0.25s; white-space: nowrap;
+}
+.ips-search-row .ips-btn:hover { background: var(--ips-cyan-light); box-shadow: 0 0 20px var(--ips-cyan-glow); transform: translateY(-1px); }
+.ips-search-row .ips-btn:active { transform: translateY(0); }
+.ips-search-row .ips-btn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; transform: none; }
+
+.ips-disclaimer {
+    margin-top: 0.75rem; font-size: 0.72rem; color: var(--text-muted);
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 12px; background: rgba(234,179,8,0.06); border: 1px solid rgba(234,179,8,0.12);
+    border-radius: 8px;
+}
+.ips-disclaimer i { color: var(--ips-yellow); font-size: 0.8rem; }
+
+/* Loading */
+.ips-loading { display: none; padding: 1rem 0; max-width: 1100px; margin: 0 auto; }
+.ips-loading.visible { display: block; }
+.ips-skeleton { border-radius: 14px; border: 1px solid var(--border-color); background: var(--bg-secondary); overflow: hidden; margin-bottom: 1.25rem; }
+.ips-skeleton-hdr { height: 44px; background: var(--bg-tertiary); border-bottom: 1px solid var(--border-color); }
+.ips-skeleton-body { padding: 1.25rem; }
+.ips-skeleton-row { display: flex; gap: 12px; margin-bottom: 10px; }
+.ips-skeleton-row:last-child { margin-bottom: 0; }
+.ips-skeleton-box { border-radius: 8px; background: linear-gradient(90deg, var(--bg-tertiary) 25%, rgba(255,255,255,0.04) 50%, var(--bg-tertiary) 75%); background-size: 200% 100%; animation: ips-shimmer 1.5s ease-in-out infinite; }
+.ips-skeleton-line { height: 14px; border-radius: 4px; flex: 1; }
+@keyframes ips-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+.ips-loading-txt { text-align: center; color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.75rem; animation: ips-pulse-txt 1.5s ease-in-out infinite; }
+@keyframes ips-pulse-txt { 0%,100% { opacity: 0.6; } 50% { opacity: 1; } }
+
+/* Error */
+.ips-error-wrap { display: none; text-align: center; padding: 1rem 0; max-width: 1100px; margin: 0 auto; }
+.ips-error-wrap.visible { display: block; }
+.ips-error-box {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2);
+    border-radius: 10px; padding: 12px 20px; font-size: 0.85rem;
+    color: #f48771; max-width: 600px;
+}
+.ips-error-box i { font-size: 1.1rem; }
+
+/* Results */
+.ips-results { display: none; padding: 0 0 3rem; max-width: 1100px; margin: 0 auto; }
+.ips-results.visible { display: block; }
+
+.ips-action-bar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1.25rem; justify-content: flex-end; }
+.ips-action-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 6px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 500;
+    background: var(--bg-tertiary); color: var(--text-secondary);
+    border: 1px solid var(--border-color); cursor: pointer; transition: all 0.2s;
+}
+.ips-action-btn:hover { border-color: var(--ips-cyan-glow); color: var(--text-primary); background: var(--ips-cyan-dim); }
+
+.ips-card {
+    background: var(--bg-secondary); border: 1px solid var(--border-color);
+    border-radius: 14px; overflow: hidden; margin-bottom: 1.25rem;
+    opacity: 0; transform: translateY(16px); transition: opacity 0.45s ease, transform 0.45s ease;
+}
+.ips-card.fade-in { opacity: 1; transform: translateY(0); }
+.ips-card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.85rem 1.25rem; border-bottom: 1px solid var(--border-color);
+    background: var(--bg-tertiary); gap: 8px; flex-wrap: wrap;
+}
+.ips-card-header h5 { margin: 0; font-size: 0.88rem; font-weight: 600; display: flex; align-items: center; gap: 7px; }
+.ips-card-body { padding: 1.25rem; }
+
+/* Overview Dashboard */
+.ips-ov-dash { display: flex; gap: 1.5rem; align-items: stretch; flex-wrap: wrap; }
+.ips-ov-left { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 140px; flex-shrink: 0; }
+.ips-threat-gauge {
+    width: 110px; height: 110px; border-radius: 50%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    position: relative; margin-bottom: 8px; font-size: 1.2rem;
+}
+.ips-threat-gauge .gauge-val { font-size: 1.1rem; font-weight: 700; line-height: 1; text-align: center; max-width: 90px; }
+.ips-threat-gauge .gauge-lbl { font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.7; margin-top: 4px; }
+.ips-threat-gauge.safe { background: conic-gradient(var(--ips-green) 0deg 360deg, transparent 360deg); color: var(--ips-green); border: 3px solid var(--ips-green); }
+.ips-threat-gauge.warning { background: conic-gradient(var(--ips-orange) 0deg 180deg, rgba(249,115,22,0.15) 180deg 360deg); color: var(--ips-orange); border: 3px solid var(--ips-orange); }
+.ips-threat-gauge.danger { background: conic-gradient(var(--ips-red) 0deg 360deg, transparent 360deg); color: var(--ips-red); border: 3px solid var(--ips-red); }
+.ips-threat-gauge.unknown { background: rgba(148,163,184,0.15); color: #94a3b8; border: 3px solid #94a3b8; }
+
+.ips-ov-right { flex: 1; min-width: 260px; display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; }
+.ips-ov-metric {
+    background: var(--bg-tertiary); border-radius: 8px; padding: 12px 14px;
+    border: 1px solid var(--border-color);
+}
+.ips-ov-metric .m-lbl { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-muted); margin-bottom: 3px; }
+.ips-ov-metric .m-val { font-size: 0.85rem; color: var(--text-primary); font-weight: 500; word-break: break-all; }
+
+.ips-ov-indicator { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; }
+.ips-ov-indicator .m-val { font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace; font-size: 0.78rem; flex: 1; }
+.ips-copy-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 6px;
+    background: transparent; color: var(--text-muted);
+    border: 1px solid var(--border-color); cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+    font-size: 0.75rem; padding: 0;
+}
+.ips-copy-btn:hover { border-color: var(--ips-cyan-glow); color: var(--ips-cyan); background: var(--ips-cyan-dim); }
+
+/* Port Scan Table */
+.ips-port-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+.ips-port-table th {
+    text-align: left; padding: 8px 12px; font-size: 0.65rem;
+    text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-muted);
+    border-bottom: 1px solid var(--border-color); font-weight: 600;
+}
+.ips-port-table td { padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.03); color: var(--text-secondary); }
+.ips-port-table tr:hover td { background: rgba(255,255,255,0.02); }
+.ips-port-state {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 2px 10px; border-radius: 100px;
+    font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+}
+.ips-port-state.open { background: rgba(239,68,68,0.12); color: var(--ips-red); border: 1px solid rgba(239,68,68,0.2); }
+.ips-port-state.closed { background: rgba(34,197,94,0.12); color: var(--ips-green); border: 1px solid rgba(34,197,94,0.2); }
+.ips-port-state.filtered { background: rgba(234,179,8,0.12); color: var(--ips-yellow); border: 1px solid rgba(234,179,8,0.2); }
+
+/* Port summary chips */
+.ips-port-summary { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 1rem; }
+.ips-port-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 600;
+    background: var(--bg-tertiary); border: 1px solid var(--border-color);
+}
+.ips-port-chip .chip-dot { width: 8px; height: 8px; border-radius: 50%; }
+.ips-port-chip.open .chip-dot { background: var(--ips-red); }
+.ips-port-chip.closed .chip-dot { background: var(--ips-green); }
+.ips-port-chip.filtered .chip-dot { background: var(--ips-yellow); }
+
+/* Abuse check */
+.ips-abuse-bar { height: 8px; border-radius: 4px; background: var(--border-color); overflow: hidden; margin-top: 6px; }
+.ips-abuse-fill { height: 100%; border-radius: 4px; transition: width 0.8s ease; }
+.ips-abuse-fill.clean { background: var(--ips-green); }
+.ips-abuse-fill.low { background: var(--ips-yellow); }
+.ips-abuse-fill.medium { background: var(--ips-orange); }
+.ips-abuse-fill.high { background: var(--ips-red); }
+
+.ips-verdict-badge {
+    display: inline-block; padding: 3px 14px; border-radius: 100px;
+    font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+}
+.ips-verdict-badge.clean { background: rgba(34,197,94,0.15); color: var(--ips-green); border: 1px solid rgba(34,197,94,0.3); }
+.ips-verdict-badge.suspicious { background: rgba(249,115,22,0.15); color: var(--ips-orange); border: 1px solid rgba(249,115,22,0.3); }
+.ips-verdict-badge.malicious { background: rgba(239,68,68,0.15); color: var(--ips-red); border: 1px solid rgba(239,68,68,0.3); }
+
+/* Tech grid */
+.ips-tech-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+.ips-tech-item {
+    background: var(--bg-tertiary); border-radius: 8px; padding: 10px 12px;
+    border: 1px solid var(--border-color); position: relative;
+}
+.ips-tech-item .lbl { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-muted); margin-bottom: 3px; }
+.ips-tech-item .val { font-size: 0.84rem; color: var(--text-primary); font-weight: 500; word-break: break-all; }
+
+/* Private IP notice */
+.ips-private-notice {
+    display: flex; align-items: center; gap: 12px;
+    background: rgba(0,212,255,0.06); border: 1px solid rgba(0,212,255,0.15);
+    border-radius: 10px; padding: 14px 20px; font-size: 0.85rem;
+    color: var(--ips-cyan-light); margin-bottom: 1.25rem;
+}
+.ips-private-notice i { font-size: 1.1rem; color: var(--ips-cyan); flex-shrink: 0; }
+
+/* Toast */
+.ips-toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: var(--bg-secondary); border: 1px solid var(--border-color);
+    border-radius: 10px; padding: 10px 20px; font-size: 0.82rem;
+    color: var(--text-primary); z-index: 9999;
+    opacity: 0; transition: all 0.35s ease; pointer-events: none;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    display: flex; align-items: center; gap: 8px;
+}
+.ips-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.ips-toast.ok i { color: var(--ips-green); }
+
+/* Print */
+@media print {
+    .ips-hero { min-height: auto !important; padding: 1rem !important; background: #f5f5f5 !important; }
+    .ips-search-card, .ips-action-bar, .ips-loading, .ips-error-wrap { display: none !important; }
+    .ips-card { break-inside: avoid; border: 1px solid #ddd !important; background: #fff !important; opacity: 1 !important; transform: none !important; }
+    .ips-results.visible { display: block !important; }
+    .container { max-width: 100% !important; padding: 0 !important; }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+    .ips-hero { padding: 2.5rem 1rem 2rem; min-height: auto; }
+    .ips-hero h1 { font-size: 1.8rem; }
+    .ips-search-card { padding: 0.875rem; }
+    .ips-search-row { flex-wrap: wrap; }
+    .ips-search-row input { min-width: 100%; }
+    .ips-search-row .ips-btn { width: 100%; justify-content: center; }
+    .ips-ov-dash { flex-direction: column; align-items: center; }
+    .ips-ov-right { grid-template-columns: 1fr 1fr; min-width: 0; }
+    .ips-ov-indicator { grid-column: 1 / -1; }
+    .ips-tech-grid { grid-template-columns: 1fr; }
+    .ips-port-table { font-size: 0.72rem; }
+    .ips-port-table th, .ips-port-table td { padding: 6px 8px; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="ips-hero" id="ipsHero">
+    <div class="hero-inner">
+        <div class="hero-badge">
+            <span class="badge-dot"></span>
+            Network Reconnaissance Tool
+        </div>
+        <h1>IP <span class="hl-cyan">Scanner</span></h1>
+        <p class="hero-sub">Investigate IP addresses with geolocation, reverse DNS, WHOIS, port scanning, and threat intelligence in a single scan.</p>
+    </div>
+</section>
+
+<div class="ips-search-card">
+    <div class="ips-search-row">
+        <input type="text" id="ipsInput" placeholder="Enter IP address or hostname" autocomplete="off" spellcheck="false">
+        <button class="ips-btn" id="ipsScanBtn"><i class="bi bi-search"></i> Scan</button>
+    </div>
+    <div class="ips-disclaimer">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        Only scan IPs you own or have explicit permission to test. Unauthorized scanning may be illegal.
+    </div>
+</div>
+
+<div class="ips-error-wrap" id="ipsError">
+    <div class="ips-error-box">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <span id="ipsErrorMsg"></span>
+    </div>
+</div>
+
+<div class="ips-loading" id="ipsLoading">
+    <div class="container">
+        <div class="ips-skeleton">
+            <div class="ips-skeleton-hdr"></div>
+            <div class="ips-skeleton-body">
+                <div class="ips-skeleton-row">
+                    <div class="ips-skeleton-box" style="width:110px;height:110px;border-radius:50%"></div>
+                    <div class="ips-skeleton-box ips-skeleton-line" style="height:100px"></div>
+                </div>
+                <div class="ips-skeleton-row">
+                    <div class="ips-skeleton-box ips-skeleton-line"></div>
+                    <div class="ips-skeleton-box ips-skeleton-line"></div>
+                </div>
+            </div>
+        </div>
+        <div class="ips-skeleton">
+            <div class="ips-skeleton-hdr"></div>
+            <div class="ips-skeleton-body">
+                <div class="ips-skeleton-row"><div class="ips-skeleton-box ips-skeleton-line"></div></div>
+                <div class="ips-skeleton-row"><div class="ips-skeleton-box ips-skeleton-line"></div></div>
+            </div>
+        </div>
+        <div class="ips-loading-txt"><i class="bi bi-arrow-repeat"></i> Running recon scans...</div>
+    </div>
+</div>
+
+<div class="ips-results" id="ipsResults">
+    <div class="container">
+
+        <div class="ips-action-bar">
+            <button class="ips-action-btn" id="ipsBtnCopyAll"><i class="bi bi-clipboard"></i> Copy All</button>
+            <button class="ips-action-btn" id="ipsBtnJSON"><i class="bi bi-filetype-json"></i> JSON</button>
+            <button class="ips-action-btn" id="ipsBtnPrint"><i class="bi bi-printer"></i> Print</button>
+        </div>
+
+        <div class="ips-card" id="ipsOverviewCard">
+            <div class="ips-card-header">
+                <h5><i class="bi bi-speedometer2" style="color:var(--ips-cyan)"></i> Scan Overview</h5>
+            </div>
+            <div class="ips-card-body" id="ipsOverviewBody"></div>
+        </div>
+
+        <div class="ips-card" id="ipsGeoCard">
+            <div class="ips-card-header">
+                <h5><i class="bi bi-geo-alt" style="color:var(--ips-cyan)"></i> Geolocation</h5>
+            </div>
+            <div class="ips-card-body" id="ipsGeoBody">
+                <p style="color:var(--text-muted);text-align:center;padding:1rem 0;margin:0">Awaiting scan results...</p>
+            </div>
+        </div>
+
+        <div class="ips-card" id="ipsDnsCard">
+            <div class="ips-card-header">
+                <h5><i class="bi bi-diagram-3" style="color:var(--ips-cyan)"></i> Reverse DNS</h5>
+            </div>
+            <div class="ips-card-body" id="ipsDnsBody">
+                <p style="color:var(--text-muted);text-align:center;padding:1rem 0;margin:0">Awaiting scan results...</p>
+            </div>
+        </div>
+
+        <div class="ips-card" id="ipsWhoisCard">
+            <div class="ips-card-header">
+                <h5><i class="bi bi-building" style="color:var(--ips-cyan)"></i> WHOIS / Network Info</h5>
+            </div>
+            <div class="ips-card-body" id="ipsWhoisBody">
+                <p style="color:var(--text-muted);text-align:center;padding:1rem 0;margin:0">Awaiting scan results...</p>
+            </div>
+        </div>
+
+        <div class="ips-card" id="ipsPortCard">
+            <div class="ips-card-header">
+                <h5><i class="bi bi-hdd-network" style="color:var(--ips-cyan)"></i> Port Scan</h5>
+            </div>
+            <div class="ips-card-body" id="ipsPortBody">
+                <p style="color:var(--text-muted);text-align:center;padding:1rem 0;margin:0">Awaiting scan results...</p>
+            </div>
+        </div>
+
+        <div class="ips-card" id="ipsAbuseCard">
+            <div class="ips-card-header">
+                <h5><i class="bi bi-shield-exclamation" style="color:var(--ips-cyan)"></i> Threat / Abuse Check</h5>
+            </div>
+            <div class="ips-card-body" id="ipsAbuseBody">
+                <p style="color:var(--text-muted);text-align:center;padding:1rem 0;margin:0">Awaiting scan results...</p>
+            </div>
+        </div>
+
+        <div style="text-align:center;padding:0.5rem 0 2rem">
+            <button class="btn btn-outline-light" id="ipsNewScan"><i class="bi bi-arrow-repeat"></i> New Scan</button>
+        </div>
+    </div>
+</div>
+
+<div class="ips-toast" id="ipsToast"><i class="bi bi-check-circle"></i> <span id="ipsToastMsg"></span></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    var input = document.getElementById('ipsInput');
+    var scanBtn = document.getElementById('ipsScanBtn');
+    var errorWrap = document.getElementById('ipsError');
+    var errorMsg = document.getElementById('ipsErrorMsg');
+    var loadingDiv = document.getElementById('ipsLoading');
+    var resultsDiv = document.getElementById('ipsResults');
+    var toast = document.getElementById('ipsToast');
+    var toastMsg = document.getElementById('ipsToastMsg');
+
+    var _lastResponse = null;
+    var _lastQuery = '';
+
+    function escapeHtml(t) { return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    function showToast(msg) {
+        toastMsg.textContent = msg;
+        toast.className = 'ips-toast ok';
+        toast.classList.add('show');
+        clearTimeout(toast._hide);
+        toast._hide = setTimeout(function() { toast.classList.remove('show'); }, 2500);
+    }
+
+    function showError(msg) {
+        errorWrap.classList.add('visible');
+        errorMsg.textContent = msg;
+    }
+
+    function hideError() { errorWrap.classList.remove('visible'); }
+
+    function showLoading() {
+        loadingDiv.classList.add('visible');
+        resultsDiv.classList.remove('visible');
+        scanBtn.disabled = true;
+        scanBtn.innerHTML = '<i class="bi bi-arrow-repeat"></i> Scanning...';
+    }
+
+    function hideLoading() {
+        loadingDiv.classList.remove('visible');
+        scanBtn.disabled = false;
+        scanBtn.innerHTML = '<i class="bi bi-search"></i> Scan';
+    }
+
+    function fadeInCards() {
+        var cards = document.querySelectorAll('.ips-card');
+        cards.forEach(function(card, i) {
+            card.style.transitionDelay = (i * 80) + 'ms';
+            setTimeout(function() { card.classList.add('fade-in'); }, i * 80 + 50);
+        });
+    }
+
+    function getCsrfToken() {
+        var name = 'csrftoken';
+        var m = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+        return m ? decodeURIComponent(m[2]) : '';
+    }
+
+    function copyToClipboard(text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(function() { showToast('Copied to clipboard'); }).catch(function() {
+                fallbackCopy(text);
+            });
+        } else { fallbackCopy(text); }
+    }
+
+    function fallbackCopy(text) {
+        var ta = document.createElement('textarea');
+        ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); showToast('Copied to clipboard'); } catch(e) {}
+        document.body.removeChild(ta);
+    }
+
+    function doScan() {
+        var val = input.value.trim();
+        if (!val) { showError('Please enter an IP address or hostname to scan.'); input.focus(); return; }
+        hideError();
+        showLoading();
+        _lastQuery = val;
+
+        fetch('/api/ip-scanner/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
+            body: JSON.stringify({ target: val }),
+        })
+        .then(function(r) { return r.json().then(function(d) { return { status: r.status, body: d }; }); })
+        .then(function(resp) {
+            hideLoading();
+            if (!resp.body.success) {
+                showError(resp.body.error || 'Scan failed');
+                return;
+            }
+            _lastResponse = resp.body;
+            renderResults(resp.body);
+        })
+        .catch(function(err) {
+            hideLoading();
+            showError('Network error: ' + err.message);
+        });
+    }
+
+    scanBtn.addEventListener('click', function() { doScan(); });
+    input.addEventListener('keypress', function(e) { if (e.key === 'Enter') { e.preventDefault(); doScan(); } });
+
+    document.getElementById('ipsNewScan').addEventListener('click', function() {
+        resultsDiv.classList.remove('visible');
+        input.value = '';
+        input.focus();
+    });
+
+    document.getElementById('ipsBtnCopyAll').addEventListener('click', function() {
+        if (!_lastResponse) return;
+        copyToClipboard(JSON.stringify(_lastResponse, null, 2));
+    });
+
+    document.getElementById('ipsBtnJSON').addEventListener('click', function() {
+        if (!_lastResponse) return;
+        var blob = new Blob([JSON.stringify(_lastResponse, null, 2)], { type: 'application/json' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'ip-scan-' + (_lastResponse.resolved_ip || 'result') + '.json';
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('JSON downloaded');
+    });
+
+    document.getElementById('ipsBtnPrint').addEventListener('click', function() { window.print(); });
+
+    function renderResults(r) {
+        renderOverview(r);
+        if (r.is_private) {
+            renderPrivateNotice(r);
+            hideAllSubCards();
+            fadeInCards();
+            resultsDiv.classList.add('visible');
+            return;
+        }
+        renderGeo(r.geolocation);
+        renderDNS(r.reverse_dns);
+        renderWhois(r.whois);
+        renderPorts(r.ports);
+        renderAbuse(r.abuse_check);
+        fadeInCards();
+        resultsDiv.classList.add('visible');
+    }
+
+    function hideAllSubCards() {
+        ['ipsGeoCard','ipsDnsCard','ipsWhoisCard','ipsPortCard','ipsAbuseCard'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
+    }
+
+    function renderOverview(r) {
+        var body = document.getElementById('ipsOverviewBody');
+        var geo = r.geolocation || {};
+        var ports = r.ports || {};
+        var abuse = r.abuse_check || {};
+
+        var gaugeClass = 'unknown';
+        var gaugeIcon = '<i class="bi bi-question-circle"></i>';
+        if (r.is_private) { gaugeClass = 'safe'; gaugeIcon = '<i class="bi bi-shield-check"></i>'; }
+        else if (abuse.verdict === 'clean') { gaugeClass = 'safe'; gaugeIcon = '<i class="bi bi-shield-check"></i>'; }
+        else if (abuse.verdict === 'suspicious') { gaugeClass = 'warning'; gaugeIcon = '<i class="bi bi-exclamation-triangle"></i>'; }
+        else if (abuse.verdict === 'malicious') { gaugeClass = 'danger'; gaugeIcon = '<i class="bi bi-shield-exclamation"></i>'; }
+
+        var gaugeLabel = r.is_private ? 'Private' : (abuse.verdict ? abuse.verdict.charAt(0).toUpperCase() + abuse.verdict.slice(1) : 'Unknown');
+
+        var html = '<div class="ips-ov-dash">';
+        html += '<div class="ips-ov-left">';
+        html += '<div class="ips-threat-gauge ' + gaugeClass + '">';
+        html += '<span class="gauge-val">' + gaugeIcon + '</span>';
+        html += '<span class="gauge-lbl">' + escapeHtml(gaugeLabel) + '</span>';
+        html += '</div>';
+        html += '</div>';
+        html += '<div class="ips-ov-right">';
+        html += '<div class="ips-ov-metric ips-ov-indicator"><div class="m-lbl">Target IP</div><div class="m-val">' + escapeHtml(r.resolved_ip) + '</div><button class="ips-copy-btn" data-copy="' + escapeHtml(r.resolved_ip) + '" title="Copy"><i class="bi bi-clipboard"></i></button></div>';
+        html += '<div class="ips-ov-metric"><div class="m-lbl">Input</div><div class="m-val">' + escapeHtml(r.input) + '</div></div>';
+        html += '<div class="ips-ov-metric"><div class="m-lbl">Input Type</div><div class="m-val">' + escapeHtml(r.input_type === 'hostname' ? 'Hostname (resolved)' : 'Direct IP') + '</div></div>';
+        if (geo.country) html += '<div class="ips-ov-metric"><div class="m-lbl">Country</div><div class="m-val">' + escapeHtml(geo.country) + '</div></div>';
+        if (geo.isp) html += '<div class="ips-ov-metric"><div class="m-lbl">ISP</div><div class="m-val">' + escapeHtml(geo.isp) + '</div></div>';
+        if (geo.is_hosting) html += '<div class="ips-ov-metric"><div class="m-lbl">Type</div><div class="m-val" style="color:var(--ips-orange)">Hosting/DC</div></div>';
+        if (ports.open_count !== undefined) html += '<div class="ips-ov-metric"><div class="m-lbl">Open Ports</div><div class="m-val" style="color:var(--ips-red)">' + ports.open_count + ' / ' + ports.total_scanned + '</div></div>';
+        if (abuse.abuse_confidence_score !== undefined) html += '<div class="ips-ov-metric"><div class="m-lbl">Abuse Score</div><div class="m-val">' + abuse.abuse_confidence_score + '%</div></div>';
+        if (r.scan_time_ms) html += '<div class="ips-ov-metric"><div class="m-lbl">Scan Time</div><div class="m-val">' + r.scan_time_ms + ' ms</div></div>';
+        html += '</div></div>';
+        body.innerHTML = html;
+
+        body.querySelectorAll('.ips-copy-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                copyToClipboard(this.getAttribute('data-copy'));
+            });
+        });
+    }
+
+    function renderPrivateNotice(r) {
+        var body = document.getElementById('ipsOverviewBody');
+        var notice = '<div class="ips-private-notice"><i class="bi bi-info-circle-fill"></i><div><strong>Private/Reserved IP Detected</strong><br>' + escapeHtml(r.private_reason) + '. External lookups (geolocation, WHOIS, abuse check) have been skipped for this address.</div></div>';
+        body.innerHTML = notice + body.innerHTML;
+    }
+
+    function renderGeo(geo) {
+        var body = document.getElementById('ipsGeoBody');
+        if (!geo || geo.status === 'skipped') {
+            body.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:1rem 0;margin:0">' + escapeHtml(geo.message || 'Skipped') + '</p>';
+            return;
+        }
+        if (geo.status === 'error') {
+            body.innerHTML = '<p style="color:var(--ips-red);text-align:center;padding:1rem 0;margin:0"><i class="bi bi-exclamation-triangle"></i> ' + escapeHtml(geo.message) + '</p>';
+            return;
+        }
+        var items = [
+            ['Country', geo.country],
+            ['Region', geo.region],
+            ['City', geo.city],
+            ['ZIP Code', geo.zip_code],
+            ['ISP', geo.isp],
+            ['Organization', geo.org],
+            ['ASN', geo.asn],
+            ['Timezone', geo.timezone],
+            ['Latitude', geo.latitude],
+            ['Longitude', geo.longitude],
+        ];
+        var html = '<div class="ips-tech-grid">';
+        items.forEach(function(item) {
+            if (item[1]) {
+                html += '<div class="ips-tech-item"><div class="lbl">' + escapeHtml(item[0]) + '</div><div class="val">' + escapeHtml(String(item[1])) + '</div></div>';
+            }
+        });
+        var flags = [];
+        if (geo.is_proxy) flags.push('<span style="color:var(--ips-orange)"><i class="bi bi-shield-lock"></i> Proxy</span>');
+        if (geo.is_hosting) flags.push('<span style="color:var(--ips-purple)"><i class="bi bi-server"></i> Hosting/DC</span>');
+        if (geo.is_mobile) flags.push('<span style="color:var(--ips-cyan)"><i class="bi bi-phone"></i> Mobile</span>');
+        if (flags.length) {
+            html += '<div class="ips-tech-item" style="grid-column:1/-1"><div class="lbl">Flags</div><div class="val" style="display:flex;gap:12px">' + flags.join(' ') + '</div></div>';
+        }
+        html += '</div>';
+        body.innerHTML = html;
+    }
+
+    function renderDNS(dns) {
+        var body = document.getElementById('ipsDnsBody');
+        if (!dns || dns.status === 'skipped') {
+            body.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:1rem 0;margin:0">' + escapeHtml(dns.message || 'Skipped') + '</p>';
+            return;
+        }
+        if (dns.status === 'not_found') {
+            body.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:1rem 0;margin:0"><i class="bi bi-dash-circle"></i> ' + escapeHtml(dns.message || 'No PTR record found') + '</p>';
+            return;
+        }
+        if (dns.status === 'error') {
+            body.innerHTML = '<p style="color:var(--ips-red);text-align:center;padding:1rem 0;margin:0"><i class="bi bi-exclamation-triangle"></i> ' + escapeHtml(dns.message) + '</p>';
+            return;
+        }
+        body.innerHTML = '<div class="ips-tech-grid"><div class="ips-tech-item" style="grid-column:1/-1"><div class="lbl">PTR Record</div><div class="val" style="font-family:var(--font-mono);font-size:0.82rem">' + escapeHtml(dns.hostname) + '</div></div></div>';
+    }
+
+    function renderWhois(whois) {
+        var body = document.getElementById('ipsWhoisBody');
+        if (!whois || whois.status === 'skipped') {
+            body.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:1rem 0;margin:0">' + escapeHtml(whois.message || 'Skipped') + '</p>';
+            return;
+        }
+        if (whois.status === 'error') {
+            body.innerHTML = '<p style="color:var(--ips-red);text-align:center;padding:1rem 0;margin:0"><i class="bi bi-exclamation-triangle"></i> ' + escapeHtml(whois.message) + '</p>';
+            return;
+        }
+        var items = [
+            ['Network Name', whois.network_name],
+            ['CIDR', whois.cidr],
+            ['Country', whois.country],
+            ['Organization', whois.org_name],
+            ['ASN', whois.asn],
+            ['ASN Description', whois.asn_description],
+            ['ASN Registry', whois.asn_registry],
+            ['ASN Country', whois.asn_country],
+            ['Registration Date', whois.registration_date],
+        ];
+        var html = '<div class="ips-tech-grid">';
+        items.forEach(function(item) {
+            if (item[1]) {
+                html += '<div class="ips-tech-item"><div class="lbl">' + escapeHtml(item[0]) + '</div><div class="val">' + escapeHtml(String(item[1])) + '</div></div>';
+            }
+        });
+        html += '</div>';
+        body.innerHTML = html;
+    }
+
+    function renderPorts(ports) {
+        var body = document.getElementById('ipsPortBody');
+        if (!ports || ports.status === 'skipped') {
+            body.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:1rem 0;margin:0">' + escapeHtml(ports.message || 'Skipped') + '</p>';
+            return;
+        }
+        if (ports.status === 'error') {
+            body.innerHTML = '<p style="color:var(--ips-red);text-align:center;padding:1rem 0;margin:0"><i class="bi bi-exclamation-triangle"></i> ' + escapeHtml(ports.message) + '</p>';
+            return;
+        }
+        var html = '<div class="ips-port-summary">';
+        html += '<div class="ips-port-chip open"><span class="chip-dot"></span> Open: ' + ports.open_count + '</div>';
+        html += '<div class="ips-port-chip closed"><span class="chip-dot"></span> Closed: ' + ports.closed_count + '</div>';
+        html += '<div class="ips-port-chip filtered"><span class="chip-dot"></span> Filtered: ' + ports.filtered_count + '</div>';
+        html += '<div class="ips-port-chip" style="font-size:0.72rem;color:var(--text-muted)"><i class="bi bi-clock"></i> ' + ports.duration_ms + ' ms</div>';
+        html += '</div>';
+
+        html += '<div style="overflow-x:auto"><table class="ips-port-table"><thead><tr><th>Port</th><th>State</th><th>Service</th><th>Latency</th></tr></thead><tbody>';
+        ports.results.forEach(function(p) {
+            html += '<tr>';
+            html += '<td style="font-family:var(--font-mono);font-weight:600">' + p.port + '</td>';
+            html += '<td><span class="ips-port-state ' + p.state + '">' + p.state + '</span></td>';
+            html += '<td>' + escapeHtml(p.service) + '</td>';
+            html += '<td>' + (p.latency_ms !== null ? p.latency_ms + ' ms' : '—') + '</td>';
+            html += '</tr>';
+        });
+        html += '</tbody></table></div>';
+        body.innerHTML = html;
+    }
+
+    function renderAbuse(abuse) {
+        var body = document.getElementById('ipsAbuseBody');
+        if (!abuse || abuse.status === 'skipped') {
+            body.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:1rem 0;margin:0">' + escapeHtml(abuse.message || 'Skipped') + '</p>';
+            return;
+        }
+        if (abuse.status === 'unavailable' || abuse.status === 'error') {
+            body.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:1rem 0;margin:0"><i class="bi bi-info-circle"></i> ' + escapeHtml(abuse.message) + '</p>';
+            return;
+        }
+
+        var score = abuse.abuse_confidence_score || 0;
+        var fillClass = score >= 50 ? 'high' : (score >= 25 ? 'medium' : (score > 0 ? 'low' : 'clean'));
+        var verdictLabel = abuse.verdict ? abuse.verdict.charAt(0).toUpperCase() + abuse.verdict.slice(1) : 'Unknown';
+        var verdictClass = abuse.verdict || 'clean';
+
+        var html = '<div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;margin-bottom:1rem">';
+        html += '<span class="ips-verdict-badge ' + verdictClass + '">' + escapeHtml(verdictLabel) + '</span>';
+        html += '<span style="font-size:0.85rem;color:var(--text-secondary)">Abuse Confidence: <strong style="color:var(--text-primary)">' + score + '%</strong></span>';
+        html += '</div>';
+        html += '<div class="ips-abuse-bar"><div class="ips-abuse-fill ' + fillClass + '" style="width:' + score + '%"></div></div>';
+
+        var items = [
+            ['Total Reports', abuse.total_reports],
+            ['Usage Type', abuse.usage_type],
+            ['ISP', abuse.isp],
+            ['Country', abuse.country_code],
+            ['Domain', abuse.domain],
+            ['Last Reported', abuse.last_reported_at],
+            ['Whitelisted', abuse.is_whitelisted ? 'Yes' : null],
+            ['Tor Exit Node', abuse.is_tor ? 'Yes' : null],
+        ];
+        html += '<div class="ips-tech-grid" style="margin-top:1rem">';
+        items.forEach(function(item) {
+            if (item[1] !== null && item[1] !== undefined && item[1] !== '') {
+                html += '<div class="ips-tech-item"><div class="lbl">' + escapeHtml(item[0]) + '</div><div class="val">' + escapeHtml(String(item[1])) + '</div></div>';
+            }
+        });
+        html += '</div>';
+        body.innerHTML = html;
+    }
+
+})();
+</script>
+{% endblock %}
